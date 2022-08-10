@@ -4,7 +4,7 @@
   "license": "MIT",
   "private": true,
   "scripts": {
-    "dev": "next dev",
+    "dev": "yarn shx cp '../../.env' './.env' && next dev",
     "build": "yarn build:anttheme && next build",
     "start": "next start",
     "lint:next": "next lint",

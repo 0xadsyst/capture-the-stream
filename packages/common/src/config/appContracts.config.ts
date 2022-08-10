@@ -4,7 +4,7 @@ import { invariant } from 'ts-invariant';
 
 import { externalContractsAddressMap } from './externalContracts.config';
 
-import * as hardhatContracts from '~common/generated/contract-types';
+import * as hardhatContracts from '~common/generated/';
 import * as externalContracts from '~common/generated/external-contracts/esm/types';
 import hardhatDeployedContractsJson from '~common/generated/hardhat_contracts.json';
 

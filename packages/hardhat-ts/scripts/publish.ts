@@ -40,7 +40,7 @@ const publishContract = (contractName: string, networkName: string): boolean => 
 
     console.log('frontEndDir:', path.resolve(frontEndDir));
 
-    if (!fs.existsSync(`${frontEndDir}/abis`)) fs.mkdirSync(`${frontEndDir}/abis`);
+    if (!fs.existsSync(`${frontEndDir}/abis`)) fs.mkdirSync(`${frontEndDir}/abis`, { recursive: true });
     fs.writeFileSync(`${frontEndDir}/abis/${contractName}.json`, JSON.stringify(contractJson.abi, null, 2));
 
     return true;

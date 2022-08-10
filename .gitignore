@@ -35,6 +35,7 @@ packages/advanced/subgraph/config/config.json
 packages/advanced/subgraph/subgraph.yaml
 packages/advanced/subgraph/generated
 packages/advanced/subgraph/abis/*
+packages/advanced/subgraph/src/subgraph.template.yaml
 
 # dependencies, yarn, etc
 /node_modules

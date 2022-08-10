@@ -1,5 +1,5 @@
 import { BigInt, Address } from '@graphprotocol/graph-ts';
-import { CaptureTheStream, EndWinner, EnterRound, InitiateRound } from '../generated/CaptureTheStream/CaptureTheStream';
+import { CaptureTheStream, EndWinner, EnterRound, InitiateRound } from '../generated/captureTheStream/CaptureTheStream';
 import { Round, Guess } from '../generated/schema';
 
 export function handleInitiateRound(event: InitiateRound): void {

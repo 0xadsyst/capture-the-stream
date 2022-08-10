@@ -1,0 +1,111 @@
+{
+  "name": "@scaffold-eth/typescript",
+  "version": "0.4.0",
+  "keywords": [
+    "ethereum",
+    "react",
+    "uniswap",
+    "workspaces",
+    "yarn"
+  ],
+  "private": true,
+  "scripts": {
+    "start": "yarn workspace frontend dev",
+    "frontend:typechain": "yarn workspace frontend typechain",
+    "@🔖🔖🔖🔖🔖 nextjs 🔖🔖🔖🔖🔖 ": "echo 📖 react nextjs-app commands",
+    "start:nextjs": "yarn workspace @scaffold-eth/nextjs-app dev",
+    "start:frontend": "yarn workspace @scaffold-eth/frontend dev",
+    "build:nextjs": "yarn workspace @scaffold-eth/nextjs-app build",
+    "@🔖🔖🔖🔖🔖 hardhat 🔖🔖🔖🔖🔖 ": "echo 📖 hardhat commands",
+    "contracts:build": "yarn workspace @scaffold-eth/hardhat compile && yarn workspace @scaffold-eth/common contracts:hardhat && yarn workspace @scaffold-eth/common contracts:external",
+    "contracts:rebuild": "yarn workspace @scaffold-eth/hardhat clean && yarn contracts:build",
+    "bad": "yarn contracts:build && yarn deploy",
+    "contracts:deploy": "yarn workspace @scaffold-eth/hardhat deploy",
+    "chain": "yarn workspace @scaffold-eth/hardhat chain",
+    "deploy": "yarn contracts:deploy",
+    "@🔖🔖🔖🔖🔖 commands 🔖🔖🔖🔖🔖 ": "echo 📖 commands",
+    "hardhat": "yarn workspace @scaffold-eth/hardhat hardhat",
+    "test": "yarn workspace @scaffold-eth/hardhat test",
+    "@🔖🔖🔖🔖🔖 workspaces 🔖🔖🔖🔖🔖 ": "echo 📖 workspace commands",
+    "w:hardhat": "yarn workspace @scaffold-eth/hardhat",
+    "w:nextjs": "yarn workspace @scaffold-eth/nextjs-app",
+    "w:subgraph": "yarn workspace @scaffold-eth/subgraph",
+    "@🔖🔖🔖🔖🔖 ethereum helpers 🔖🔖🔖🔖🔖": "echo 📖 ethereum helper commands",
+    "generate": "yarn workspace @scaffold-eth/hardhat generate",
+    "account": "yarn workspace @scaffold-eth/hardhat account",
+    "@🔖🔖🔖🔖🔖 utilities 🔖🔖🔖🔖🔖": "echo 📖 utilities commands",
+    "syncpack:fix": "yarn syncpack fix-mismatches",
+    "lint": "yarn workspace @scaffold-eth/common lint --fix && yarn workspace @scaffold-eth/hardhat lint --fix && yarn workspace @scaffold-eth/nextjs-app lint --fix",
+    "@🔖🔖🔖🔖🔖 services 🔖🔖🔖🔖🔖": "echo 📖 services commands",
+    "run-graph-node": "yarn workspace @scaffold-eth/services run-graph-node",
+    "setup-graph-node-linux": "yarn workspace @scaffold-eth/services setup-linux",
+    "@🔖🔖🔖🔖🔖 subgraph 🔖🔖🔖🔖🔖": "echo 📖 subgraph commands",
+    "subgraph-prepare": "yarn workspace @scaffold-eth/subgraph prepare",
+    "subgraph-codegen": "yarn workspace @scaffold-eth/subgraph codegen",
+    "subgraph-build": "yarn workspace @scaffold-eth/subgraph build",
+    "subgraph-deploy": "yarn workspace @scaffold-eth/subgraph deploy",
+    "subgraph-create-local": "yarn workspace @scaffold-eth/subgraph create-local",
+    "subgraph-remove-local": "yarn workspace @scaffold-eth/subgraph remove-local",
+    "subgraph-deploy-local": "yarn workspace @scaffold-eth/subgraph deploy-local",
+    "subgraph-bad-local": "yarn workspace @scaffold-eth/subgraph prepare-local && yarn workspace @scaffold-eth/subgraph codegen && yarn workspace @scaffold-eth/subgraph build && yarn workspace @scaffold-eth/subgraph create-local && yarn workspace @scaffold-eth/subgraph deploy-local",
+    "subgraph-bad-mumbai": "yarn workspace @scaffold-eth/subgraph prepare-mumbai && yarn workspace @scaffold-eth/subgraph codegen && yarn workspace @scaffold-eth/subgraph build && yarn workspace @scaffold-eth/subgraph create-local && yarn workspace @scaffold-eth/subgraph deploy-mumbai"
+  },
+  "workspaces": {
+    "packages": [
+      "packages/common",
+      "packages/hardhat-ts",
+      "packages/next-app-ts",
+      "packages/advanced/subgraph",
+      "packages/advanced/services",
+      "packages/*",
+      "frontend"
+    ]
+  },
+  "packageManager": "yarn@3.2.1",
+  "devDependencies": {
+    "cross-env": "^7.0.3",
+    "eslint": "^8.20.0",
+    "lint-staged": "^13.0.3",
+    "prettier": "^2.7.1",
+    "prettier-plugin-solidity": "^1.0.0-dev.23",
+    "shx": "^0.3.4",
+    "syncpack": "^8.2.4",
+    "ts-node": "^10.9.1"
+  },
+  "lint-staged": {
+    "packages/nextjs-app-ts/src/**/*.{ts,tsx}": [
+      "yarn workspace @scaffold-eth/nextjs-app lint --fix",
+      "yarn workspace @scaffold-eth/nextjs-app format"
+    ],
+    "packages/common/src/**/*.{ts,tsx}": [
+      "yarn workspace @scaffold-eth/common lint --fix",
+      "yarn workspace @scaffold-eth/common format"
+    ],
+    "packages/hardhat-ts/test/**/*.ts": [
+      "yarn workspace @scaffold-eth/hardhat lint --fix",
+      "yarn workspace @scaffold-eth/hardhat format"
+    ],
+    "packages/hardhat-ts/helpers/**/*.ts": [
+      "yarn workspace @scaffold-eth/hardhat lint --fix",
+      "yarn workspace @scaffold-eth/hardhat format"
+    ],
+    "packages/hardhat-ts/tasks/**/*.ts": [
+      "yarn workspace @scaffold-eth/hardhat lint --fix",
+      "yarn workspace @scaffold-eth/hardhat format"
+    ],
+    "packages/hardhat-ts/deploy/**/*.ts": [
+      "yarn workspace @scaffold-eth/hardhat lint --fix",
+      "yarn workspace @scaffold-eth/hardhat format"
+    ],
+    "packages/hardhat-ts/**/*.sol": [
+      "yarn workspace @scaffold-eth/hardhat format",
+      "yarn workspace @scaffold-eth/hardhat solhint --fix"
+    ]
+  },
+  "volta": {
+    "node": "16.15.0"
+  },
+  "dependencies": {
+    "depcheck": "^1.4.3"
+  }
+}

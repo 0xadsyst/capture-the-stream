@@ -1,0 +1,5 @@
+{
+  "network": "localhost",
+  "address": "\"{{localhost_CaptureTheStreamAddress}}\"",
+  "startBlock": 1
+}

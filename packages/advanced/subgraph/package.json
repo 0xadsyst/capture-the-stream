@@ -1,0 +1,26 @@
+{
+  "name": "@scaffold-eth/subgraph",
+  "license": "UNLICENSED",
+  "version": "1.0.0",
+  "scripts": {
+    "prepare-local": "mustache config/initLocalhost.json src/subgraph.template.template.yaml > src/subgraph.template.yaml && mustache config/config.json src/subgraph.template.yaml > subgraph.yaml",
+    "prepare-mumbai": "mustache config/initMumbai.json src/subgraph.template.template.yaml > src/subgraph.template.yaml && mustache config/config.json src/subgraph.template.yaml > subgraph.yaml",
+    "codegen": "graph codegen",
+    "build": "graph build",
+    "deploy": "graph deploy --node https://api.thegraph.com/deploy/ --ipfs https://api.thegraph.com/ipfs/ GITHUB_USERNAME/your-contract",
+    "deploy-mumbai": "graph deploy --product hosted-service 0xadsyst/capture-the-stream-mumbai",
+    "create-local": "graph create --node http://localhost:8020/ GITHUB_USERNAME/your-contract",
+    "remove-local": "graph remove --node http://localhost:8020/ GITHUB_USERNAME/your-contract",
+    "deploy-local": "graph deploy --node http://localhost:8020/ --ipfs http://localhost:5001 GITHUB_USERNAME/your-contract"
+  },
+  "dependencies": {
+    "@graphprotocol/graph-cli": "^0.33.0",
+    "@graphprotocol/graph-ts": "^0.27.0"
+  },
+  "devDependencies": {
+    "mustache": "^4.2.0"
+  },
+  "installConfig": {
+    "hoistingLimits": "workspaces"
+  }
+}

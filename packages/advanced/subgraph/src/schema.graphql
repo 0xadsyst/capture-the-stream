@@ -1,0 +1,16 @@
+type Round @entity {
+  id: ID!
+  asset: Bytes!
+  startTimestamp: BigInt!
+  endTimestamp: BigInt!
+  currentWinner: BigInt!
+}
+
+type Guess @entity {
+  id: ID!
+  roundId: BigInt!
+  guessId: BigInt!
+  user: Bytes!
+  guess: BigInt!
+  winningTime: BigInt!
+}

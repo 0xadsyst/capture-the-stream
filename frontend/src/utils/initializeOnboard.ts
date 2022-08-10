@@ -2,23 +2,17 @@ import { init } from '@web3-onboard/react'
 import injectedModule from '@web3-onboard/injected-wallets'
 
 export default function initializeOnboard() {
-  const infuraKey = '58c2341ec5b54691b7de91bcb940b428'
-  const rpcUrl = `https://mainnet.infura.io/v3/${infuraKey}`
+  const INFURA_ID = process.env.NEXT_PUBLIC_INFURA_ID;
+  const rpcUrl = `https://mainnet.infura.io/v3/${INFURA_ID}`
   const injected = injectedModule()
   // initialize Onboard
   init({
     wallets: [injected],
     chains: [
       {
-        id: '0x1',
-        token: 'ETH',
-        label: 'Ethereum Mainnet',
-        rpcUrl
-      },
-      {
-        id: '0xA4B1',
-        token: 'ETH',
-        label: 'Arbitrum Mainnet',
+        id: '0x13881',
+        token: 'MATIC',
+        label: 'Polygon Mumbai',
         rpcUrl
       },
       {

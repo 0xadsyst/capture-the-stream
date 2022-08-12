@@ -3,7 +3,7 @@ import { ethers } from 'ethers'
 
 export interface ProviderType {
   provider: ethers.providers.Web3Provider | undefined
-  setProvider: Function
+  setProvider: () => void
 }
 
 export const ProviderContext = createContext<ProviderType>({

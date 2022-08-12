@@ -19,7 +19,7 @@ import { init } from '@web3-onboard/react'
 import { useQuery } from 'react-query'
 
 const Test = () => {
-  const [testData, setTestData] = useState([<p>TEST DATA LOADING</p>])
+  const [testData, setTestData] = useState([<p key={1}>TEST DATA LOADING</p>])
   const roundsContext = useContext(RoundsCtx)
   const providerContext = useContext(ProviderContext)
 
@@ -153,16 +153,16 @@ async function fetchData(provider: ethers.providers.Web3Provider | undefined) {
     const roundCount = await (await captureTheStream.roundCount()).toString()
 
     return [
-      <p>Contract address: {address.toString()}</p>,
-      <p>myAddress: {myAddress}</p>,
-      <p>deposits: {deposits}</p>,
-      <p>depositAsset: {depositAsset}</p>,
-      <p>upkeep: {upkeepRequired}</p>,
+      <p key={1}>Contract address: {address.toString()}</p>,
+      <p key={2}>myAddress: {myAddress}</p>,
+      <p key={3}>deposits: {deposits}</p>,
+      <p key={4}>depositAsset: {depositAsset}</p>,
+      <p key={5}>upkeep: {upkeepRequired}</p>,
 
       // <p>DAI Balance: {daiBalance}</p>
-      <p>roundCount: {roundCount}</p>,
+      <p key={6}>roundCount: {roundCount}</p>,
     ]
   } else {
-    return [<p>LOADING</p>]
+    return [<p key={2}>LOADING</p>]
   }
 }

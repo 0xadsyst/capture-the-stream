@@ -17,7 +17,7 @@ export interface RoundType {
 
 export interface RoundsContextInterface {
   rounds: RoundType[]
-  setRounds: Function
+  setRounds: () => null
 }
 
 export const RoundsCtx = createContext<RoundsContextInterface>({

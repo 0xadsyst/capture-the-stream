@@ -2,7 +2,7 @@ import { createContext } from "react";
 
 export interface RoundContextInterface {
   roundId: number
-  setRoundId: Function
+  setRoundId: () => null
 }
 
 export const RoundCtx = createContext<RoundContextInterface | null>(null);

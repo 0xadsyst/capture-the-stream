@@ -31,8 +31,9 @@ async function fetchBalance(provider: ethers.providers.Web3Provider | undefined)
   if (provider) {
     const address = externalContractsAddressMap[provider.network.chainId]['CaptureTheStream']
     const captureTheStream = CaptureTheStream__factory.connect(address, provider)
-    let myAddress = await provider.getSigner().getAddress()
-    return captureTheStream.deposits(myAddress)
+    const myAddress = await provider.getSigner().getAddress()
+    
+return captureTheStream.deposits(myAddress)
   } else {
     return undefined
   }

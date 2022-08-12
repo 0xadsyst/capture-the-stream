@@ -19,7 +19,7 @@ import { RoundCtx } from 'src/context/roundContext'
 import moment from 'moment'
 
 const style = {
-  position: 'absolute' as 'absolute',
+  position: 'absolute' as const,
   top: '50%',
   left: '50%',
   transform: 'translate(-50%, -50%)',
@@ -144,7 +144,8 @@ const InitiateRoundModal = () => {
       guessCost: txValues.guessCost > 0 ? false : true,
       inRoundGuessesAllowed: false
     }
-    return invalidTransactionValues
+    
+return invalidTransactionValues
   }
 
   return (
@@ -286,7 +287,8 @@ function initiateRound(txValues: TransactionValues, provider: ethers.providers.W
   if (provider) {
     const address = externalContractsAddressMap[provider.network.chainId]['CaptureTheStream']
     const captureTheStream = CaptureTheStream__factory.connect(address, provider.getSigner())
-    return captureTheStream.initiateRound(
+    
+return captureTheStream.initiateRound(
       txValues.oracle,
       txValues.startTimestamp,
       txValues.endTimestamp,

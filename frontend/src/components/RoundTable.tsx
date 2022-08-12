@@ -58,7 +58,8 @@ const RoundTable = () => {
 
   useEffect(() => {
     const interval = setInterval(() => setTime(Date.now()), 1000);
-    return () => {
+    
+return () => {
       clearInterval(interval);
     };
   }, []);
@@ -76,7 +77,7 @@ const RoundTable = () => {
         status = 'Winning'
         winningTime += (moment().unix() - roundData?.lastWinnerChange)
       }
-      let winnings = winningTime * roundData.deposits / ((roundData.endTimestamp - roundData.startTimestamp) * 1e18)
+      const winnings = winningTime * roundData.deposits / ((roundData.endTimestamp - roundData.startTimestamp) * 1e18)
       if (guessData['roundId'] == roundContext?.roundId) {
         newRows.push({
           guessId: guessData['guessId'],

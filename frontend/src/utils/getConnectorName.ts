@@ -11,5 +11,6 @@ export function getName(connector: Connector) {
   if (connector instanceof CoinbaseWallet) return 'Coinbase Wallet'
   if (connector instanceof Network) return 'Network'
   if (connector instanceof GnosisSafe) return 'Gnosis Safe'
-  return 'Unknown'
+  
+return 'Unknown'
 }

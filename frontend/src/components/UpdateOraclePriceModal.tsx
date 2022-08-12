@@ -20,7 +20,7 @@ import moment from 'moment'
 import { MockChainlinkAggregator__factory } from 'generated/factories/MockChainlinkAggregator__factory'
 
 const style = {
-  position: 'absolute' as 'absolute',
+  position: 'absolute' as const,
   top: '50%',
   left: '50%',
   transform: 'translate(-50%, -50%)',
@@ -136,7 +136,8 @@ function updateOracle(txValues: TransactionValues, provider: ethers.providers.We
 
   if (provider) {
     const aggregatorContract = MockChainlinkAggregator__factory.connect(txValues.oracle, provider.getSigner())
-    return aggregatorContract.updateAnswer(txValues.newPrice)
+    
+return aggregatorContract.updateAnswer(txValues.newPrice)
   } else {
     return Promise.resolve(false)
   }

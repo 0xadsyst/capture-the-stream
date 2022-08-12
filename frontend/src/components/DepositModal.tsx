@@ -13,7 +13,7 @@ import { ethers } from 'ethers'
 import { ProviderContext } from 'src/context/providerContext'
 
 const style = {
-  position: 'absolute' as 'absolute',
+  position: 'absolute' as const,
   top: '50%',
   left: '50%',
   transform: 'translate(-50%, -50%)',
@@ -90,7 +90,8 @@ function deposit(amount: number, provider: ethers.providers.Web3Provider | undef
     const captureTheStream = CaptureTheStream__factory.connect(address, provider.getSigner())
     console.log("captureTheStream contract:", captureTheStream)
     const a = ethers.utils.parseUnits(amount.toString(), 18)
-    return captureTheStream.deposit(a)
+    
+return captureTheStream.deposit(a)
   } else {
     return Promise.resolve(false)
   }
@@ -102,7 +103,8 @@ function withdraw(amount: number, provider: ethers.providers.Web3Provider | unde
     const address = externalContractsAddressMap[provider._network.chainId]['CaptureTheStream']
     const captureTheStream = CaptureTheStream__factory.connect(address, provider.getSigner())
     const a = ethers.utils.parseUnits(amount.toString(), 18)
-    return captureTheStream.withdraw(a)
+    
+return captureTheStream.withdraw(a)
   } else {
     return Promise.resolve(false)
   }

@@ -48,7 +48,7 @@
     "subgraph-remove-local": "yarn workspace @scaffold-eth/subgraph remove-local",
     "subgraph-deploy-local": "yarn workspace @scaffold-eth/subgraph deploy-local",
     "subgraph-build-deploy-local": "yarn workspace @scaffold-eth/subgraph prepare-local && yarn workspace @scaffold-eth/subgraph codegen && yarn workspace @scaffold-eth/subgraph build && yarn workspace @scaffold-eth/subgraph create-local && yarn workspace @scaffold-eth/subgraph deploy-local",
-    "subgraph-build-deploy-mumbai": "yarn workspace @scaffold-eth/subgraph prepare-mumbai && yarn workspace @scaffold-eth/subgraph codegen && yarn workspace @scaffold-eth/subgraph build && yarn workspace @scaffold-eth/subgraph create-local && yarn workspace @scaffold-eth/subgraph deploy-mumbai"
+    "subgraph-build-deploy-mumbai": "yarn workspace @scaffold-eth/subgraph prepare-mumbai && yarn workspace @scaffold-eth/subgraph codegen && yarn workspace @scaffold-eth/subgraph build && yarn workspace @scaffold-eth/subgraph deploy-mumbai"
   },
   "workspaces": {
     "packages": [

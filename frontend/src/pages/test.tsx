@@ -26,6 +26,7 @@ const Test = () => {
   const handleMintDAIClick = () => mintDAI(providerContext.provider)
   const handleDAIBalanceClick = () => daiBalance(providerContext.provider).then(v => console.log('DAI balance:', v))
   const handleSetDepositAssetClick = () => setDepositAddress(providerContext.provider)
+
   // const handleInitiateRoundClick = () => initiateRound(providerContext.provider)
   const handleEndRoundClick = () => endRound(providerContext.provider)
   const handlePerformUpkeepClick = () => performUpkeep(providerContext.provider)
@@ -80,7 +81,8 @@ async function mintDAI(provider: ethers.providers.Web3Provider | undefined) {
     const myAddress = await provider.getSigner().getAddress()
     const daiContract = MockDAI__factory.connect(address, provider.getSigner())
     const a = ethers.utils.parseUnits('1000', 18)
-    return daiContract.mint(myAddress, a)
+    
+return daiContract.mint(myAddress, a)
   } else {
     return Promise.resolve(false)
   }
@@ -93,7 +95,8 @@ async function daiBalance(provider: ethers.providers.Web3Provider | undefined) {
     const myAddress = await provider.getSigner().getAddress()
     const daiContract = MockDAI__factory.connect(address, provider.getSigner())
     const a = ethers.utils.parseUnits('1000', 18)
-    return daiContract.balanceOf(myAddress)
+    
+return daiContract.balanceOf(myAddress)
   } else {
     return Promise.resolve(false)
   }
@@ -105,7 +108,8 @@ async function setDepositAddress(provider: ethers.providers.Web3Provider | undef
     const contractAddress = externalContractsAddressMap[provider.network.chainId]['CaptureTheStream']
     const address = externalContractsAddressMap[provider.network.chainId]['MockDAI']
     const captureTheStreamContract = CaptureTheStream__factory.connect(contractAddress, provider.getSigner())
-    return captureTheStreamContract.setDepositAsset(address)
+    
+return captureTheStreamContract.setDepositAsset(address)
   } else {
     return Promise.resolve(false)
   }
@@ -116,7 +120,8 @@ async function endRound(provider: ethers.providers.Web3Provider | undefined) {
   if (provider) {
     const address = externalContractsAddressMap[provider.network.chainId]['CaptureTheStream']
     const captureTheStreamContract = CaptureTheStream__factory.connect(address, provider.getSigner())
-    return captureTheStreamContract.endRound(0)
+    
+return captureTheStreamContract.endRound(0)
   } else {
     return Promise.resolve(false)
   }
@@ -128,7 +133,8 @@ async function performUpkeep(provider: ethers.providers.Web3Provider | undefined
     const address = externalContractsAddressMap[provider.network.chainId]['CaptureTheStream']
     const captureTheStreamContract = CaptureTheStream__factory.connect(address, provider.getSigner())
     const upkeepRequired = await captureTheStreamContract.checkUpkeep(ethers.utils.randomBytes(1))
-    return captureTheStreamContract.performUpkeep(upkeepRequired[1])
+    
+return captureTheStreamContract.performUpkeep(upkeepRequired[1])
   } else {
     return Promise.resolve(false)
   }
@@ -142,6 +148,7 @@ async function fetchData(provider: ethers.providers.Web3Provider | undefined) {
     const deposits = await (await captureTheStream.deposits(myAddress)).toString()
     const depositAsset = await (await captureTheStream.depositAsset()).toString()
     const upkeepRequired = await (await captureTheStream.checkUpkeep(ethers.utils.randomBytes(1))).toString()
+
     // const daiBalance = await (await captureTheStream.daiBalance()).toString()
     const roundCount = await (await captureTheStream.roundCount()).toString()
 
@@ -151,6 +158,7 @@ async function fetchData(provider: ethers.providers.Web3Provider | undefined) {
       <p>deposits: {deposits}</p>,
       <p>depositAsset: {depositAsset}</p>,
       <p>upkeep: {upkeepRequired}</p>,
+
       // <p>DAI Balance: {daiBalance}</p>
       <p>roundCount: {roundCount}</p>,
     ]

@@ -10,6 +10,7 @@ export const providerLocalhost = new StaticJsonRpcProvider('127.0.0.1:8545');
  * Use burner wallet as fallback
  */
  export const BURNER_FALLBACK_ENABLED: boolean = process.env.NEXT_PUBLIC_BURNER_FALLBACK_ALLOWED === 'true';
+
  /**
   * Connect to burner on first load if there are no cached providers
   */

@@ -1,4 +1,4 @@
-import React, {useEffect} from 'react'
+import React from 'react'
 import { useConnectWallet } from '@web3-onboard/react'
 import Button from '@mui/material/Button'
 

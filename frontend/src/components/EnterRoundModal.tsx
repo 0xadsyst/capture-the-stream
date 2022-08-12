@@ -14,7 +14,7 @@ import { ethers } from 'ethers'
 import { RoundCtx } from 'src/context/roundContext'
 
 const style = {
-  position: 'absolute' as 'absolute',
+  position: 'absolute' as const,
   top: '50%',
   left: '50%',
   transform: 'translate(-50%, -50%)',
@@ -88,7 +88,8 @@ function enterRound(roundId: number | undefined, guess: number, provider: ethers
   if (provider && roundId != undefined) {
     const address = externalContractsAddressMap[provider.network.chainId]['CaptureTheStream']
     const captureTheStream = CaptureTheStream__factory.connect(address, provider.getSigner())
-    return captureTheStream.enterRound(roundId, guess)
+    
+return captureTheStream.enterRound(roundId, guess)
   } else {
     return Promise.resolve(false)
   }

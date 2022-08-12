@@ -82,6 +82,7 @@ export const CHAINS: { [chainId: number]: BasicChainInformation | ExtendedChainI
     ),
     name: 'Kovan',
   },
+
   // Optimism
   10: {
     urls: [
@@ -101,6 +102,7 @@ export const CHAINS: { [chainId: number]: BasicChainInformation | ExtendedChainI
     nativeCurrency: ETH,
     blockExplorerUrls: ['https://kovan-optimistic.etherscan.io'],
   },
+
   // Arbitrum
   42161: {
     urls: [
@@ -120,6 +122,7 @@ export const CHAINS: { [chainId: number]: BasicChainInformation | ExtendedChainI
     nativeCurrency: ETH,
     blockExplorerUrls: ['https://testnet.arbiscan.io'],
   },
+
   // Polygon
   137: {
     urls: [
@@ -138,6 +141,7 @@ export const CHAINS: { [chainId: number]: BasicChainInformation | ExtendedChainI
     nativeCurrency: MATIC,
     blockExplorerUrls: ['https://mumbai.polygonscan.com'],
   },
+
   // Celo
   42220: {
     urls: ['https://forno.celo.org'],

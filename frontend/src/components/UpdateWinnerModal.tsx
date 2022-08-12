@@ -13,7 +13,7 @@ import { ethers } from 'ethers'
 import { RoundCtx } from 'src/context/roundContext'
 
 const style = {
-  position: 'absolute' as 'absolute',
+  position: 'absolute' as const,
   top: '50%',
   left: '50%',
   transform: 'translate(-50%, -50%)',
@@ -73,7 +73,8 @@ function updateWinner(roundId: number | undefined, provider: ethers.providers.We
   if (provider && roundId != undefined) {
     const address = externalContractsAddressMap[provider.network.chainId]['CaptureTheStream']
     const captureTheStream = CaptureTheStream__factory.connect(address, provider.getSigner())
-    return captureTheStream.updateWinner(roundId)
+    
+return captureTheStream.updateWinner(roundId)
   } else {
     return Promise.resolve(false)
   }

@@ -5,6 +5,7 @@ export default function initializeOnboard() {
   const INFURA_ID = process.env.NEXT_PUBLIC_INFURA_ID;
   const rpcUrl = `https://mainnet.infura.io/v3/${INFURA_ID}`
   const injected = injectedModule()
+
   // initialize Onboard
   init({
     wallets: [injected],

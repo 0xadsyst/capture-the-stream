@@ -4,7 +4,8 @@ export const getAssetNameFromOracle = (oracleAddress: string, chainId: number) :
     if (oracleAddress && chainId) {
     const addresses = externalContractsAddressMap[chainId]
     const result = Object.keys(addresses).find(key => addresses[key].toLowerCase() == oracleAddress.toLowerCase()) ?? ''
-    return result.replace("AggregatorV3Interface","")
+    
+return result.replace("AggregatorV3Interface","")
     } else {
         return ''
     }

@@ -11,7 +11,7 @@ export interface GuessType {
 
 export interface GuessesContextInterface {
   guesses: GuessType[]
-  setGuesses: () => null
+  setGuesses: (guesses: GuessType[]) => null
 }
 
 export const GuessesContext = createContext<GuessesContextInterface>({

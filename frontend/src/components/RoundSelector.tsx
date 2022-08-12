@@ -1,4 +1,4 @@
-import React from 'react'
+import React, {useContext} from 'react'
 
 // ** MUI Imports
 import Select, { SelectChangeEvent } from '@mui/material/Select'
@@ -6,60 +6,44 @@ import { FormControl } from '@mui/material'
 import MenuItem from '@mui/material/MenuItem'
 import InputLabel from '@mui/material/InputLabel'
 
-import { ProviderProps, useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 
 // ** Web3
-import { useQuery } from '@apollo/client'
-import { ROUNDS_QUERY } from '../constants/queries/queries'
-
-interface RoundDataType {
-  __typeName: string
-  id: string
-}
+import { RoundsCtx, RoundType } from 'src/context/roundsContext' 
+import { RoundCtx } from 'src/context/roundContext'
 
 const emptyList = [<MenuItem value={0} key ="">0</MenuItem>]
-const emptyQueryData: number[] = []
-const emptyRoundData: RoundDataType[] = []
 
-interface Props {
-  onChange: (e: SelectChangeEvent) => void
-  roundId: number | undefined
-}
+const RoundSelector = () => {
+  const roundsContext = useContext(RoundsCtx)
+  const roundContext = useContext(RoundCtx)
 
-const RoundSelector = (props: Props) => {
-  const [items, setItems] = useState(emptyList)
-  const [queryData, setQueryData] = useState(emptyRoundData)
+  const [items, setItems] = useState<any[]>([])
+  const [selectedValue, setSelectedValue] = useState<string>("")
 
-  const { loading, error, data } = useQuery(ROUNDS_QUERY, {
-    pollInterval: 5000
+  const handleChange = (event:SelectChangeEvent<string>) => {
+    console.log("event.target.value", event.target.value)
+    setSelectedValue(event.target.value.toString())
+    roundContext?.setRoundId(event.target.value)
   }
-  )
 
   useEffect(() => {
-    if (data) {
-      console.log('rounds data:', data)
-      setQueryData(data.rounds)
-    }
-  }, [data, loading])
-
-  useEffect(() => {
-    console.log('queryData:', queryData)
-    if (queryData) {
-      const newItemList = queryData.map((q, index) => {
+    if (roundsContext.rounds) {
+      const newItemList = roundsContext.rounds.map(r => {
         return (
-          <MenuItem value={q['id']} key={index}>
-            {q['id']}
+          <MenuItem value={r.roundId} key={r.roundId}>
+            {r.roundId}
           </MenuItem>
         )
       })
       setItems(newItemList)
     }
-  }, [queryData])
+  }, [roundsContext.rounds])
 
   return (
     <FormControl fullWidth>
       <InputLabel id='demo-simple-select-label'>Round</InputLabel>
-      <Select labelId='roundId-label' id='roundId-select' value={props.roundId ? props.roundId.toString() : ''} label='Round' onChange={props.onChange}>
+      <Select labelId='roundId-label' id='roundId-select' value={selectedValue} label='Round' onChange={handleChange}>
         {items}
       </Select>
     </FormControl>

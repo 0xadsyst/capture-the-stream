@@ -1,7 +1,7 @@
 import { ApolloClient, InMemoryCache, NormalizedCacheObject } from '@apollo/client'
 
 const apolloClientLocalhost = new ApolloClient({
-  uri: 'http://localhost:8000/subgraphs/name/scaffold-eth/CaptureTheStream',
+  uri: 'http://localhost:8000/subgraphs/name/capture-the-stream/capture-the-stream',
   cache: new InMemoryCache()
 })
 

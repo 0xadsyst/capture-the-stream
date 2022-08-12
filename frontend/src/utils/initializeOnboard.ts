@@ -12,7 +12,7 @@ export default function initializeOnboard() {
       {
         id: '0x13881',
         token: 'MATIC',
-        label: 'Polygon Mumbai',
+        label: 'Mumbai',
         rpcUrl
       },
       {

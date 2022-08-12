@@ -9,22 +9,18 @@ const navigation = (): VerticalNavItemsType => {
   return [
     {
       title: 'Summary',
-      icon: HomeOutline,
       path: '/'
     },
     {
       title: 'Round',
-      icon: AccountCogOutline,
       path: '/round'
     },
     {
       title: 'My History',
-      icon: AccountCogOutline,
       path: '/underConstruction'
     },
     {
       title: 'Protocol Statistics',
-      icon: AccountCogOutline,
       path: '/underConstruction'
     }
   ]

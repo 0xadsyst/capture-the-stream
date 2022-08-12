@@ -16,7 +16,7 @@ export function useProvider() {
     } else {
       setProvider(undefined)
     }
-    console.log("new provider:", provider)
+    console.log("New provider:", provider)
     providerContext.setProvider(provider)
 
   }, [connectedWallets])

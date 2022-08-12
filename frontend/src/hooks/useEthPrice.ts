@@ -28,7 +28,7 @@ function useEthPrice() {
 
 function fetchEthPrice(provider: ethers.providers.Web3Provider | undefined) {
   if (provider) {
-    const address = externalContractsAddressMap[provider.network.chainId]['AggregatorV3Interface']
+    const address = externalContractsAddressMap[provider.network.chainId]['AggregatorV3InterfaceETH']
     const aggregator = AggregatorV3Interface__factory.connect(address, provider)
     return aggregator.latestRoundData()
   } else {

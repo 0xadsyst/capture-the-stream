@@ -20,6 +20,7 @@ import useEthPrice from 'src/hooks/useEthPrice'
 import { RoundCtx } from 'src/context/roundContext'
 import { RoundsCtx } from 'src/context/roundsContext'
 import { GuessesContext } from 'src/context/guessesContext'
+import moment from 'moment'
 
 interface RowType {
   guessId: number
@@ -27,6 +28,7 @@ interface RowType {
   guess: number
   difference: number
   winningTime: number
+  winnings: string
   status: string
 }
 
@@ -48,28 +50,41 @@ const emptyRow: RowType[] = []
 
 const RoundTable = () => {
   const [rows, setRows] = useState<RowType[]>([])
+  const [time, setTime] = useState(Date.now());
   const roundContext = useContext(RoundCtx)
   const roundsContext = useContext(RoundsCtx)
   const guessesContext = useContext(GuessesContext)
   const ethPrice = useEthPrice()
 
   useEffect(() => {
+    const interval = setInterval(() => setTime(Date.now()), 1000);
+    return () => {
+      clearInterval(interval);
+    };
+  }, []);
+
+  useEffect(() => {
     const newRows: RowType[] = []
     const currentRound = roundContext?.roundId ?? 0
+    const roundData = roundsContext.rounds[currentRound]
 
     guessesContext.guesses.map(guessData => {
       let status = 'Losing'
-      if (roundsContext.rounds[currentRound].currentWinner == guessData.guessId) {
+      let winningTime = guessData['winningTime']
+      
+      if (roundData?.currentWinner == guessData.guessId) {
         status = 'Winning'
+        winningTime += (moment().unix() - roundData?.lastWinnerChange)
       }
-
+      let winnings = winningTime * roundData.deposits / ((roundData.endTimestamp - roundData.startTimestamp) * 1e18)
       if (guessData['roundId'] == roundContext?.roundId) {
         newRows.push({
           guessId: guessData['guessId'],
           user: guessData['user'],
           guess: guessData['guess'],
           difference: (ethPrice ?? guessData['guess']) - guessData['guess'],
-          winningTime: guessData['winningTime'],
+          winningTime: winningTime,
+          winnings: winnings.toPrecision(4),
           status: status
         })
       }
@@ -77,7 +92,7 @@ const RoundTable = () => {
     newRows.sort((a, b) => Math.abs(a.difference) - Math.abs(b.difference))
 
     setRows(newRows)
-  }, [guessesContext.guesses, ethPrice])
+  }, [guessesContext.guesses, ethPrice, time])
 
   return (
     <Card>
@@ -90,6 +105,7 @@ const RoundTable = () => {
               <TableCell>Guess</TableCell>
               <TableCell>Difference</TableCell>
               <TableCell>Time Winning</TableCell>
+              <TableCell>Winnings</TableCell>
               <TableCell>Status</TableCell>
             </TableRow>
           </TableHead>
@@ -101,6 +117,7 @@ const RoundTable = () => {
                 <TableCell>{row.guess}</TableCell>
                 <TableCell>{row.difference}</TableCell>
                 <TableCell>{row.winningTime}</TableCell>
+                <TableCell>{row.winnings + " DAI"}</TableCell>
                 <TableCell>{row.status}</TableCell>
               </TableRow>
             ))}

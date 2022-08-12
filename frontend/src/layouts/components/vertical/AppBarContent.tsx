@@ -2,9 +2,6 @@
 import Box from '@mui/material/Box'
 import Card from '@mui/material/Card'
 
-import { Theme } from '@mui/material/styles'
-import useMediaQuery from '@mui/material/useMediaQuery'
-
 // ** Type Import
 import { Settings } from 'src/context/settingsContext'
 
@@ -30,7 +27,6 @@ const AppBarContent = (props: Props) => {
   const { hidden, settings, saveSettings, toggleNavVisibility } = props
 
   // ** Hook
-  const hiddenSm = useMediaQuery((theme: Theme) => theme.breakpoints.down('sm'))
   const balance = useProtocolBalance()
   const rounds = useRounds()
   const guesses = useGuesses()

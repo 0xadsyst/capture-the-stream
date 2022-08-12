@@ -40,13 +40,14 @@ import { RoundCtx } from 'src/context/roundContext'
 import { RoundsCtx, RoundType } from 'src/context/roundsContext'
 import { GuessesContext, GuessType } from 'src/context/guessesContext'
 import { ProviderContext, ProviderType } from 'src/context/providerContext'
-import { ApolloProvider, ApolloClient, InMemoryCache } from '@apollo/client'
+import { ApolloClient, InMemoryCache, NormalizedCacheObject } from '@apollo/client'
 import { apolloClient } from 'src/utils/apollo-client'
+import { ApolloProvider, ApolloConsumer } from '@apollo/react-components'
 
 const queryClient = new QueryClient()
 
 export const initialApolloClient = new ApolloClient({
-  uri: 'http://localhost:8000/subgraphs/name/',
+  uri: 'http://localhost:8000/subgraphs/name/capture-the-stream/capture-the-stream',
   cache: new InMemoryCache()
 })
 
@@ -79,10 +80,13 @@ const App = (props: ExtendedAppProps) => {
   const [rounds, setRounds] = useState<RoundType[] | undefined>()
   const [guesses, setGuesses] = useState<GuessType[] | undefined>()
   const [provider, setProvider] = useState<ethers.providers.Web3Provider | undefined>()
+  const [apolloContextClient, setapolloContextClient] = useState<ApolloClient<NormalizedCacheObject>>(
+    initialApolloClient
+  )
 
-  const client = useMemo(() => {
+  useEffect(() => {
     console.log('update apollo provider', provider)
-    return apolloClient[provider?._network?.chainId ?? 31337]
+    setapolloContextClient(apolloClient[provider?._network?.chainId ?? 31337])
   }, [provider?._network?.chainId])
 
   const { Component, emotionCache = clientSideEmotionCache, pageProps } = props
@@ -100,20 +104,22 @@ const App = (props: ExtendedAppProps) => {
       <QueryClientProvider client={queryClient}>
         <SettingsProvider>
           <ProviderContext.Provider value={{ provider: provider ?? undefined, setProvider: setProvider }}>
-            <ApolloProvider client={client}>
-              <RoundCtx.Provider value={{ roundId: round ?? 0, setRoundId: setRound }}>
-                <RoundsCtx.Provider value={{ rounds: rounds ?? [], setRounds: setRounds }}>
-                  <GuessesContext.Provider value={{ guesses: guesses ?? [], setGuesses: setGuesses }}>
-                    <SettingsConsumer>
-                      {({ settings }) => {
-                        return (
-                          <ThemeComponent settings={settings}>{getLayout(<Component {...pageProps} />)}</ThemeComponent>
-                        )
-                      }}
-                    </SettingsConsumer>
-                  </GuessesContext.Provider>
-                </RoundsCtx.Provider>
-              </RoundCtx.Provider>
+            <ApolloProvider client={apolloContextClient}>
+                <RoundCtx.Provider value={{ roundId: round ?? 0, setRoundId: setRound }}>
+                  <RoundsCtx.Provider value={{ rounds: rounds ?? [], setRounds: setRounds }}>
+                    <GuessesContext.Provider value={{ guesses: guesses ?? [], setGuesses: setGuesses }}>
+                      <SettingsConsumer>
+                        {({ settings }) => {
+                          return (
+                            <ThemeComponent settings={settings}>
+                              {getLayout(<Component {...pageProps} />)}
+                            </ThemeComponent>
+                          )
+                        }}
+                      </SettingsConsumer>
+                    </GuessesContext.Provider>
+                  </RoundsCtx.Provider>
+                </RoundCtx.Provider>
             </ApolloProvider>
           </ProviderContext.Provider>
         </SettingsProvider>

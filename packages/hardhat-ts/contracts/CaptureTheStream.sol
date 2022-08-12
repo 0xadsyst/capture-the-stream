@@ -19,10 +19,14 @@ contract CaptureTheStream is KeeperCompatibleInterface {
     using SafeERC20 for IERC20;
 
     struct Round {
-        address asset;
         address oracle;
         uint256 startTimestamp;
         uint256 endTimestamp;
+        uint256 guessCutOffTimestamp;
+        uint256 numberOfGuessesAllowed;
+        uint256 minimumGuessSpacing;
+        uint256 guessCost;
+        bool inRoundGuessesAllowed;
         Guess[] guesses;
         uint256 currentWinnerIndex;
         uint256 lastWinnerChange;
@@ -45,41 +49,72 @@ contract CaptureTheStream is KeeperCompatibleInterface {
 
     event Deposit(address user, uint256 depositAmount, uint256 balance);
     event Withdraw(address user, uint256 withdrawAmount, uint256 balance);
-    event InitiateRound(uint256 roundId, address asset, uint256 startTimestamp, uint256 endTimestamp);
     event EndRound(uint256 roundId);
-    event EnterRound(uint256 roundId, uint256 guessIndex, address user, uint256 balance, int256 guess);
+    event EnterRound(uint256 roundId, uint256 guessIndex, address user, uint256 balance, int256 guess, uint256 guessCost);
     event StartWinner(uint256 roundId, uint256 winningGuessIndex, address winnerAddress, int256 winningGuess, int256 currentPrice);
     event EndWinner(uint256 roundId, uint256 winningGuessIndex, address winnerAddress, int256 winningGuess, int256 currentPrice, uint256 timeWinning);
     event WinningGuesses(Guess[] winningGuesses);
+    event InitiateRound(
+        uint256 roundId,
+        address oracle,
+        uint256 startTimestamp,
+        uint256 endTimestamp,
+        uint256 guessCutOffTimestamp,
+        uint256 numberOfGuessesAllowed,
+        uint256 minimumGuessSpacing,
+        uint256 guessCost,
+        bool inRoundGuessesAllowed
+    );
 
     constructor() {
-        oracles[0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2] = AggregatorV3Interface(0x0715A7794a1dc8e42615F059dD6e406A6594651A);
         depositAsset = IERC20(0xE81Fca457ba225C7D0921207f0b24444b9303944); // MockDAI
         guessCost = 10 * 1e18; // 10 DAI
     }
 
-    function getLatestPrice(address _asset) public view returns (int256) {
-        AggregatorV3Interface priceFeed = oracles[_asset];
+    function getLatestPrice(address _oracle) public view returns (int256) {
+        AggregatorV3Interface priceFeed = AggregatorV3Interface(_oracle);
         (, int256 price, , , ) = priceFeed.latestRoundData();
         return price.div(1e8);
     }
 
-    function initiateRound() public //address _asset,
-    //uint256 _startTimestamp,
-    //uint256 _endTimestamp
-    {
-        address _asset = 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2;
-        uint256 _startTimestamp = block.timestamp;
-        uint256 _endTimestamp = _startTimestamp + 1000;
+    function initiateRound(
+        address _oracle,
+        uint256 _startTimestamp,
+        uint256 _endTimestamp,
+        uint256 _guessCutOffTimestamp,
+        uint256 _numberOfGuessesAllowed,
+        uint256 _minimumGuessSpacing,
+        uint256 _guessCost,
+        bool _inRoundGuessesAllowed
+    ) public {
         require(_endTimestamp > _startTimestamp, "_endTimestamp < _startTimestamp");
-        rounds[roundCount].asset = _asset;
+        rounds[roundCount].oracle = _oracle;
         rounds[roundCount].startTimestamp = _startTimestamp;
         rounds[roundCount].endTimestamp = _endTimestamp;
+        rounds[roundCount].guessCutOffTimestamp = _guessCutOffTimestamp;
+        rounds[roundCount].numberOfGuessesAllowed = _numberOfGuessesAllowed;
+        rounds[roundCount].minimumGuessSpacing = _minimumGuessSpacing;
+        rounds[roundCount].guessCost = _guessCost * 1e18;
+        rounds[roundCount].inRoundGuessesAllowed = _inRoundGuessesAllowed;
         rounds[roundCount].lastWinnerChange = _startTimestamp;
 
-        emit InitiateRound(roundCount, _asset, _startTimestamp, _endTimestamp);
+        emitInitiateRound();
 
         roundCount++;
+    }
+
+    function emitInitiateRound() internal {
+        emit InitiateRound(
+            roundCount,
+            rounds[roundCount].oracle,
+            rounds[roundCount].startTimestamp,
+            rounds[roundCount].endTimestamp,
+            rounds[roundCount].guessCutOffTimestamp,
+            rounds[roundCount].numberOfGuessesAllowed,
+            rounds[roundCount].minimumGuessSpacing,
+            rounds[roundCount].guessCost,
+            rounds[roundCount].inRoundGuessesAllowed
+        );
     }
 
     function setDepositAsset(address _asset) public {
@@ -112,30 +147,38 @@ contract CaptureTheStream is KeeperCompatibleInterface {
     }
 
     function enterRound(uint256 _roundId, int256 _guess) public {
-        require(deposits[msg.sender] >= guessCost, "Not enough funds to enter round");
-        require(block.timestamp <= rounds[_roundId].endTimestamp, "Round has finished");
+        Round memory round = rounds[_roundId];
+        require(deposits[msg.sender] >= round.guessCost, "Not enough funds to enter round");
+        require(block.timestamp <= round.endTimestamp, "Round has finished");
+        require(block.timestamp <= round.guessCutOffTimestamp, "Round entries have closed");
+        require(round.numberOfGuessesAllowed == 0 || round.guesses.length < round.numberOfGuessesAllowed, "Round guesses are full");
+        for (uint256 i = 0; i < round.guesses.length; i++) {
+            uint256 guessDiff = SignedMath.abs(_guess - round.guesses[i].guess);
+            require(guessDiff <= round.minimumGuessSpacing, "Too close to another guess");
+        }
 
         Guess memory newGuess = Guess({ user: msg.sender, guess: _guess, timeWinning: 0 });
         rounds[_roundId].guesses.push(newGuess);
-        deposits[msg.sender] = deposits[msg.sender].sub(guessCost);
-        rounds[_roundId].deposits += guessCost;
+        deposits[msg.sender] = deposits[msg.sender].sub(round.guessCost);
+        rounds[_roundId].deposits = round.deposits.add(round.guessCost);
 
-        emit EnterRound(_roundId, rounds[_roundId].guesses.length - 1, msg.sender, deposits[msg.sender], _guess);
+        emit EnterRound(_roundId, round.guesses.length - 1, msg.sender, deposits[msg.sender], _guess, guessCost);
     }
 
     function updateWinner(uint256 _roundId) public {
-        require(block.timestamp >= rounds[_roundId].startTimestamp && block.timestamp <= rounds[_roundId].endTimestamp, "Not within time range of round");
+        Round memory round = rounds[_roundId];
+        require(block.timestamp >= round.startTimestamp && block.timestamp <= round.endTimestamp, "Not within time range of round");
 
-        int256 price = getLatestPrice(rounds[_roundId].asset);
+        int256 price = getLatestPrice(round.oracle);
 
         uint256 bestGuessIndex = getBestGuess(_roundId, price);
 
-        if (bestGuessIndex == rounds[_roundId].currentWinnerIndex) {
+        if (bestGuessIndex == round.currentWinnerIndex) {
             revert("No change to current winner");
         } else {
-            uint256 timeSinceLastWinnerChange = block.timestamp.sub(rounds[_roundId].lastWinnerChange);
-            uint256 previousWinnerIndex = rounds[_roundId].currentWinnerIndex;
-            Guess memory previousWinnerGuess = rounds[_roundId].guesses[previousWinnerIndex];
+            uint256 timeSinceLastWinnerChange = block.timestamp.sub(round.lastWinnerChange);
+            uint256 previousWinnerIndex = round.currentWinnerIndex;
+            Guess memory previousWinnerGuess = round.guesses[previousWinnerIndex];
 
             emit EndWinner(_roundId, previousWinnerIndex, previousWinnerGuess.user, previousWinnerGuess.guess, price, timeSinceLastWinnerChange);
 
@@ -143,13 +186,14 @@ contract CaptureTheStream is KeeperCompatibleInterface {
             rounds[_roundId].lastWinnerChange = block.timestamp;
             rounds[_roundId].currentWinnerIndex = bestGuessIndex;
 
-            emit StartWinner(_roundId, bestGuessIndex, rounds[_roundId].guesses[bestGuessIndex].user, rounds[_roundId].guesses[bestGuessIndex].guess, price);
+            emit StartWinner(_roundId, bestGuessIndex, round.guesses[bestGuessIndex].user, round.guesses[bestGuessIndex].guess, price);
         }
     }
 
     function endRound(uint256 _roundId) public {
-        require(block.timestamp >= rounds[_roundId].endTimestamp, "Round has not finished");
         Round memory round = rounds[_roundId];
+        require(block.timestamp >= round.endTimestamp, "Round has not finished");
+
         uint256 roundLength = round.endTimestamp.sub(round.startTimestamp);
         for (uint256 i = 0; i < round.guesses.length; i++) {
             if (round.guesses[i].timeWinning > 0) {
@@ -174,7 +218,6 @@ contract CaptureTheStream is KeeperCompatibleInterface {
                 minPriceDifference = priceDifference;
             }
         }
-
         return bestGuessIndex;
     }
 
@@ -202,7 +245,7 @@ contract CaptureTheStream is KeeperCompatibleInterface {
         uint256 updatesRequired = 0;
         for (uint256 _roundId = 0; _roundId < roundCount; _roundId++) {
             if (block.timestamp >= rounds[_roundId].startTimestamp && block.timestamp <= rounds[_roundId].endTimestamp) {
-                int256 price = getLatestPrice(rounds[_roundId].asset);
+                int256 price = getLatestPrice(rounds[_roundId].oracle);
 
                 uint256 bestGuessIndex = getBestGuess(_roundId, price);
 

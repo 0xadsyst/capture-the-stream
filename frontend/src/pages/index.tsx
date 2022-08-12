@@ -7,6 +7,7 @@ import React, { useEffect, useState } from 'react'
 
 // ** Web3
 import RoundOverview from 'src/components/RoundOverview'
+import InitiateRoundModal from 'src/components/InitiateRoundModal'
 
 // ** Next
 import { useContext } from 'react'
@@ -18,7 +19,12 @@ const Summary = () => {
 
   return (
     <Grid container spacing={12}>
-      <RoundOverview />
+      <Grid item xs={12} md={12}>
+        <InitiateRoundModal />
+      </Grid>
+      <Grid item xs={12} md={12}>
+        <RoundOverview />
+      </Grid>
     </Grid>
   )
 }

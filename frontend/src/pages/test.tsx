@@ -11,6 +11,7 @@ import { externalContractsAddressMap } from 'src/configs/externalContracts.confi
 import { CaptureTheStream__factory } from '../../generated/factories/CaptureTheStream__factory'
 import { MockDAI__factory } from '../../generated/factories/MockDAI__factory'
 import { ethers } from 'ethers'
+import UpdateOracleModal from 'src/components/UpdateOraclePriceModal'
 
 import { RoundsCtx } from 'src/context/roundsContext'
 import { ProviderContext } from 'src/context/providerContext'
@@ -25,8 +26,9 @@ const Test = () => {
   const handleMintDAIClick = () => mintDAI(providerContext.provider)
   const handleDAIBalanceClick = () => daiBalance(providerContext.provider).then(v => console.log('DAI balance:', v))
   const handleSetDepositAssetClick = () => setDepositAddress(providerContext.provider)
-  const handleInitiateRoundClick = () => initiateRound(providerContext.provider)
+  // const handleInitiateRoundClick = () => initiateRound(providerContext.provider)
   const handleEndRoundClick = () => endRound(providerContext.provider)
+  const handlePerformUpkeepClick = () => performUpkeep(providerContext.provider)
 
   const { isLoading, isError, data, error } = useQuery(['testData'], () => fetchData(providerContext.provider), {
     refetchInterval: 5000,
@@ -53,12 +55,16 @@ const Test = () => {
           <Button variant='contained' onClick={handleSetDepositAssetClick}>
             Set Deposit Asset
           </Button>
-          <Button variant='contained' onClick={handleInitiateRoundClick}>
+          {/* <Button variant='contained' onClick={handleInitiateRoundClick}>
             Initiate Round
-          </Button>
+          </Button> */}
           <Button variant='contained' onClick={handleEndRoundClick}>
             End Round
           </Button>
+          <Button variant='contained' onClick={handlePerformUpkeepClick}>
+            Perform Upkeep
+          </Button>
+          <UpdateOracleModal/>
         </Grid>
       </Grid>
     </>
@@ -105,17 +111,6 @@ async function setDepositAddress(provider: ethers.providers.Web3Provider | undef
   }
 }
 
-async function initiateRound(provider: ethers.providers.Web3Provider | undefined) {
-  console.log('provider:', provider)
-  if (provider) {
-    const address = externalContractsAddressMap[provider.network.chainId]['CaptureTheStream']
-    const captureTheStreamContract = CaptureTheStream__factory.connect(address, provider.getSigner())
-    return captureTheStreamContract.initiateRound()
-  } else {
-    return Promise.resolve(false)
-  }
-}
-
 async function endRound(provider: ethers.providers.Web3Provider | undefined) {
   console.log('provider:', provider)
   if (provider) {
@@ -127,23 +122,37 @@ async function endRound(provider: ethers.providers.Web3Provider | undefined) {
   }
 }
 
+async function performUpkeep(provider: ethers.providers.Web3Provider | undefined) {
+  console.log('provider:', provider)
+  if (provider) {
+    const address = externalContractsAddressMap[provider.network.chainId]['CaptureTheStream']
+    const captureTheStreamContract = CaptureTheStream__factory.connect(address, provider.getSigner())
+    const upkeepRequired = await captureTheStreamContract.checkUpkeep(ethers.utils.randomBytes(1))
+    return captureTheStreamContract.performUpkeep(upkeepRequired[1])
+  } else {
+    return Promise.resolve(false)
+  }
+}
+
 async function fetchData(provider: ethers.providers.Web3Provider | undefined) {
   if (provider) {
     const address = externalContractsAddressMap[provider.network.chainId]['CaptureTheStream']
     const captureTheStream = CaptureTheStream__factory.connect(address, provider)
     const myAddress = await (await provider.getSigner().getAddress()).toString()
-    const deposits = await (await CaptureTheStream.deposits(myAddress)).toString()
-    const depositAsset = await (await CaptureTheStream.depositAsset()).toString()
-    const daiBalance = await (await CaptureTheStream.daiBalance()).toString()
-    //const roundCount = await (await CaptureTheStream.roundCount()).toString()
+    const deposits = await (await captureTheStream.deposits(myAddress)).toString()
+    const depositAsset = await (await captureTheStream.depositAsset()).toString()
+    const upkeepRequired = await (await captureTheStream.checkUpkeep(ethers.utils.randomBytes(1))).toString()
+    // const daiBalance = await (await captureTheStream.daiBalance()).toString()
+    const roundCount = await (await captureTheStream.roundCount()).toString()
 
     return [
       <p>Contract address: {address.toString()}</p>,
       <p>myAddress: {myAddress}</p>,
       <p>deposits: {deposits}</p>,
       <p>depositAsset: {depositAsset}</p>,
-      <p>DAI Balance: {daiBalance}</p>
-      //<p>roundCount: {roundCount}</p>,
+      <p>upkeep: {upkeepRequired}</p>,
+      // <p>DAI Balance: {daiBalance}</p>
+      <p>roundCount: {roundCount}</p>,
     ]
   } else {
     return [<p>LOADING</p>]

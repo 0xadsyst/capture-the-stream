@@ -1,0 +1,31 @@
+specVersion: 0.0.2
+schema:
+  file: ./src/schema.graphql
+dataSources:
+  - kind: ethereum/contract
+    name: captureTheStream
+    network: localhost
+    source:
+      address: "{{localhost_CaptureTheStreamAddress}}"
+      abi: CaptureTheStream
+      startBlock: 1
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.6
+      language: wasm/assemblyscript
+      entities:
+        - Round
+        - Guess
+      abis:
+        - name: CaptureTheStream
+          file: ./abis/localhost_CaptureTheStream.json
+      eventHandlers:
+        - event: InitiateRound(uint256,address,uint256,uint256,uint256,uint256,uint256,uint256,bool)
+          handler: handleInitiateRound
+        - event: EnterRound(uint256,uint256,address,uint256,int256,uint256)
+          handler: handleEnterRound
+        - event: EndWinner(uint256,uint256,address,int256,int256,uint256)
+          handler: handleEndWinner
+        - event: StartWinner(uint256,uint256,address,int256,int256)
+          handler: handleStartWinner
+      file: ./src/mapping.ts

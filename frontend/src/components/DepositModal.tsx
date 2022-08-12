@@ -88,6 +88,7 @@ function deposit(amount: number, provider: ethers.providers.Web3Provider | undef
   if (provider) {
     const address = externalContractsAddressMap[provider.network.chainId]['CaptureTheStream']
     const captureTheStream = CaptureTheStream__factory.connect(address, provider.getSigner())
+    console.log("captureTheStream contract:", captureTheStream)
     const a = ethers.utils.parseUnits(amount.toString(), 18)
     return captureTheStream.deposit(a)
   } else {
@@ -98,7 +99,7 @@ function deposit(amount: number, provider: ethers.providers.Web3Provider | undef
 function withdraw(amount: number, provider: ethers.providers.Web3Provider | undefined) {
   console.log('withdrawing: ', amount)
   if (provider) {
-    const address = externalContractsAddressMap[provider.network.chainId]['CaptureTheStream']
+    const address = externalContractsAddressMap[provider._network.chainId]['CaptureTheStream']
     const captureTheStream = CaptureTheStream__factory.connect(address, provider.getSigner())
     const a = ethers.utils.parseUnits(amount.toString(), 18)
     return captureTheStream.withdraw(a)

@@ -13,36 +13,47 @@ import { RoundsCtx, RoundType } from 'src/context/roundsContext'
 import { useContext, useEffect, useState } from 'react'
 // ** Next
 import { useRouter } from 'next/router'
+import {getAssetNameFromOracle } from 'src/utils/getAssetNameFromOracle'
+import { ProviderContext } from 'src/context/providerContext'
+
+import moment from 'moment'
 
 const RoundOverview = () => {
   const [roundOverviewCards, setroundOverviewCards] = useState<any[]>([])
   const roundsContext = useContext(RoundsCtx)
   const roundContext = useContext(RoundCtx)
+  const providerContext = useContext(ProviderContext)
+
   const router = useRouter()
   const theme = useTheme()
 
   function createRoundOverviewCard(round: RoundType) {
-    const startTimeString = new Date(round['startTimestamp'] * 1000).toLocaleString('en-GB', {
-      dateStyle: 'short',
-      timeStyle: 'medium'
-    })
-    const endTimeString = new Date(round['endTimestamp'] * 1000).toLocaleString('en-GB', {
-      dateStyle: 'short',
-      timeStyle: 'medium'
-    })
+    const startTimeString = moment(round['startTimestamp'] * 1000).format("MMM D hh:mm ")
+    const endTimeString = moment(round['endTimestamp'] * 1000).format("MMM D hh:mm ")
+    const guessCutOffTimestamp = moment(round['guessCutOffTimestamp'] * 1000).format("MMM D hh:mm ")
+    const numberOfGuessesAllowed = round['numberOfGuessesAllowed'] == 0 ? "Unlimited" : round['numberOfGuessesAllowed']
+    const asset = getAssetNameFromOracle(round['oracle'], providerContext.provider?._network.chainId ?? 0)
 
     return (
-      <Grid item xs={4} md={4}>
+      <Grid item xs={4} md={4} key={round.roundId}>
         <Card>
           <CardHeader title={'Round: ' + round['roundId'].toString()} />
           <CardContent >
+          <Typography variant='body1'><b>Asset: </b>{asset}</Typography>
+
             <Typography variant='body1' sx={{ mr: 4 }}>
-              Start Time: {startTimeString}
+              <b>Start Time: </b>{startTimeString}
             </Typography>
             <Typography variant='body1' sx={{ mr: 4 }} display='block'>
-              End Time: {endTimeString}
+              <b>End Time: </b>{endTimeString}
             </Typography>
-            <Typography variant='body1'>Current Winner: {round['currentWinner'].toString()}</Typography>
+            <Typography variant='body1'><b>Entry Cut-off Time: </b>{guessCutOffTimestamp}</Typography>
+            <Typography variant='body1'><b>Number of Guesses Allowed: </b>{numberOfGuessesAllowed}</Typography>
+            <Typography variant='body1'><b>Minimum Guess Spacing: </b>{round['minimumGuessSpacing'].toString()}</Typography>
+            <Typography variant='body1'><b>Guess Cost: </b>{round['guessCost'].toString()}</Typography>
+            <Typography variant='body1'><b>In Round Guesses Allowed: </b>{round['inRoundGuessesAllowed'] ? "Yes" : "No"}</Typography>
+            <Typography variant='body1'><b>Current Winner: </b>{round['currentWinner'].toString()}</Typography>
+            <Typography variant='body1'><b>Pool Size: </b>{(round['deposits'] / 1e18).toString()} DAI</Typography>
             <p />
             <Button fullWidth variant='contained' onClick={() => handleRoundClick(round.roundId)}>
               Details

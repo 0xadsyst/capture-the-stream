@@ -17,7 +17,7 @@ function useProtocolBalance() {
   useEffect(() => {
     let bal = ''
     if (data && providerContext.provider) {
-      bal = ethers.utils.formatUnits(data, 18)
+      bal = parseFloat(ethers.utils.formatUnits(data, 18)).toPrecision(2)
     } else {
       bal = ''
     }

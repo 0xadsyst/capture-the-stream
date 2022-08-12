@@ -1,9 +1,16 @@
 type Round @entity {
   id: ID!
-  asset: Bytes!
+  oracle: Bytes!
   startTimestamp: BigInt!
   endTimestamp: BigInt!
+  guessCutOffTimestamp: BigInt!
+  numberOfGuessesAllowed: BigInt!
+  minimumGuessSpacing: BigInt!
+  guessCost: BigInt!
+  inRoundGuessesAllowed: Boolean!
   currentWinner: BigInt!
+  lastWinnerChange: BigInt!
+  deposits: BigInt!
 }
 
 type Guess @entity {
@@ -12,5 +19,6 @@ type Guess @entity {
   guessId: BigInt!
   user: Bytes!
   guess: BigInt!
+  guessCost: BigInt!
   winningTime: BigInt!
 }

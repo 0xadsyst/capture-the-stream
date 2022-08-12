@@ -24,7 +24,7 @@ const RoundSelector = () => {
   const handleChange = (event:SelectChangeEvent<string>) => {
     console.log("event.target.value", event.target.value)
     setSelectedValue(event.target.value.toString())
-    roundContext?.setRoundId(event.target.value)
+    roundContext?.setRoundId(parseInt(event.target.value))
   }
 
   useEffect(() => {

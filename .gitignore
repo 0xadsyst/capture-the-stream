@@ -76,3 +76,4 @@ yarn-error.log*
 
 **/generated
 *.code-workspace
+packages/hardhat-ts/coverage.json

@@ -13,40 +13,146 @@ import {
 import hre from 'hardhat';
 import { ethers } from 'hardhat';
 import { getHardhatSigners } from 'tasks/functions/accounts';
+import { SignerWithAddress } from 'hardhat-deploy-ethers/signers';
+import { CaptureTheStreamInterface } from 'generated/contract-types/contracts/CaptureTheStream';
 
-describe('CaptureTheStream', function () {
-    let captureTheStreamContract: CaptureTheStream;
-    let mockChainlinkAggregatorContract: MockChainlinkAggregator;
-    let mockDAIContract: MockDAI;
+const {
+  BN, // Big Number support
+  constants, // Common constants, like the zero address and largest integers
+  expectEvent, // Assertions for emitted events
+  expectRevert, // Assertions for transactions that should fail
+} = require('@openzeppelin/test-helpers');
 
-  before(async () => {
-    const { deployer } = await getHardhatSigners(hre);
+describe('CTS', function () {
+  let captureTheStreamContract: CaptureTheStream;
+  let mockChainlinkAggregatorContract: MockChainlinkAggregator;
+  let mockDAIContract: MockDAI;
+  let deployer: SignerWithAddress;
+  let deployerAddress: string;
+
+  this.beforeAll(async () => {
+    deployer = await (await getHardhatSigners(hre)).deployer;
+    deployerAddress = deployer.address;
+
     const captureTheStreamFactory = new CaptureTheStream__factory(deployer);
     captureTheStreamContract = await captureTheStreamFactory.deploy();
     const mockChainlinkAggregatorFactory = new MockChainlinkAggregator__factory(deployer);
     mockChainlinkAggregatorContract = await mockChainlinkAggregatorFactory.deploy(18, 0);
     const mockDAIFactory = new MockDAI__factory(deployer);
     mockDAIContract = await mockDAIFactory.deploy();
-  });
 
-  beforeEach(async () => {
-    // put stuff you need to run before each test here
-  });
-
-  it('Should be able to deposit', async function () {
-    const { deployer } = await getHardhatSigners(hre);
     await captureTheStreamContract.deployed();
     await mockChainlinkAggregatorContract.deployed();
     await mockDAIContract.deployed();
+  });
 
-    await mockDAIContract.mint(deployer.address, ethers.BigNumber.from(100 * 1e18));
-    expect(await mockDAIContract.balanceOf(deployer.address)).to.equal(ethers.BigNumber.from(100 * 1e18));
+  describe('Deposits', function () {
+    before(async () => {});
 
+    beforeEach(async () => {});
 
-    // expect(await yourContract.purpose()).to.equal('Building Unstoppable Apps!!!');
+    it('Should be able to mint', async function () {
+      const beforeMintBalance = await mockDAIContract.balanceOf(deployerAddress);
+      console.log('Before mint balance: ', ethers.utils.formatEther(beforeMintBalance));
+      await mockDAIContract.mint(deployerAddress, ethers.BigNumber.from('100000000000000000000'));
+      const afterMintBalance = await mockDAIContract.balanceOf(deployerAddress);
+      console.log('After mint balance: ', ethers.utils.formatEther(afterMintBalance));
+      expect(afterMintBalance).to.equal(beforeMintBalance.add(ethers.BigNumber.from('100000000000000000000')));
+    });
 
-    // const newPurpose = 'Hola, mundo!';
-    // await yourContract.setPurpose(newPurpose);
-    // expect(await yourContract.purpose()).to.equal(newPurpose);
+    it('Should be able to set the deposit asset', async function () {
+      await captureTheStreamContract.setDepositAsset(mockDAIContract.address);
+      expect(await captureTheStreamContract.depositAsset()).to.equal(mockDAIContract.address);
+    });
+
+    it('Should be able to deposit', async function () {
+      const depositAmount = ethers.BigNumber.from('100000000000000000000');
+      const beforeDepositContractBalance = await captureTheStreamContract.deposits(deployerAddress);
+      console.log('Before deposit contract balance: ', ethers.utils.formatEther(beforeDepositContractBalance));
+      const beforeDepositBalance = await mockDAIContract.balanceOf(deployerAddress);
+      console.log('Before deposit  balance: ', ethers.utils.formatEther(beforeDepositBalance));
+      await captureTheStreamContract.deposit(depositAmount);
+      const afterDepositContractBalance = await captureTheStreamContract.deposits(deployerAddress);
+      console.log('After deposit contract balance: ', ethers.utils.formatEther(afterDepositContractBalance));
+      const afterDepositBalance = await mockDAIContract.balanceOf(deployerAddress);
+      console.log('After deposit  balance: ', ethers.utils.formatEther(afterDepositBalance));
+      expect(afterDepositContractBalance).to.equal(beforeDepositContractBalance.add(depositAmount));
+      expect(afterDepositBalance).to.equal(beforeDepositBalance.sub(depositAmount));
+    });
+
+    it('Should be able to withdraw', async function () {
+      const withdrawAmount = ethers.BigNumber.from('10000000000000000000');
+      const beforeWithdrawContractBalance = await captureTheStreamContract.deposits(deployerAddress);
+      console.log('Before withdraw contract balance: ', ethers.utils.formatEther(beforeWithdrawContractBalance));
+      const beforeWithdrawBalance = await mockDAIContract.balanceOf(deployerAddress);
+      console.log('Before withdraw  balance: ', ethers.utils.formatEther(beforeWithdrawBalance));
+      await captureTheStreamContract.withdraw(withdrawAmount);
+      const afterWithdrawContractBalance = await captureTheStreamContract.deposits(deployerAddress);
+      console.log('After withdraw contract balance: ', ethers.utils.formatEther(afterWithdrawContractBalance));
+      const afterWithdrawBalance = await mockDAIContract.balanceOf(deployerAddress);
+      console.log('After withdraw  balance: ', ethers.utils.formatEther(afterWithdrawBalance));
+      expect(afterWithdrawContractBalance).to.equal(beforeWithdrawContractBalance.sub(withdrawAmount));
+      expect(afterWithdrawBalance).to.equal(beforeWithdrawBalance.add(withdrawAmount));
+    });
+  });
+
+  describe('Initiate Round Tests', function () {
+    let valuesArray: [string, number, number, number, number, number, number, boolean];
+    let baseData: any;
+
+    before(async () => {
+      baseData = {
+        oracle: mockChainlinkAggregatorContract.address,
+        startTimestamp: parseInt((Date.now() / 1000).toString()) + 100,
+        endTimestamp: parseInt((Date.now() / 1000).toString()) + 1000,
+        guessCutOffTimestamp: parseInt((Date.now() / 1000).toString()) + 1000,
+        numberOfGuessesAllowed: 0,
+        minimumGuessSpacing: 0,
+        guessCost: 10,
+        inRoundGuessesAllowed: true,
+      };
+    });
+
+    beforeEach(async () => {});
+
+    it('Should be able to initiate a round with valid data', async function () {
+      valuesArray = [...Object.values(baseData)] as [string, number, number, number, number, number, number, boolean];
+      const initTx = await captureTheStreamContract.initiateRound(...valuesArray);
+      expect(initTx.confirmations).is.greaterThan(0);
+      const round = await captureTheStreamContract.rounds(0);
+      console.log('round', round);
+    });
+
+    it('Should not be able to initiate a round with startTimestamp > block.timestamp', async function () {
+      let baseDataTemp = { ...baseData };
+      baseDataTemp.startTimestamp = parseInt((Date.now() / 1000).toString()) - 100;
+      valuesArray = [...Object.values(baseDataTemp)] as [string, number, number, number, number, number, number, boolean];
+      await expectRevert(captureTheStreamContract.initiateRound(...valuesArray), 'Start time must be in the future');
+    });
+
+    it('Should not be able to initiate a round with endTimestamp < startTimestamp>', async function () {
+      let baseDataTemp = { ...baseData };
+      baseDataTemp.endTimestamp = parseInt((Date.now() / 1000).toString()) + 50;
+      console.log('Start, end timestamps: ', baseDataTemp.startTimestamp, baseDataTemp.endTimestamp);
+      valuesArray = [...Object.values(baseDataTemp)] as [string, number, number, number, number, number, number, boolean];
+      await expectRevert(captureTheStreamContract.initiateRound(...valuesArray), 'endTimestamp < startTimestamp');
+    });
+  });
+
+  describe('Enter Round Tests', function () {
+    before(async () => {});
+
+    beforeEach(async () => {});
+
+    it('Should be able to enter a round with valid data', async function () {
+      const roundId = 0;
+      const guess: number = 1000;
+      const round = await captureTheStreamContract.rounds(0);
+      console.log('round', round);
+      const initTx = await captureTheStreamContract.enterRound(roundId, guess);
+      //expect(initTx.confirmations).is.greaterThan(0);
+      const roundGuesses = await captureTheStreamContract.getRoundGuesses(roundId);
+      console.log('roundGuesses', roundGuesses);
+    });
   });
 });

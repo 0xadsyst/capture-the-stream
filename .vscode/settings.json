@@ -60,6 +60,6 @@
   "[solidity]": {
     "editor.defaultFormatter": "esbenp.prettier-vscode"
   },
-  "solidity.defaultCompiler": "localNodeModule",
+  "solidity.defaultCompiler": "localFile",
   "mochaExplorer.configFile": "./packages/hardhat-ts/.mocharc.json"
 }

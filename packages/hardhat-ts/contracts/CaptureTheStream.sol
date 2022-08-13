@@ -10,7 +10,7 @@ import "@openzeppelin/contracts/utils/math/SignedMath.sol";
 import "@openzeppelin/contracts/utils/math/SafeCast.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
-//import "hardhat/console.sol";
+import "hardhat/console.sol";
 import "@openzeppelin/contracts/utils/Strings.sol";
 
 contract CaptureTheStream is KeeperCompatibleInterface {
@@ -77,6 +77,10 @@ contract CaptureTheStream is KeeperCompatibleInterface {
         return price.div(1e8);
     }
 
+    function getRoundGuesses(uint256 _roundId) public view returns (Guess[] memory) {
+        return rounds[_roundId].guesses;
+    }
+
     function initiateRound(
         address _oracle,
         uint256 _startTimestamp,
@@ -87,7 +91,8 @@ contract CaptureTheStream is KeeperCompatibleInterface {
         uint256 _guessCost,
         bool _inRoundGuessesAllowed
     ) public {
-        require(_endTimestamp > _startTimestamp, "_endTimestamp < _startTimestamp");
+        require(_startTimestamp > block.timestamp, "Start time must be in the future");
+        require(_endTimestamp > _startTimestamp, "endTimestamp < startTimestamp");
         rounds[roundCount].oracle = _oracle;
         rounds[roundCount].startTimestamp = _startTimestamp;
         rounds[roundCount].endTimestamp = _endTimestamp;
@@ -134,19 +139,12 @@ contract CaptureTheStream is KeeperCompatibleInterface {
     function withdraw(uint256 _withdrawAmount) public {
         require(_withdrawAmount <= deposits[msg.sender]);
         deposits[msg.sender] -= _withdrawAmount;
-        SafeERC20.safeTransfer(depositAsset, address(this), _withdrawAmount);
+        SafeERC20.safeTransfer(depositAsset, msg.sender, _withdrawAmount);
         emit Withdraw(msg.sender, _withdrawAmount, deposits[msg.sender]);
     }
 
-    function daiBalance() public view returns (uint256) {
-        return depositAsset.balanceOf(msg.sender);
-    }
-
-    function connectedUser() public view returns (address) {
-        return msg.sender;
-    }
-
     function enterRound(uint256 _roundId, int256 _guess) public {
+        console.log("new guess", _roundId);
         Round memory round = rounds[_roundId];
         require(deposits[msg.sender] >= round.guessCost, "Not enough funds to enter round");
         require(block.timestamp <= round.endTimestamp, "Round has finished");

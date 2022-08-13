@@ -13,6 +13,8 @@ import { removeConsoleLog } from 'hardhat-preprocessor';
 import { HardhatUserConfig } from 'hardhat/config';
 
 import { getMnemonic } from './tasks/functions/mnemonic';
+import { solidity } from 'ethereum-waffle';
+//require('solidity-coverage');
 
 /**
  * ⛳️⛳️⛳️⛳️⛳️⛳️⛳️⛳️⛳️⛳️

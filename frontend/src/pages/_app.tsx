@@ -31,7 +31,7 @@ import 'react-perfect-scrollbar/dist/css/styles.css'
 import '../../styles/globals.css'
 
 // ** Web3
-import React, { useState, useEffect, useMemo } from 'react'
+import React, { useState, useEffect } from 'react'
 import { QueryClient, QueryClientProvider } from 'react-query'
 import initializeOnboard from 'src/utils/initializeOnboard'
 import { ethers } from 'ethers'
@@ -39,10 +39,10 @@ import { ethers } from 'ethers'
 import { RoundCtx } from 'src/context/roundContext'
 import { RoundsCtx, RoundType } from 'src/context/roundsContext'
 import { GuessesContext, GuessType } from 'src/context/guessesContext'
-import { ProviderContext, ProviderType } from 'src/context/providerContext'
+import { ProviderContext } from 'src/context/providerContext'
 import { ApolloClient, InMemoryCache, NormalizedCacheObject } from '@apollo/client'
 import { apolloClient } from 'src/utils/apollo-client'
-import { ApolloProvider, ApolloConsumer } from '@apollo/react-components'
+import { ApolloProvider } from '@apollo/react-components'
 
 const queryClient = new QueryClient()
 

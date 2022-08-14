@@ -1,4 +1,4 @@
-import { createContext } from "react";
+import { createContext, Dispatch, SetStateAction } from "react";
 
 export interface GuessType {
   id: string
@@ -11,7 +11,7 @@ export interface GuessType {
 
 export interface GuessesContextInterface {
   guesses: GuessType[]
-  setGuesses: (guesses: GuessType[]) => null
+  setGuesses: Dispatch<SetStateAction<GuessType[] | undefined>>
 }
 
 export const GuessesContext = createContext<GuessesContextInterface>({

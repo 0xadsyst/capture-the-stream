@@ -37,7 +37,7 @@ const AppBarContent = (props: Props) => {
       <Box className='actions-left' sx={{ mr: 2, display: 'flex', alignItems: 'center' }}>
         <ModeToggler settings={settings} saveSettings={saveSettings} />
       </Box>
-      <Box className='actions-middle' sx={{ mt: 4, mr: 2, display: 'flex', textAlign: 'center' }}>
+      <Box className='actions-middle' sx={{ mt: 4, mr: 12, display: 'flex', textAlign: 'left' }}>
         <Card>
           <Box sx={{ mt: 2, mb: 2, ml: 2, mr: 2, textAlign: 'center' }}>Balance: {balance} DAI</Box>
           <Box sx={{ mt: 2, mb: 2, ml: 2, mr: 2, display: 'flex', alignItems: 'center' }}>

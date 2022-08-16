@@ -31,9 +31,19 @@ export const appContractsConfig = () => {
         hardhatContracts.CaptureTheStream__factory,
         hardhatDeployedContractsJson
       ),
-      MockChainlinkAggregator: createConnectorForHardhatContract(
-        'MockChainlinkAggregator',
-        hardhatContracts.MockChainlinkAggregator__factory,
+      MockChainlinkAggregatorETH: createConnectorForHardhatContract(
+        'MockChainlinkAggregatorETH',
+        hardhatContracts.MockChainlinkAggregatorETH__factory,
+        hardhatDeployedContractsJson
+      ),
+      MockChainlinkAggregatorBTC: createConnectorForHardhatContract(
+        'MockChainlinkAggregatorBTC',
+        hardhatContracts.MockChainlinkAggregatorBTC__factory,
+        hardhatDeployedContractsJson
+      ),
+      MockChainlinkAggregatorMATIC: createConnectorForHardhatContract(
+        'MockChainlinkAggregatorMATIC',
+        hardhatContracts.MockChainlinkAggregatorMATIC__factory,
         hardhatDeployedContractsJson
       ),
       MockDAI: createConnectorForHardhatContract(

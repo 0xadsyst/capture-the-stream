@@ -1,4 +1,5 @@
 import '../helpers/hardhat-imports';
+
 import './helpers/chai-imports';
 
 import { expect } from 'chai';
@@ -15,6 +16,7 @@ import { ethers } from 'hardhat';
 import { getHardhatSigners } from 'tasks/functions/accounts';
 import { SignerWithAddress } from 'hardhat-deploy-ethers/signers';
 import { CaptureTheStreamInterface } from 'generated/contract-types/contracts/CaptureTheStream';
+import { BigNumber } from 'ethers';
 
 const {
   BN, // Big Number support
@@ -31,7 +33,7 @@ describe('CTS', function () {
   let deployerAddress: string;
 
   this.beforeAll(async () => {
-    deployer = await (await getHardhatSigners(hre)).deployer;
+    deployer = (await getHardhatSigners(hre)).deployer;
     deployerAddress = deployer.address;
 
     const captureTheStreamFactory = new CaptureTheStream__factory(deployer);
@@ -100,7 +102,7 @@ describe('CTS', function () {
     let valuesArray: [string, number, number, number, number, number, number, boolean];
     let baseData: any;
 
-    before(async () => {
+    before(() => {
       baseData = {
         oracle: mockChainlinkAggregatorContract.address,
         startTimestamp: parseInt((Date.now() / 1000).toString()) + 100,
@@ -119,21 +121,19 @@ describe('CTS', function () {
       valuesArray = [...Object.values(baseData)] as [string, number, number, number, number, number, number, boolean];
       const initTx = await captureTheStreamContract.initiateRound(...valuesArray);
       expect(initTx.confirmations).is.greaterThan(0);
-      const round = await captureTheStreamContract.rounds(0);
-      console.log('round', round);
+      await captureTheStreamContract.rounds(0);
     });
 
     it('Should not be able to initiate a round with startTimestamp > block.timestamp', async function () {
-      let baseDataTemp = { ...baseData };
+      const baseDataTemp = { ...baseData };
       baseDataTemp.startTimestamp = parseInt((Date.now() / 1000).toString()) - 100;
       valuesArray = [...Object.values(baseDataTemp)] as [string, number, number, number, number, number, number, boolean];
       await expectRevert(captureTheStreamContract.initiateRound(...valuesArray), 'Start time must be in the future');
     });
 
     it('Should not be able to initiate a round with endTimestamp < startTimestamp>', async function () {
-      let baseDataTemp = { ...baseData };
+      const baseDataTemp = { ...baseData };
       baseDataTemp.endTimestamp = parseInt((Date.now() / 1000).toString()) + 50;
-      console.log('Start, end timestamps: ', baseDataTemp.startTimestamp, baseDataTemp.endTimestamp);
       valuesArray = [...Object.values(baseDataTemp)] as [string, number, number, number, number, number, number, boolean];
       await expectRevert(captureTheStreamContract.initiateRound(...valuesArray), 'endTimestamp < startTimestamp');
     });
@@ -146,13 +146,11 @@ describe('CTS', function () {
 
     it('Should be able to enter a round with valid data', async function () {
       const roundId = 0;
-      const guess: number = 1000;
-      const round = await captureTheStreamContract.rounds(0);
-      console.log('round', round);
-      const initTx = await captureTheStreamContract.enterRound(roundId, guess);
-      //expect(initTx.confirmations).is.greaterThan(0);
+      const guess = 1000;
+      await captureTheStreamContract.enterRound(roundId, guess);
       const roundGuesses = await captureTheStreamContract.getRoundGuesses(roundId);
-      console.log('roundGuesses', roundGuesses);
+      expect(roundGuesses[0].user).to.equal(deployerAddress);
+      expect(roundGuesses[0].guess).to.equal(guess);
     });
   });
 });

@@ -10,10 +10,10 @@ import "@openzeppelin/contracts/utils/math/SignedMath.sol";
 import "@openzeppelin/contracts/utils/math/SafeCast.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
-import "hardhat/console.sol";
 import "@openzeppelin/contracts/utils/Strings.sol";
+import "@openzeppelin/contracts/access/Ownable.sol";
 
-contract CaptureTheStream is KeeperCompatibleInterface {
+contract CaptureTheStream is KeeperCompatibleInterface, Ownable {
     using SafeMath for uint256;
     using SignedSafeMath for int256;
     using SafeERC20 for IERC20;
@@ -31,6 +31,7 @@ contract CaptureTheStream is KeeperCompatibleInterface {
         uint256 currentWinnerIndex;
         uint256 lastWinnerChange;
         uint256 deposits;
+        bool roundClosed;
     }
 
     struct Guess {
@@ -40,10 +41,10 @@ contract CaptureTheStream is KeeperCompatibleInterface {
     }
 
     mapping(address => uint256) public deposits;
-    mapping(address => AggregatorV3Interface) public oracles;
     mapping(uint256 => Round) public rounds;
     uint256 public roundCount;
     uint256 public guessCost;
+    
 
     IERC20 public depositAsset;
 
@@ -74,7 +75,7 @@ contract CaptureTheStream is KeeperCompatibleInterface {
     function getLatestPrice(address _oracle) public view returns (int256) {
         AggregatorV3Interface priceFeed = AggregatorV3Interface(_oracle);
         (, int256 price, , , ) = priceFeed.latestRoundData();
-        return price.div(1e8);
+        return price;
     }
 
     function getRoundGuesses(uint256 _roundId) public view returns (Guess[] memory) {
@@ -102,6 +103,7 @@ contract CaptureTheStream is KeeperCompatibleInterface {
         rounds[roundCount].guessCost = _guessCost * 1e18;
         rounds[roundCount].inRoundGuessesAllowed = _inRoundGuessesAllowed;
         rounds[roundCount].lastWinnerChange = _startTimestamp;
+        rounds[roundCount].roundClosed = false;
 
         emitInitiateRound();
 
@@ -122,12 +124,8 @@ contract CaptureTheStream is KeeperCompatibleInterface {
         );
     }
 
-    function setDepositAsset(address _asset) public {
+    function setDepositAsset (address _asset) public onlyOwner {
         depositAsset = IERC20(_asset);
-    }
-
-    function setOracle(address _asset, address _oracle) public {
-        oracles[_asset] = AggregatorV3Interface(_oracle);
     }
 
     function deposit(uint256 _depositAmount) public {
@@ -144,15 +142,15 @@ contract CaptureTheStream is KeeperCompatibleInterface {
     }
 
     function enterRound(uint256 _roundId, int256 _guess) public {
-        console.log("new guess", _roundId);
         Round memory round = rounds[_roundId];
         require(deposits[msg.sender] >= round.guessCost, "Not enough funds to enter round");
         require(block.timestamp <= round.endTimestamp, "Round has finished");
         require(block.timestamp <= round.guessCutOffTimestamp, "Round entries have closed");
         require(round.numberOfGuessesAllowed == 0 || round.guesses.length < round.numberOfGuessesAllowed, "Round guesses are full");
+
         for (uint256 i = 0; i < round.guesses.length; i++) {
             uint256 guessDiff = SignedMath.abs(_guess - round.guesses[i].guess);
-            require(guessDiff <= round.minimumGuessSpacing, "Too close to another guess");
+            require(guessDiff >= round.minimumGuessSpacing, "Too close to another guess");
         }
 
         Guess memory newGuess = Guess({ user: msg.sender, guess: _guess, timeWinning: 0 });
@@ -160,7 +158,7 @@ contract CaptureTheStream is KeeperCompatibleInterface {
         deposits[msg.sender] = deposits[msg.sender].sub(round.guessCost);
         rounds[_roundId].deposits = round.deposits.add(round.guessCost);
 
-        emit EnterRound(_roundId, round.guesses.length - 1, msg.sender, deposits[msg.sender], _guess, guessCost);
+        emit EnterRound(_roundId, rounds[_roundId].guesses.length - 1, msg.sender, deposits[msg.sender], _guess, guessCost);
     }
 
     function updateWinner(uint256 _roundId) public {
@@ -234,7 +232,11 @@ contract CaptureTheStream is KeeperCompatibleInterface {
     function performUpkeep(bytes calldata performData) external override {
         uint256[] memory roundsToUpdate = abi.decode(performData, (uint256[]));
         for (uint256 i = 0; i < roundsToUpdate.length; i++) {
-            updateWinner(roundsToUpdate[i]);
+            if (!rounds[roundsToUpdate[i]].roundClosed && block.timestamp >= rounds[roundsToUpdate[i]].endTimestamp) {
+                endRound(roundsToUpdate[i]);
+            } else {
+                updateWinner(roundsToUpdate[i]);
+            }
         }
     }
 
@@ -251,6 +253,9 @@ contract CaptureTheStream is KeeperCompatibleInterface {
                     needsUpdating[updatesRequired] = _roundId;
                     updatesRequired++;
                 }
+            } else if (!rounds[_roundId].roundClosed && block.timestamp >= rounds[_roundId].endTimestamp) {
+                needsUpdating[updatesRequired] = _roundId;
+                updatesRequired++;
             }
         }
         return (updatesRequired, needsUpdating);

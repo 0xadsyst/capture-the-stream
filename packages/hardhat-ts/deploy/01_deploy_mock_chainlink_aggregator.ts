@@ -8,8 +8,17 @@ const func: DeployFunction = async (hre: THardhatRuntimeEnvironmentExtended) => 
     const { getNamedAccounts, deployments } = hre;
     const { deploy } = deployments;
     const { deployer } = await getNamedAccounts();
-    await deploy('MockChainlinkAggregator', {
-      // Learn more about args here: https://www.npmjs.com/package/hardhat-deploy#deploymentsdeploy
+    await deploy('MockChainlinkAggregatorETH', {
+      from: deployer,
+      args: [18, 0],
+      log: true,
+    });
+    await deploy('MockChainlinkAggregatorBTC', {
+      from: deployer,
+      args: [18, 0],
+      log: true,
+    });
+    await deploy('MockChainlinkAggregatorMATIC', {
       from: deployer,
       args: [18, 0],
       log: true,
@@ -25,7 +34,7 @@ const func: DeployFunction = async (hre: THardhatRuntimeEnvironmentExtended) => 
   }
 };
 export default func;
-func.tags = ['MockChainlinkAggregator'];
+func.tags = ['MockChainlinkAggregatorETH', 'MockChainlinkAggregatorBTC', 'MockChainlinkAggregatorMATIC'];
 
 /*
 Tenderly verification

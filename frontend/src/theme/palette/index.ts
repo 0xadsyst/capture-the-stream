@@ -4,15 +4,15 @@ import { ThemeColor } from 'src/layouts/types'
 
 const DefaultPalette = (mode: PaletteMode, themeColor: ThemeColor) => {
   // ** Vars
-  const lightColor = '58, 53, 65'
-  const darkColor = '231, 227, 252'
+  const lightColor = "#F6D8AE"//'58, 53, 65'
+  const darkColor = "#3E505B"//'231, 227, 252'
   const mainColor = mode === 'light' ? lightColor : darkColor
 
   const primaryGradient = () => {
     if (themeColor === 'primary') {
-      return '#C6A7FE'
+      return '#1E5871'
     } else if (themeColor === 'secondary') {
-      return '#9C9FA4'
+      return '#8AB0AB'
     } else if (themeColor === 'success') {
       return '#93DD5C'
     } else if (themeColor === 'error') {
@@ -20,7 +20,7 @@ const DefaultPalette = (mode: PaletteMode, themeColor: ThemeColor) => {
     } else if (themeColor === 'warning') {
       return '#FFCF5C'
     } else {
-      return '#6ACDFF'
+      return '#F0EDE7'
     }
   }
 
@@ -28,24 +28,17 @@ const DefaultPalette = (mode: PaletteMode, themeColor: ThemeColor) => {
     customColors: {
       main: mainColor,
       primaryGradient: primaryGradient(),
-      tableHeaderBg: mode === 'light' ? '#F9FAFC' : '#3D3759'
+      tableHeaderBg: mode === 'light' ? '#F9FAFC' : '#3E505B'
     },
     common: {
       black: '#000',
       white: '#FFF'
     },
     mode: mode,
-
-    // primary: {
-    //   light: '#9E69FD',
-    //   main: '#9155FD',
-    //   dark: '#804BDF',
-    //   contrastText: '#FFF'
-    // },
     primary: {
-      light: '#C4D7E0',
-      main: '#B2C8DF',
-      dark: '#6E85B7',
+      light: '#FFE66D',
+      main: '#2E86AB',
+      dark: '#1E1E24',
       contrastText: '#FFF'
     },
     secondary: {
@@ -101,8 +94,8 @@ const DefaultPalette = (mode: PaletteMode, themeColor: ThemeColor) => {
     },
     divider: `rgba(${mainColor}, 0.12)`,
     background: {
-      paper: mode === 'light' ? '#FFF' : '#312D4B',
-      default: mode === 'light' ? '#F4F5FA' : '#28243D'
+      paper: mode === 'light' ? '#CCCCCC' : '#CCCCCC',
+      default: mode === 'light' ? '#F5F5F5' : '#346083'
     },
     action: {
       active: `rgba(${mainColor}, 0.54)`,

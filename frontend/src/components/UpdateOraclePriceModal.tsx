@@ -4,19 +4,16 @@ import Button from '@mui/material/Button'
 import Typography from '@mui/material/Typography'
 import Modal from '@mui/material/Modal'
 import Grid from '@mui/material/Grid'
-import Select, { SelectChangeEvent } from '@mui/material/Select'
+import Select from '@mui/material/Select'
 import MenuItem from '@mui/material/MenuItem'
-import Switch from '@mui/material/Switch'
 import FormHelperText from '@mui/material/FormHelperText'
 
-import { InputAdornment, TextField } from '@mui/material'
+import { TextField } from '@mui/material'
 
 import { externalContractsAddressMap } from 'src/configs/externalContracts.config'
-import { CaptureTheStream__factory } from '../../generated/factories/CaptureTheStream__factory'
 import { ProviderContext } from 'src/context/providerContext'
 import { ethers } from 'ethers'
 import { RoundCtx } from 'src/context/roundContext'
-import moment from 'moment'
 import { MockChainlinkAggregator__factory } from 'generated/factories/MockChainlinkAggregator__factory'
 
 const style = {
@@ -70,7 +67,7 @@ const UpdateOracleModal = () => {
           externalContractsAddressMap[providerContext.provider.network.chainId][
             'AggregatorV3Interface' + formValues.oracle
           ],
-        newPrice: parseInt(formValues.newPrice) * 1e8
+        newPrice: parseFloat(formValues.newPrice) * 1e8
       }
       const updateOracleTx = updateOracle(txValues, providerContext.provider)
     } else {

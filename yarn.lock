@@ -4281,6 +4281,7 @@ __metadata:
     "@nomiclabs/hardhat-waffle": ^2.0.3
     "@openzeppelin/contracts": ^4.7.1
     "@openzeppelin/hardhat-upgrades": ^1.19.0
+    "@openzeppelin/test-helpers": ^0.5.15
     "@primitivefi/hardhat-dodoc": ^0.2.3
     "@scaffold-eth/common": "workspace:^"
     "@tenderly/hardhat-tenderly": ^1.1.4
@@ -11055,6 +11056,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"dayjs@npm:^1.11.5":
+  version: 1.11.5
+  resolution: "dayjs@npm:1.11.5"
+  checksum: e3bbaa7b4883b31be4bf75a181f1447fbb19800c29b332852125aab96baeff3ac232dcba8b88c4ea17d3b636c99dac5fb9d1af4bb6ae26615698bbc4a852dffb
+  languageName: node
+  linkType: hard
+
 "death@npm:^1.1.0":
   version: 1.1.0
   resolution: "death@npm:1.1.0"
@@ -15020,6 +15028,7 @@ __metadata:
     "@web3-react/walletconnect": 8.0.35-beta.0
     chart.js: ^3.9.1
     clsx: ^1.1.1
+    dayjs: ^1.11.5
     eslint: ^7.32.0
     eslint-config-next: latest
     eslint-config-prettier: ^8.3.0
@@ -15043,6 +15052,7 @@ __metadata:
     react-dom: 17.0.2
     react-perfect-scrollbar: ^1.5.8
     react-popper: ^2.2.5
+    sass: ^1.54.4
     typechain: ^8.1.0
     typescript: 4.5.2
     web3-react: ^5.0.5
@@ -25883,6 +25893,19 @@ __metadata:
   bin:
     sass: sass.js
   checksum: 9b405f602c0dcdad85e7f216cfa5ca9dfe3f7ded7b3928817cfe8dbfde0cd27b70f4cff724e229b233b3f51a06e71d3fcbbd7d3a0ff92b3e40ac57bc05b90b48
+  languageName: node
+  linkType: hard
+
+"sass@npm:^1.54.4":
+  version: 1.54.4
+  resolution: "sass@npm:1.54.4"
+  dependencies:
+    chokidar: ">=3.0.0 <4.0.0"
+    immutable: ^4.0.0
+    source-map-js: ">=0.6.2 <2.0.0"
+  bin:
+    sass: sass.js
+  checksum: bb6aead09764de450a02b9a66e4ee538f0ba6bc8f2fc3905c71b2c302b5f47e089b510b86cfa7ef2d4139c210c8abf99fe157e7a5bd356c057f10d29e6c4b44c
   languageName: node
   linkType: hard
 

@@ -29,14 +29,16 @@ const EnterRoundModal = () => {
   const [open, setOpen] = useState(false)
   const handleOpen = () => setOpen(true)
   const handleClose = () => setOpen(false)
-  const [guess, setGuess] = useState<number>(0)
+  const [guess, setGuess] = useState<string>("0")
   const balance = useProtocolBalance()
   const providerContext = useContext(ProviderContext)
   const roundContext = useContext(RoundCtx)
 
   const handleEnterRoundClick = () => {
-    const depositTx = enterRound(roundContext?.roundId, guess, providerContext.provider)
-    setOpen(false)
+    if (roundContext?.roundId != null) {
+      const depositTx = enterRound(roundContext?.roundId, parseFloat(guess) * 1e8, providerContext.provider)
+      setOpen(false)
+    }
   }
 
   return (
@@ -67,7 +69,8 @@ const EnterRoundModal = () => {
             }}
             value={guess}
             onChange={e => {
-              setGuess(parseInt(e.currentTarget.value))
+              //setGuess(parseFloat(e.currentTarget.value))
+              setGuess(e.currentTarget.value)
             }}
           />
 

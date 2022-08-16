@@ -1,6 +1,7 @@
 // ** MUI Imports
 import Grid from '@mui/material/Grid'
 import Card from '@mui/material/Card'
+import Switch from '@mui/material/Switch'
 
 // ** React
 import React, { useEffect, useState } from 'react'
@@ -9,22 +10,28 @@ import React, { useEffect, useState } from 'react'
 import RoundOverview from 'src/components/RoundOverview'
 import InitiateRoundModal from 'src/components/InitiateRoundModal'
 
-// ** Next
-import { useContext } from 'react'
-
-import { RoundsCtx } from 'src/context/roundsContext'
-
 const Summary = () => {
-  const roundsContext = useContext(RoundsCtx)
+  const [showFinishedRounds, setShowFinishedRounds] = useState<boolean>(false)
+  const handleInputChange = (e: any) => {
+    setShowFinishedRounds(e.target.checked)
+  }
 
   return (
     <Grid container spacing={12}>
-      <Grid item xs={12} md={12}>
+      <Grid item xs={6} md={6}>
         <InitiateRoundModal />
       </Grid>
-      <Grid item xs={12} md={12}>
-        <RoundOverview />
+      <Grid item xs={6} md={6} textAlign={'right'}>
+        Show Finished Rounds
+      <Switch
+                id='inRoundGuessesAllowed'
+                name='inRoundGuessesAllowed'
+                onChange={handleInputChange}
+                inputProps={{ 'aria-label': 'controlled' }}
+                value={showFinishedRounds}
+              />
       </Grid>
+        <RoundOverview key={showFinishedRounds.toString()} showFinishedRounds={showFinishedRounds}/>
     </Grid>
   )
 }

@@ -1,8 +1,11 @@
 import { createContext, Dispatch, SetStateAction } from "react";
 
 export interface RoundContextInterface {
-  roundId: number
+  roundId: number | null
   setRoundId: Dispatch<SetStateAction<number | undefined>>
 }
 
-export const RoundCtx = createContext<RoundContextInterface | null>(null);
+export const RoundCtx = createContext<RoundContextInterface>({
+  roundId: null,
+  setRoundId: () => null
+});

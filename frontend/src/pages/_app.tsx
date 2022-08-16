@@ -80,15 +80,15 @@ const App = (props: ExtendedAppProps) => {
   const [rounds, setRounds] = useState<RoundType[] | undefined>()
   const [guesses, setGuesses] = useState<GuessType[] | undefined>()
   const [provider, setProvider] = useState<ethers.providers.Web3Provider | undefined>()
+  const [chainId, setChainId] = useState<number | undefined>()
   const [apolloContextClient, setapolloContextClient] = useState<ApolloClient<NormalizedCacheObject>>(
     initialApolloClient
   )
 
   useEffect(() => {
     console.log('update apollo provider', provider)
-    setapolloContextClient(apolloClient[provider?._network?.chainId ?? 31337])
-  }, [provider?._network?.chainId])
-
+  setapolloContextClient(apolloClient[chainId ?? 31337])
+}, [chainId])
   const { Component, emotionCache = clientSideEmotionCache, pageProps } = props
 
   // Variables
@@ -103,9 +103,9 @@ const App = (props: ExtendedAppProps) => {
       </Head>
       <QueryClientProvider client={queryClient}>
         <SettingsProvider>
-          <ProviderContext.Provider value={{ provider: provider ?? undefined, setProvider: setProvider }}>
+          <ProviderContext.Provider value={{ provider: provider ?? undefined, setProvider: setProvider, chainId: chainId ?? undefined, setChainId: setChainId  }}>
             <ApolloProvider client={apolloContextClient}>
-                <RoundCtx.Provider value={{ roundId: round ?? 0, setRoundId: setRound }}>
+                <RoundCtx.Provider value={{ roundId: round ?? null, setRoundId: setRound }}>
                   <RoundsCtx.Provider value={{ rounds: rounds ?? [], setRounds: setRounds }}>
                     <GuessesContext.Provider value={{ guesses: guesses ?? [], setGuesses: setGuesses }}>
                       <SettingsConsumer>

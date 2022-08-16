@@ -16,7 +16,7 @@ import { CaptureTheStream__factory } from '../../generated/factories/CaptureTheS
 import { ProviderContext } from 'src/context/providerContext'
 import { ethers } from 'ethers'
 import { RoundCtx } from 'src/context/roundContext'
-import moment from 'moment'
+import dayjs from 'dayjs'
 
 const style = {
   position: 'absolute' as const,
@@ -65,9 +65,9 @@ interface InvalidTransactionValues {
 
 const defaultValues: Form = {
   oracle: 'ETH',
-  startTimestamp: moment().add(10, 'minutes').format('yyyy-MM-DD[T]HH:mm'),
-  endTimestamp: moment().add(2, 'days').format('yyyy-MM-DD[T]HH:mm'),
-  guessCutOffTimestamp: moment().add(10, 'minutes').format('yyyy-MM-DD[T]HH:mm'),
+  startTimestamp: dayjs().add(10, 'minutes').format('YYYY-MM-DD[T]HH:mm'),
+  endTimestamp: dayjs().add(2, 'days').format('YYYY-MM-DD[T]HH:mm'),
+  guessCutOffTimestamp: dayjs().add(10, 'minutes').format('YYYY-MM-DD[T]HH:mm'),
   numberOfGuessesAllowed: '0',
   minimumGuessSpacing: '0',
   guessCost: '10',
@@ -82,6 +82,8 @@ const InitiateRoundModal = () => {
   const handleClose = () => setOpen(false)
   const providerContext = useContext(ProviderContext)
   const roundContext = useContext(RoundCtx)
+
+  console.log(defaultValues)
 
   const handleInputChange = (e: any) => {
     const { name, value, checked, type } = e.target
@@ -102,11 +104,11 @@ const InitiateRoundModal = () => {
           externalContractsAddressMap[providerContext.provider.network.chainId][
             'AggregatorV3Interface' + formValues.oracle
           ],
-        startTimestamp: moment(formValues.startTimestamp).unix(),
-        endTimestamp: moment(formValues.endTimestamp).unix(),
+        startTimestamp: dayjs(formValues.startTimestamp).unix(),
+        endTimestamp: dayjs(formValues.endTimestamp).unix(),
         guessCutOffTimestamp: formValues.inRoundGuessesAllowed
-          ? moment(formValues.endTimestamp).unix()
-          : moment(formValues.guessCutOffTimestamp).unix(),
+          ? dayjs(formValues.endTimestamp).unix()
+          : dayjs(formValues.guessCutOffTimestamp).unix(),
         numberOfGuessesAllowed: parseInt(formValues.numberOfGuessesAllowed),
         minimumGuessSpacing: parseInt(formValues.minimumGuessSpacing),
         guessCost: parseInt(formValues.guessCost),
@@ -130,15 +132,15 @@ const InitiateRoundModal = () => {
     const invalidTransactionValues: InvalidTransactionValues = {
       oracle: txValues.oracle.substring(0, 2) == '0x' ? false : true,
       startTimestamp:
-        (txValues.startTimestamp > moment().unix() ? false : true) ||
-        (txValues.startTimestamp < moment().add(1, 'weeks').unix() ? false : true),
+        (txValues.startTimestamp > dayjs().unix() ? false : true) ||
+        (txValues.startTimestamp < dayjs().add(1, 'weeks').unix() ? false : true),
       endTimestamp:
-        (txValues.endTimestamp > txValues.startTimestamp + 600 ? false : true) ||
-        (txValues.endTimestamp < moment().add(1, 'months').unix() ? false : true),
+        (txValues.endTimestamp > txValues.startTimestamp + 60 ? false : true) ||
+        (txValues.endTimestamp < dayjs().add(1, 'months').unix() ? false : true),
       guessCutOffTimestamp:
-        (txValues.guessCutOffTimestamp > moment().unix() ? false : true) ||
+        (txValues.guessCutOffTimestamp > dayjs().unix() ? false : true) ||
         (txValues.guessCutOffTimestamp <= txValues.endTimestamp ? false : true) ||
-        (txValues.guessCutOffTimestamp >= txValues.startTimestamp && !txValues.inRoundGuessesAllowed ? true : false),
+        (txValues.guessCutOffTimestamp > txValues.startTimestamp && !txValues.inRoundGuessesAllowed ? true : false),
       numberOfGuessesAllowed: txValues.numberOfGuessesAllowed >= 0 ? false : true,
       minimumGuessSpacing: txValues.minimumGuessSpacing >= 0 ? false : true,
       guessCost: txValues.guessCost > 0 ? false : true,

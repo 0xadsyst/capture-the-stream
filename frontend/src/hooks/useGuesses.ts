@@ -43,7 +43,7 @@ const useGuesses = () => {
           roundId: parseInt(g['roundId']),
           guessId: parseInt(g['guessId']),
           user: g['user'],
-          guess: parseInt(g['guess']),
+          guess: parseFloat(g['guess']) / 1e8,
           winningTime: parseInt(g['winningTime'])
         })
       )

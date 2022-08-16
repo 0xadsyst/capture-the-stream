@@ -1,6 +1,5 @@
 // ** MUI Imports
 import Grid from '@mui/material/Grid'
-import Card from '@mui/material/Card'
 import Button from '@mui/material/Button'
 
 // ** React
@@ -15,11 +14,16 @@ import UpdateOracleModal from 'src/components/UpdateOraclePriceModal'
 
 import { RoundsCtx } from 'src/context/roundsContext'
 import { ProviderContext } from 'src/context/providerContext'
-import { init } from '@web3-onboard/react'
 import { useQuery } from 'react-query'
+import usePrice from 'src/hooks/usePrice'
 
 const Test = () => {
   const [testData, setTestData] = useState([<p key={1}>TEST DATA LOADING</p>])
+  const [oracles, setOracles] = useState<{ ETH: string | null; BTC: string | null; MATIC: string | null }>({
+    ETH: null,
+    BTC: null,
+    MATIC: null
+  })
   const roundsContext = useContext(RoundsCtx)
   const providerContext = useContext(ProviderContext)
 
@@ -27,9 +31,12 @@ const Test = () => {
   const handleDAIBalanceClick = () => daiBalance(providerContext.provider).then(v => console.log('DAI balance:', v))
   const handleSetDepositAssetClick = () => setDepositAddress(providerContext.provider)
 
-  // const handleInitiateRoundClick = () => initiateRound(providerContext.provider)
   const handleEndRoundClick = () => endRound(providerContext.provider)
   const handlePerformUpkeepClick = () => performUpkeep(providerContext.provider)
+
+  const ethPrice = usePrice(oracles.ETH)
+  const btcPrice = usePrice(oracles.BTC)
+  const maticPrice = usePrice(oracles.MATIC)
 
   const { isLoading, isError, data, error } = useQuery(['testData'], () => fetchData(providerContext.provider), {
     refetchInterval: 5000,
@@ -37,14 +44,22 @@ const Test = () => {
   })
 
   useEffect(() => {
-    if (data) {
-      setTestData(data)
+    if (providerContext.chainId) {
+      setOracles({
+        ETH: externalContractsAddressMap[providerContext.chainId]['AggregatorV3InterfaceETH'],
+        BTC: externalContractsAddressMap[providerContext.chainId]['AggregatorV3InterfaceBTC'],
+        MATIC: externalContractsAddressMap[providerContext.chainId]['AggregatorV3InterfaceMATIC']
+      })
     }
-  }, [data, providerContext.provider])
+  }, [providerContext.chainId])
 
   return (
     <>
       {testData}
+      <p key={7}>current network: {providerContext.chainId}</p>
+      <p key={8}>ethPrice: {ethPrice}</p>
+      <p key={9}>btcPrice: {btcPrice}</p>
+      <p key={10}>maticPrice: {maticPrice}</p>
       <Grid container spacing={12}>
         <Grid item>
           <Button variant='contained' onClick={handleMintDAIClick}>
@@ -65,7 +80,7 @@ const Test = () => {
           <Button variant='contained' onClick={handlePerformUpkeepClick}>
             Perform Upkeep
           </Button>
-          <UpdateOracleModal/>
+          <UpdateOracleModal />
         </Grid>
       </Grid>
     </>
@@ -81,8 +96,8 @@ async function mintDAI(provider: ethers.providers.Web3Provider | undefined) {
     const myAddress = await provider.getSigner().getAddress()
     const daiContract = MockDAI__factory.connect(address, provider.getSigner())
     const a = ethers.utils.parseUnits('1000', 18)
-    
-return daiContract.mint(myAddress, a)
+
+    return daiContract.mint(myAddress, a)
   } else {
     return Promise.resolve(false)
   }
@@ -95,8 +110,8 @@ async function daiBalance(provider: ethers.providers.Web3Provider | undefined) {
     const myAddress = await provider.getSigner().getAddress()
     const daiContract = MockDAI__factory.connect(address, provider.getSigner())
     const a = ethers.utils.parseUnits('1000', 18)
-    
-return daiContract.balanceOf(myAddress)
+
+    return daiContract.balanceOf(myAddress)
   } else {
     return Promise.resolve(false)
   }
@@ -108,8 +123,8 @@ async function setDepositAddress(provider: ethers.providers.Web3Provider | undef
     const contractAddress = externalContractsAddressMap[provider.network.chainId]['CaptureTheStream']
     const address = externalContractsAddressMap[provider.network.chainId]['MockDAI']
     const captureTheStreamContract = CaptureTheStream__factory.connect(contractAddress, provider.getSigner())
-    
-return captureTheStreamContract.setDepositAsset(address)
+
+    return captureTheStreamContract.setDepositAsset(address)
   } else {
     return Promise.resolve(false)
   }
@@ -120,8 +135,8 @@ async function endRound(provider: ethers.providers.Web3Provider | undefined) {
   if (provider) {
     const address = externalContractsAddressMap[provider.network.chainId]['CaptureTheStream']
     const captureTheStreamContract = CaptureTheStream__factory.connect(address, provider.getSigner())
-    
-return captureTheStreamContract.endRound(0)
+
+    return captureTheStreamContract.endRound(0)
   } else {
     return Promise.resolve(false)
   }
@@ -133,8 +148,8 @@ async function performUpkeep(provider: ethers.providers.Web3Provider | undefined
     const address = externalContractsAddressMap[provider.network.chainId]['CaptureTheStream']
     const captureTheStreamContract = CaptureTheStream__factory.connect(address, provider.getSigner())
     const upkeepRequired = await captureTheStreamContract.checkUpkeep(ethers.utils.randomBytes(1))
-    
-return captureTheStreamContract.performUpkeep(upkeepRequired[1])
+
+    return captureTheStreamContract.performUpkeep(upkeepRequired[1])
   } else {
     return Promise.resolve(false)
   }
@@ -160,7 +175,7 @@ async function fetchData(provider: ethers.providers.Web3Provider | undefined) {
       <p key={5}>upkeep: {upkeepRequired}</p>,
 
       // <p>DAI Balance: {daiBalance}</p>
-      <p key={6}>roundCount: {roundCount}</p>,
+      <p key={6}>roundCount: {roundCount}</p>
     ]
   } else {
     return [<p key={2}>LOADING</p>]

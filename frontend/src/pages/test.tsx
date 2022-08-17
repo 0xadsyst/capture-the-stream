@@ -11,8 +11,9 @@ import { CaptureTheStream__factory } from '../../generated/factories/CaptureTheS
 import { MockDAI__factory } from '../../generated/factories/MockDAI__factory'
 import { ethers } from 'ethers'
 import UpdateOracleModal from 'src/components/UpdateOraclePriceModal'
+import UpdateWinnerModal from '../components/UpdateWinnerModal'
 
-import { RoundsCtx } from 'src/context/roundsContext'
+import { RoundsContext } from 'src/context/roundsContext'
 import { ProviderContext } from 'src/context/providerContext'
 import { useQuery } from 'react-query'
 import usePrice from 'src/hooks/usePrice'
@@ -24,7 +25,7 @@ const Test = () => {
     BTC: null,
     MATIC: null
   })
-  const roundsContext = useContext(RoundsCtx)
+  const roundsContext = useContext(RoundsContext)
   const providerContext = useContext(ProviderContext)
 
   const handleMintDAIClick = () => mintDAI(providerContext.provider)
@@ -42,6 +43,12 @@ const Test = () => {
     refetchInterval: 5000,
     enabled: providerContext.provider != undefined
   })
+
+  useEffect(() => {
+    if (data) {
+      setTestData(data)
+    }
+  }, [data])
 
   useEffect(() => {
     if (providerContext.chainId) {
@@ -81,6 +88,7 @@ const Test = () => {
             Perform Upkeep
           </Button>
           <UpdateOracleModal />
+          <UpdateWinnerModal />
         </Grid>
       </Grid>
     </>
@@ -163,18 +171,14 @@ async function fetchData(provider: ethers.providers.Web3Provider | undefined) {
     const deposits = await (await captureTheStream.deposits(myAddress)).toString()
     const depositAsset = await (await captureTheStream.depositAsset()).toString()
     const upkeepRequired = await (await captureTheStream.checkUpkeep(ethers.utils.randomBytes(1))).toString()
-
-    // const daiBalance = await (await captureTheStream.daiBalance()).toString()
     const roundCount = await (await captureTheStream.roundCount()).toString()
-
+    
     return [
       <p key={1}>Contract address: {address.toString()}</p>,
       <p key={2}>myAddress: {myAddress}</p>,
       <p key={3}>deposits: {deposits}</p>,
       <p key={4}>depositAsset: {depositAsset}</p>,
       <p key={5}>upkeep: {upkeepRequired}</p>,
-
-      // <p>DAI Balance: {daiBalance}</p>
       <p key={6}>roundCount: {roundCount}</p>
     ]
   } else {

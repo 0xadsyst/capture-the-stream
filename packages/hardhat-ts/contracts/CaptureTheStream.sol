@@ -190,6 +190,13 @@ contract CaptureTheStream is KeeperCompatibleInterface, Ownable {
         Round memory round = rounds[_roundId];
         require(block.timestamp >= round.endTimestamp, "Round has not finished");
 
+        int256 price = getLatestPrice(round.oracle);
+
+        uint256 timeSinceLastWinnerChange = round.endTimestamp.sub(round.lastWinnerChange);
+        uint256 previousWinnerIndex = round.currentWinnerIndex;
+        Guess memory previousWinnerGuess = round.guesses[previousWinnerIndex];
+        emit EndWinner(_roundId, previousWinnerIndex, previousWinnerGuess.user, previousWinnerGuess.guess, price, timeSinceLastWinnerChange);
+
         uint256 roundLength = round.endTimestamp.sub(round.startTimestamp);
         for (uint256 i = 0; i < round.guesses.length; i++) {
             if (round.guesses[i].timeWinning > 0) {

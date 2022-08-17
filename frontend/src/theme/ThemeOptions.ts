@@ -13,10 +13,10 @@ import breakpoints from './breakpoints'
 
 const themeOptions = (settings: Settings): ThemeOptions => {
   // ** Vars
-  const { mode, themeColor } = settings
+  const { mode } = settings
 
   const themeConfig = {
-    palette: palette(mode, themeColor),
+    palette: palette(mode),
     typography: {
       fontFamily: [
         'Inter',
@@ -49,7 +49,7 @@ const themeOptions = (settings: Settings): ThemeOptions => {
   return deepmerge(themeConfig, {
     palette: {
       primary: {
-        ...themeConfig.palette[themeColor]
+        ...themeConfig.palette
       }
     }
   })

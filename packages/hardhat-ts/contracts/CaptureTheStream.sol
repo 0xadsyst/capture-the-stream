@@ -42,9 +42,7 @@ contract CaptureTheStream is KeeperCompatibleInterface, Ownable {
 
     mapping(address => uint256) public deposits;
     mapping(uint256 => Round) public rounds;
-    uint256 public roundCount;
-    uint256 public guessCost;
-    
+    uint256 public roundCount;    
 
     IERC20 public depositAsset;
 
@@ -69,7 +67,6 @@ contract CaptureTheStream is KeeperCompatibleInterface, Ownable {
 
     constructor() {
         depositAsset = IERC20(0xE81Fca457ba225C7D0921207f0b24444b9303944); // MockDAI
-        guessCost = 10 * 1e18; // 10 DAI
     }
 
     function getLatestPrice(address _oracle) public view returns (int256) {
@@ -158,7 +155,7 @@ contract CaptureTheStream is KeeperCompatibleInterface, Ownable {
         deposits[msg.sender] = deposits[msg.sender].sub(round.guessCost);
         rounds[_roundId].deposits = round.deposits.add(round.guessCost);
 
-        emit EnterRound(_roundId, rounds[_roundId].guesses.length - 1, msg.sender, deposits[msg.sender], _guess, guessCost);
+        emit EnterRound(_roundId, rounds[_roundId].guesses.length - 1, msg.sender, deposits[msg.sender], _guess, round.guessCost);
     }
 
     function updateWinner(uint256 _roundId) public {

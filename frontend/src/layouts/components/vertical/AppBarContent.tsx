@@ -15,6 +15,8 @@ import useRounds from '../../../hooks/useRounds'
 import useGuesses from '../../../hooks/useGuesses'
 import useProvider from '../../../hooks/useProvider'
 
+import {ethers} from 'ethers'
+
 interface Props {
   hidden: boolean
   settings: Settings
@@ -27,7 +29,7 @@ const AppBarContent = (props: Props) => {
   const { hidden, settings, saveSettings, toggleNavVisibility } = props
 
   // ** Hook
-  const balance = useProtocolBalance()
+  const balance = parseFloat(ethers.utils.formatUnits(useProtocolBalance(), 18)).toFixed(2).toString()
   const rounds = useRounds()
   const guesses = useGuesses()
   const provider = useProvider()

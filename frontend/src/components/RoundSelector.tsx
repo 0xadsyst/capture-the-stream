@@ -9,14 +9,14 @@ import InputLabel from '@mui/material/InputLabel'
 import { useEffect, useState } from 'react'
 
 // ** Web3
-import { RoundsCtx, RoundType } from 'src/context/roundsContext' 
-import { RoundCtx } from 'src/context/roundContext'
+import { RoundsContext, RoundType } from 'src/context/roundsContext' 
+import { RoundContext } from 'src/context/roundContext'
 
 const emptyList = [<MenuItem value={0} key ="">0</MenuItem>]
 
 const RoundSelector = () => {
-  const roundsContext = useContext(RoundsCtx)
-  const roundContext = useContext(RoundCtx)
+  const roundsContext = useContext(RoundsContext)
+  const roundContext = useContext(RoundContext)
 
   const [items, setItems] = useState<any[]>([])
   const [selectedValue, setSelectedValue] = useState<string>("")

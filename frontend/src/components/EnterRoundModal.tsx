@@ -1,4 +1,4 @@
-import React, { useState, useContext } from 'react'
+import React, { useState, useContext, useEffect } from 'react'
 import Box from '@mui/material/Box'
 import Button from '@mui/material/Button'
 import Typography from '@mui/material/Typography'
@@ -10,8 +10,10 @@ import { InputAdornment, TextField } from '@mui/material'
 import { externalContractsAddressMap } from 'src/configs/externalContracts.config'
 import { CaptureTheStream__factory } from '../../generated/factories/CaptureTheStream__factory'
 import { ProviderContext } from 'src/context/providerContext'
-import { ethers } from 'ethers'
-import { RoundCtx } from 'src/context/roundContext'
+import { ethers, BigNumber } from 'ethers'
+import { RoundContext } from 'src/context/roundContext'
+import { RoundsContext } from 'src/context/roundsContext'
+import dayjs from 'dayjs'
 
 const style = {
   position: 'absolute' as const,
@@ -27,23 +29,39 @@ const style = {
 
 const EnterRoundModal = () => {
   const [open, setOpen] = useState(false)
+  const [disabled, setDisabled] = useState(true)
+  const [roundCost, setRoundCost] = useState(0)
   const handleOpen = () => setOpen(true)
   const handleClose = () => setOpen(false)
-  const [guess, setGuess] = useState<string>("0")
-  const balance = useProtocolBalance()
+  const [guess, setGuess] = useState<string>('0')
+  const balance = parseFloat(ethers.utils.formatUnits(useProtocolBalance(), 18)).toFixed(2).toString()
   const providerContext = useContext(ProviderContext)
-  const roundContext = useContext(RoundCtx)
+  const roundContext = useContext(RoundContext)
+  const roundsContext = useContext(RoundsContext)
 
   const handleEnterRoundClick = () => {
     if (roundContext?.roundId != null) {
-      const depositTx = enterRound(roundContext?.roundId, parseFloat(guess) * 1e8, providerContext.provider)
+      const enterRoundTx = enterRound(roundContext?.roundId, parseFloat(guess) * 1e8, providerContext.provider)
       setOpen(false)
     }
   }
 
+  useEffect(() => {
+    if (roundContext?.roundId != null) {
+      setRoundCost(roundsContext.rounds[roundContext.roundId].guessCost / 1e18)
+      console.log(roundsContext.rounds[roundContext.roundId].guessCutOffTimestamp)
+      console.log(dayjs().unix())
+      if (roundsContext.rounds[roundContext.roundId].guessCutOffTimestamp < dayjs().unix()) {
+        setDisabled(true)
+      } else {
+        setDisabled(false)
+      }
+    }
+  }, [roundContext?.roundId])
+
   return (
     <>
-      <Button variant='contained' onClick={handleOpen}>
+      <Button variant='contained' onClick={handleOpen} disabled={disabled}>
         ENTER ROUND
       </Button>
 
@@ -55,26 +73,30 @@ const EnterRoundModal = () => {
       >
         <Box sx={style}>
           <Typography id='modal-modal-title' variant='h6' component='h2'>
-            Current Balance: {balance}
-          </Typography>
-          <Typography id='modal-modal-title' variant='h6' component='h2'>
             Round: {roundContext?.roundId}
           </Typography>
+          <Typography id='modal-modal-title' variant='h6' component='h2'>
+            Current Balance: {balance} DAI
+          </Typography>
+          <Typography id='modal-modal-title' variant='h6' component='h2'>
+            Round Cost: {roundCost} DAI
+          </Typography>
+
           <TextField
             label='Guess'
             id='guess'
-            sx={{ m: 1, width: '25ch' }}
+            sx={{ m: 1, width: '25ch', mt: 4, mb: 2 }}
             InputProps={{
               endAdornment: <InputAdornment position='end'>USD</InputAdornment>
             }}
             value={guess}
             onChange={e => {
-              //setGuess(parseFloat(e.currentTarget.value))
               setGuess(e.currentTarget.value)
             }}
+            onFocus={e => e.target.select()}
           />
 
-          <Button variant='contained' onClick={handleEnterRoundClick}>
+          <Button variant='contained' onClick={handleEnterRoundClick} disabled={roundCost > parseInt(balance)}>
             Enter Round
           </Button>
         </Box>
@@ -91,8 +113,8 @@ function enterRound(roundId: number | undefined, guess: number, provider: ethers
   if (provider && roundId != undefined) {
     const address = externalContractsAddressMap[provider.network.chainId]['CaptureTheStream']
     const captureTheStream = CaptureTheStream__factory.connect(address, provider.getSigner())
-    
-return captureTheStream.enterRound(roundId, guess)
+
+    return captureTheStream.enterRound(roundId, guess)
   } else {
     return Promise.resolve(false)
   }

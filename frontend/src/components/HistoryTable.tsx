@@ -86,19 +86,19 @@ const HistoryTable = () => {
         })
         const winnings = parseFloat((
           (roundsContext.rounds[i].deposits * roundWinningTime) /
-          (roundsContext.rounds[i].endTimestamp - roundsContext.rounds[i].startTimestamp) * 1e-18).toPrecision(3))
+          (roundsContext.rounds[i].endTimestamp - roundsContext.rounds[i].startTimestamp) * 1e-18).toFixed(2))
         const profitLoss = winnings - entriesCost
         newRows.push({
           roundId: i.toString(),
           entries: entries,
           entriesCost: entriesCost,
           winnings: winnings,
-          profitLoss: parseFloat(profitLoss.toPrecision(3))
+          profitLoss: parseFloat(profitLoss.toFixed(2))
         })
         totalsRow.entries += entries
         totalsRow.entriesCost += entriesCost
         totalsRow.winnings += winnings
-        totalsRow.profitLoss += parseFloat(profitLoss.toPrecision(3))
+        totalsRow.profitLoss += parseFloat(profitLoss.toFixed(2))
       }
     }
     newRows.push(totalsRow)

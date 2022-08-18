@@ -13,7 +13,7 @@ import { TextField } from '@mui/material'
 import { externalContractsAddressMap } from 'src/configs/externalContracts.config'
 import { ProviderContext } from 'src/context/providerContext'
 import { ethers } from 'ethers'
-import { RoundCtx } from 'src/context/roundContext'
+import { RoundContext } from 'src/context/roundContext'
 import { MockChainlinkAggregator__factory } from 'generated/factories/MockChainlinkAggregator__factory'
 
 const style = {
@@ -49,7 +49,7 @@ const UpdateOracleModal = () => {
   const handleOpen = () => setOpen(true)
   const handleClose = () => setOpen(false)
   const providerContext = useContext(ProviderContext)
-  const roundContext = useContext(RoundCtx)
+  const roundContext = useContext(RoundContext)
 
   const handleInputChange = (e: any) => {
     const { name, value } = e.target

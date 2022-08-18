@@ -175,3 +175,5 @@ export const URLS: { [chainId: number]: string[] } = Object.keys(CHAINS).reduce<
   },
   {}
 )
+
+export const SUPPORTED_CHAINS = [31337, 80001]

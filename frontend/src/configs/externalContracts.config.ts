@@ -2,11 +2,11 @@ import { TExternalContractsAddressMap } from 'eth-hooks/models'
 
 export const externalContractsAddressMap: TExternalContractsAddressMap = {
   [31337]: {
-    AggregatorV3InterfaceETH: '0xB7f8BC63BbcaD18155201308C8f3540b07f84F5e',
-    AggregatorV3InterfaceBTC: '0xA51c1fc2f0D1a1b8494Ed1FE312d7C3a78Ed91C0',
-    AggregatorV3InterfaceMATIC: '0x0DCd1Bf9A1b36cE34237eEaFef220932846BCD82',
-    CaptureTheStream: '0x68B1D87F95878fE05B998F19b66F4baba5De1aed',
-    MockDAI: '0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0'
+    AggregatorV3InterfaceETH: '0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0',
+    AggregatorV3InterfaceBTC: '0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9',
+    AggregatorV3InterfaceMATIC: '0xDc64a140Aa3E981100a9becA4E685f962f0cF6C9',
+    CaptureTheStream: '0xB7f8BC63BbcaD18155201308C8f3540b07f84F5e',
+    MockDAI: '0x5FC8d32690cc91D4c39d9d3abcBD16989F875707'
   },
   [80001]: {
     AggregatorV3InterfaceETH: '0x0715A7794a1dc8e42615F059dD6e406A6594651A',

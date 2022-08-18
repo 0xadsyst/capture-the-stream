@@ -7,17 +7,16 @@ import RoundTable from 'src/components/RoundTable'
 import RoundSelector from 'src/components/RoundSelector'
 import RoundVisualization from 'src/components/RoundVisualization'
 import EnterRoundModal from '../components/EnterRoundModal'
-import UpdateWinnerModal from '../components/UpdateWinnerModal'
 
 // ** React
 import React from 'react'
 
 // ** Web3
-import { RoundCtx } from 'src/context/roundContext'
+import { RoundContext } from 'src/context/roundContext'
 import { useContext } from 'react'
 
 const Round = () => {
-  const roundContext = useContext(RoundCtx)
+  const roundContext = useContext(RoundContext)
 
   return (
     <>
@@ -27,12 +26,12 @@ const Round = () => {
         </Grid>
         <Grid item xs={4} md={4}>
           <Box sx={{ mt: 2, mb: 2, ml: 2, mr: 2, textAlign: 'center' }}>
-            <EnterRoundModal />
+            
           </Box>
         </Grid>
         <Grid item xs={4} md={4}>
           <Box sx={{ mt: 2, mb: 2, ml: 2, mr: 2, textAlign: 'right' }}>
-            <UpdateWinnerModal />
+            <EnterRoundModal />
           </Box>
         </Grid>
         <Grid item xs={12} md={12}>

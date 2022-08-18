@@ -8,10 +8,10 @@ interface Props {
 }
 
 export const AssetLogo = (props: Props) => {
-    let image
-    props.asset == 'BTC' ? image = btcLogo : ''
-    props.asset == 'ETH' ? image = ethLogo : ''
-    props.asset == 'MATIC' ? image = maticLogo : ''
+    let image = ethLogo
+    props.asset == 'BTC' ? image = btcLogo : image = image
+    props.asset == 'ETH' ? image = ethLogo : image = image
+    props.asset == 'MATIC' ? image = maticLogo : image = image
 
   return <><Image src={image} alt={''} width="40px" height="40px" ></Image></>
 } 

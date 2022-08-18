@@ -8,8 +8,8 @@ import IconButton from '@mui/material/IconButton'
 import Typography from '@mui/material/Typography'
 import CardContent from '@mui/material/CardContent'
 
-import { RoundCtx } from 'src/context/roundContext'
-import { RoundsCtx, RoundType } from 'src/context/roundsContext'
+import { RoundContext } from 'src/context/roundContext'
+import { RoundsContext, RoundType } from 'src/context/roundsContext'
 import { useContext, useEffect, useState } from 'react'
 
 // ** Next
@@ -28,8 +28,8 @@ interface Props {
 
 const RoundOverview = (props: Props) => {
   const [roundOverviewCards, setroundOverviewCards] = useState<any[]>([])
-  const roundsContext = useContext(RoundsCtx)
-  const roundContext = useContext(RoundCtx)
+  const roundsContext = useContext(RoundsContext)
+  const roundContext = useContext(RoundContext)
   const providerContext = useContext(ProviderContext)
 
   const router = useRouter()
@@ -76,11 +76,10 @@ const RoundOverview = (props: Props) => {
             </Typography>
             <Typography variant='body1'><b>Entry Cut-off Time: </b>{guessCutOffTimestamp}</Typography>
             <Typography variant='body1'><b>Number of Guesses Allowed: </b>{numberOfGuessesAllowed}</Typography>
-            <Typography variant='body1'><b>Minimum Guess Spacing: </b>{round['minimumGuessSpacing'].toString()}</Typography>
+            <Typography variant='body1'><b>Minimum Guess Spacing: </b>{(round['minimumGuessSpacing'] / 1e8).toString()}</Typography>
             <Typography variant='body1'><b>Guess Cost: </b>{(round['guessCost'] /1e18).toString()} DAI</Typography>
             <Typography variant='body1'><b>In Round Guesses Allowed: </b>{round['inRoundGuessesAllowed'] ? "Yes" : "No"}</Typography>
-            <Typography variant='body1'><b>Current Winner: </b>{round['currentWinner'].toString()}</Typography>
-            <Typography variant='body1'><b>Pool Size: </b>{(round['deposits'] / 1e18).toString()} DAI</Typography>
+            <Typography variant='body1'><b>Current Pool Size: </b>{(round['deposits'] / 1e18).toString()} DAI</Typography>
             <p />
             <Button fullWidth variant='contained' onClick={() => handleRoundClick(round.roundId)}>
               Details

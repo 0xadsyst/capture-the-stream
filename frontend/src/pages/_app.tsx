@@ -33,16 +33,16 @@ import '../../styles/globals.css'
 // ** Web3
 import React, { useState, useEffect } from 'react'
 import { QueryClient, QueryClientProvider } from 'react-query'
-import initializeOnboard from 'src/utils/initializeOnboard'
 import { ethers } from 'ethers'
 
-import { RoundCtx } from 'src/context/roundContext'
-import { RoundsCtx, RoundType } from 'src/context/roundsContext'
+import { RoundContext } from 'src/context/roundContext'
+import { RoundsContext, RoundType } from 'src/context/roundsContext'
 import { GuessesContext, GuessType } from 'src/context/guessesContext'
 import { ProviderContext } from 'src/context/providerContext'
 import { ApolloClient, InMemoryCache, NormalizedCacheObject } from '@apollo/client'
 import { apolloClient } from 'src/utils/apollo-client'
 import { ApolloProvider } from '@apollo/react-components'
+import { SUPPORTED_CHAINS } from 'src/constants/chains'
 
 const queryClient = new QueryClient()
 
@@ -72,9 +72,7 @@ if (themeConfig.routingLoader) {
   })
 }
 
-initializeOnboard()
 
-// ** Configure JSS & ClassName
 const App = (props: ExtendedAppProps) => {
   const [round, setRound] = useState<number | undefined>()
   const [rounds, setRounds] = useState<RoundType[] | undefined>()
@@ -86,8 +84,10 @@ const App = (props: ExtendedAppProps) => {
   )
 
   useEffect(() => {
-    console.log('update apollo provider', provider)
-  setapolloContextClient(apolloClient[chainId ?? 31337])
+    if (SUPPORTED_CHAINS.includes(chainId ?? 0)) {
+      console.log('update apollo provider', provider)
+      setapolloContextClient(apolloClient[chainId ?? 31337])
+    }
 }, [chainId])
   const { Component, emotionCache = clientSideEmotionCache, pageProps } = props
 
@@ -105,8 +105,8 @@ const App = (props: ExtendedAppProps) => {
         <SettingsProvider>
           <ProviderContext.Provider value={{ provider: provider ?? undefined, setProvider: setProvider, chainId: chainId ?? undefined, setChainId: setChainId  }}>
             <ApolloProvider client={apolloContextClient}>
-                <RoundCtx.Provider value={{ roundId: round ?? null, setRoundId: setRound }}>
-                  <RoundsCtx.Provider value={{ rounds: rounds ?? [], setRounds: setRounds }}>
+                <RoundContext.Provider value={{ roundId: round ?? null, setRoundId: setRound }}>
+                  <RoundsContext.Provider value={{ rounds: rounds ?? [], setRounds: setRounds }}>
                     <GuessesContext.Provider value={{ guesses: guesses ?? [], setGuesses: setGuesses }}>
                       <SettingsConsumer>
                         {({ settings }) => {
@@ -118,8 +118,8 @@ const App = (props: ExtendedAppProps) => {
                         }}
                       </SettingsConsumer>
                     </GuessesContext.Provider>
-                  </RoundsCtx.Provider>
-                </RoundCtx.Provider>
+                  </RoundsContext.Provider>
+                </RoundContext.Provider>
             </ApolloProvider>
           </ProviderContext.Provider>
         </SettingsProvider>

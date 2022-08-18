@@ -20,7 +20,7 @@ export interface RoundsContextInterface {
   setRounds: Dispatch<SetStateAction<RoundType[] | undefined>>
 }
 
-export const RoundsCtx = createContext<RoundsContextInterface>({
+export const RoundsContext = createContext<RoundsContextInterface>({
   rounds: [],
   setRounds: () => null
 });

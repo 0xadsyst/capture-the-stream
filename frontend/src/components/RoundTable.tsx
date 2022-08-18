@@ -7,15 +7,12 @@ import TableBody from '@mui/material/TableBody'
 import TableCell from '@mui/material/TableCell'
 import TableContainer from '@mui/material/TableContainer'
 
-// ** Types Imports
-import { ThemeColor } from 'src/layouts/types'
-
 import { useEffect, useState, useContext } from 'react'
 import usePrice from '../hooks/usePrice'
 
 // ** Web3
-import { RoundCtx } from 'src/context/roundContext'
-import { RoundsCtx } from 'src/context/roundsContext'
+import { RoundContext } from 'src/context/roundContext'
+import { RoundsContext } from 'src/context/roundsContext'
 import { GuessesContext } from 'src/context/guessesContext'
 import { ProviderContext } from 'src/context/providerContext'
 import dayjs from 'dayjs'
@@ -28,28 +25,16 @@ interface RowType {
   winningTime: number
   winnings: string
   priceNeeded: string
-}
-
-interface StatusObj {
-  [key: string]: {
-    color: ThemeColor
-  }
-}
-
-const statusObj: StatusObj = {
-  applied: { color: 'info' },
-  rejected: { color: 'error' },
-  current: { color: 'primary' },
-  canSteal: { color: 'warning' },
-  winning: { color: 'success' }
+  border: number
+  borderColor: string
 }
 
 const RoundTable = () => {
   const [rows, setRows] = useState<RowType[]>([])
   const [time, setTime] = useState(Date.now())
   const [oracle, setOracle] = useState<string>()
-  const roundContext = useContext(RoundCtx)
-  const roundsContext = useContext(RoundsCtx)
+  const roundContext = useContext(RoundContext)
+  const roundsContext = useContext(RoundsContext)
   const guessesContext = useContext(GuessesContext)
   const providerContext = useContext(ProviderContext)
 
@@ -76,28 +61,43 @@ const RoundTable = () => {
         .sort((a, b) => a.guess - b.guess)
 
       sortedData.map((guessData, index) => {
-        let priceNeeded = 'Losing'
+        let priceNeeded = ''
         let winningTime = guessData['winningTime']
 
-        let lower =  guessData['guess'] * 0.95
-        let upper = guessData['guess'] * 1.05
+        let lower = '0'
+        let upper = 'Infinity'
+        const borderColor = '#F4D35E'
+        let border = 0
         if (index != 0) {
-          lower = (+guessData['guess'] + +sortedData[index - 1].guess) / 2
-        } 
+          lower = ((+guessData['guess'] + +sortedData[index - 1].guess) / 2).toString()
+        }
         if (index != sortedData.length - 1) {
-          upper = (+guessData['guess'] + +sortedData[index + 1].guess) / 2
+          upper = ((+guessData['guess'] + +sortedData[index + 1].guess) / 2).toString()
+        }
+        if (lower == '0' && upper == 'Infinity') {
+          priceNeeded = '0 - Infinity'
+        } else if (lower == '0') {
+          priceNeeded = '<' + upper
+        } else if (upper == 'Infinity') {
+          priceNeeded = '>' + lower
+        } else {
+          priceNeeded = lower + '-' + upper
         }
 
         if (roundData?.currentWinner == guessData.guessId) {
-          priceNeeded = 'Winning'
-          winningTime += dayjs().unix() - roundData?.lastWinnerChange
-        } else {
-          if (price) {
-            priceNeeded = price > guessData.guess ? (upper).toString() : (lower).toString()
+          if (dayjs().unix() < roundData.startTimestamp) {
+            winningTime = 0
+          } else if (dayjs().unix() < roundData.endTimestamp) {
+            border = 5
+            winningTime += dayjs().unix() - roundData?.lastWinnerChange
+          } else {
+            winningTime += roundData.endTimestamp - roundData?.lastWinnerChange
           }
         }
-        const winnings = dayjs().unix() > roundData.startTimestamp ?
-          (winningTime * roundData.deposits) / ((roundData.endTimestamp - roundData.startTimestamp) * 1e18) : 0
+        const winnings =
+          dayjs().unix() > roundData.startTimestamp
+            ? (winningTime * roundData.deposits) / ((roundData.endTimestamp - roundData.startTimestamp) * 1e18)
+            : 0
         if (guessData['roundId'] == roundContext?.roundId) {
           newRows.push({
             guessId: guessData['guessId'],
@@ -105,8 +105,10 @@ const RoundTable = () => {
             guess: guessData['guess'],
             difference: (price ?? guessData['guess']) - guessData['guess'],
             winningTime: winningTime,
-            winnings: winnings.toPrecision(4),
-            priceNeeded: priceNeeded
+            winnings: winnings.toFixed(4),
+            priceNeeded: priceNeeded,
+            border: border,
+            borderColor: borderColor
           })
         }
       })
@@ -131,12 +133,19 @@ const RoundTable = () => {
                 <TableCell>Difference</TableCell>
                 <TableCell>Time Winning</TableCell>
                 <TableCell>Winnings</TableCell>
-                <TableCell>Price Needed</TableCell>
+                <TableCell>Winning Range</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
               {rows.map((row: RowType) => (
-                <TableRow hover key={row.guessId} sx={{ '&:last-of-type td, &:last-of-type th': { border: 0 } }}>
+                <TableRow
+                  key={row.guessId}
+                  sx={{
+                    '&:last-of-type td, &:last-of-type th': { border: 0 },
+                    border: row.border,
+                    borderColor: row.borderColor
+                  }}
+                >
                   <TableCell>{row.guessId}</TableCell>
                   <TableCell>{row.user}</TableCell>
                   <TableCell>{row.guess}</TableCell>

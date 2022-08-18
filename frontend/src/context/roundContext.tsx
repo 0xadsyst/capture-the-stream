@@ -5,7 +5,7 @@ export interface RoundContextInterface {
   setRoundId: Dispatch<SetStateAction<number | undefined>>
 }
 
-export const RoundCtx = createContext<RoundContextInterface>({
+export const RoundContext = createContext<RoundContextInterface>({
   roundId: null,
   setRoundId: () => null
 });

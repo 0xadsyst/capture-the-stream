@@ -10,16 +10,15 @@ import Grid from '@mui/material/Grid'
 import React, { useEffect, useState, useRef, useContext } from 'react'
 
 import { memo } from 'react'
-import { RoundCtx } from 'src/context/roundContext'
+import { RoundContext } from 'src/context/roundContext'
 import { GuessesContext } from 'src/context/guessesContext'
-import { RoundsCtx, RoundType } from 'src/context/roundsContext'
+import { RoundsContext, RoundType } from 'src/context/roundsContext'
 import { ProviderContext } from 'src/context/providerContext'
 import usePrice from '../hooks/usePrice'
 
 import dayjs from 'dayjs'
 import { getAssetNameFromOracle } from 'src/utils/getAssetNameFromOracle'
-import {AssetLogo} from './AssetLogo'
-
+import { AssetLogo } from './AssetLogo'
 
 interface ChartData {
   labels: string[]
@@ -64,15 +63,18 @@ import {
   Title,
   Tooltip,
   Legend,
-  InteractionAxis,
+  InteractionAxis
 } from 'chart.js'
 import { Chart } from 'react-chartjs-2'
+import { minHeight } from '@mui/system'
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, LineElement, PointElement, Title, Tooltip, Legend)
 
 const yAxis: InteractionAxis = 'y'
+
 export const options = {
   indexAxis: yAxis,
+  maintainAspectRatio: false,
   borderSkipped: false,
   plugins: {
     title: {
@@ -90,11 +92,30 @@ export const options = {
       max: 5000,
       stacked: false,
       ticks: {
-        precision: 0
+        precision: 0,
+        callback: function (value: any) {
+          return '$' + value
+        }
+      },
+      title: {
+        display: true,
+        text: 'Price',
+        font: {
+          size: 14,
+          weight: 'bold'
+        }
       }
     },
     y: {
-      stacked: true
+      stacked: true,
+      title: {
+        display: true,
+        text: 'User',
+        font: {
+          size: 14,
+          weight: 'bold'
+        }
+      }
     }
   }
 }
@@ -107,8 +128,8 @@ const RoundVisualization = () => {
   const [time, setTime] = useState(Date.now())
   const [oracle, setOracle] = useState<string>()
 
-  const roundContext = useContext(RoundCtx)
-  const roundsContext = useContext(RoundsCtx)
+  const roundContext = useContext(RoundContext)
+  const roundsContext = useContext(RoundsContext)
   const guessesContext = useContext(GuessesContext)
   const providerContext = useContext(ProviderContext)
 
@@ -117,26 +138,47 @@ const RoundVisualization = () => {
 
   useEffect(() => {
     const chart = chartRef.current
+    const currentChartMin = chartOptions.scales.x.min
+    const currentChartMax = chartOptions.scales.x.max
+    const currentChartPrecision = chartOptions.scales.x.ticks.precision
+    console.log(currentChartMin, currentChartMax)
+    let precision = 0
+
     let chartMin = 0
     let chartMax = 50000
+
+    if (price) {
+      chartMin = price * 0.99
+      chartMax = price * 1.01
+      if (price < 10) {
+        precision = 2
+      }
+    }
 
     chartData.datasets.map(ds => {
       if (ds['type'] == 'bar') {
         if (price) {
-          chartMin = Math.min(price * 0.9, ds['data'][0]['x'][0])
-          chartMax = Math.max(price * 1.1, ds['data'][0]['x'][1])
-        }else {
-          chartMin = ds['data'][0]['x'][0] ?? chartMin
-          chartMax = ds['data'][0]['x'][1] ?? chartMax
+          chartMin = Math.min(chartMin, ds['data'][0]['x'][0] * 0.99)
+          chartMax = Math.max(chartMax, ds['data'][0]['x'][1] * 1.01)
         }
-
       }
     })
     const newOptions = { ...chartOptions }
-    newOptions.scales.x.min = parseFloat((chartMin * 0.95).toFixed(3))
-    newOptions.scales.x.max = parseFloat((chartMax * 1.05).toFixed(3))
-    setChartOptions(newOptions)
-    chart?.update()
+    newOptions.scales.x.ticks.precision = precision
+    newOptions.scales.x.min = parseFloat(chartMin.toFixed(3))
+    newOptions.scales.x.max = parseFloat(chartMax.toFixed(3))
+    if (
+      newOptions.scales.x.ticks.precision != currentChartPrecision ||
+      newOptions.scales.x.min != currentChartMin ||
+      newOptions.scales.x.max != currentChartMax
+    ) {
+      console.log('Updating options')
+      console.log(newOptions.scales.x.ticks.precision, currentChartPrecision)
+      console.log(newOptions.scales.x.min, currentChartMin)
+      console.log(newOptions.scales.x.max, currentChartMax)
+      setChartOptions(newOptions)
+      chart?.update()
+    }
   }, [chartData, price])
 
   useEffect(() => {
@@ -145,7 +187,10 @@ const RoundVisualization = () => {
 
     const newData: ChartData = chartData
     const newLineDataset: LineDatasetType = newData['datasets'].pop()
+
     if (newLineDataset != undefined) {
+      console.log('newData', newData)
+      console.log('newLineDataset', newLineDataset)
       newLineDataset['data'].map(p => {
         p['x'] = price
       })
@@ -170,21 +215,33 @@ const RoundVisualization = () => {
         .sort((a, b) => a.guess - b.guess)
       const users: string[] = []
       sortedData.map((guessData, index) => {
-        let lower =  Math.min(guessData['guess'] * 0.95, (price ?? 1e10) * 0.95)
-        let upper = Math.max(guessData['guess'] * 1.05, (price ?? 0) * 1.05)
+        let borderColor = '#bbbbbb'
+        let borderWidth = 2
+        console.log('guess', guessData['guess'])
+        console.log('price', price)
+        let lower = Math.min(guessData['guess'] * 0.99, (price ?? 1e10) * 0.99)
+        let upper = Math.max(guessData['guess'] * 1.01, (price ?? 0) * 1.01)
+
         if (index != 0) {
           lower = (+guessData['guess'] + +sortedData[index - 1].guess) / 2
-        } else {
-          options.scales.x.min = lower * 0.95
         }
         if (index != sortedData.length - 1) {
           upper = (+guessData['guess'] + +sortedData[index + 1].guess) / 2
-        } else {
-          options.scales.x.max = upper * 1.05
         }
         const user = guessData['user'].substring(0, 8)
         if (!users.includes(user)) {
           users.push(user)
+        }
+
+        if (roundsContext && roundContext.roundId != null) {
+          if (
+            roundsContext.rounds[roundContext.roundId].currentWinner == guessData.guessId &&
+            dayjs().unix() > roundsContext.rounds[roundContext.roundId].startTimestamp &&
+            dayjs().unix() < roundsContext.rounds[roundContext.roundId].endTimestamp
+          ) {
+            borderColor = '#F4D35E'
+            borderWidth = 5
+          }
         }
 
         newData['datasets'].push({
@@ -193,8 +250,8 @@ const RoundVisualization = () => {
           data: [{ y: user, x: [lower, upper] }],
           backgroundColor: '#' + user.substring(2, 8),
           order: 1,
-          borderWidth: 2,
-          borderColor: '#bbbbbb'
+          borderWidth: borderWidth,
+          borderColor: borderColor
         })
       })
       const priceData: { y: string; x: number }[] = []
@@ -203,14 +260,21 @@ const RoundVisualization = () => {
         users.map(user => {
           priceData.push({ y: user, x: price })
         })
+      } else {
+        users.map(user => {
+          priceData.push({ y: user, x: 0 })
+        })
       }
 
       newData['datasets'].push({
         type: 'line' as const,
         label: 'Price',
         data: priceData,
-        backgroundColor: '',
-        pointStyle: 'point',
+        borderColor: '#999999',
+        borderJoinStyle: 'bevel',
+        borderWidth: 5,
+        borderDash: [5, 5],
+        pointStyle: 'circle',
         radius: 2,
         order: 0
       })
@@ -221,7 +285,7 @@ const RoundVisualization = () => {
       console.log('new chart Data', newData)
       setChartData(newData)
     }
-  }, [guessesContext.guesses, roundContext?.roundId, price])
+  }, [guessesContext.guesses, roundContext?.roundId])
 
   useEffect(() => {
     const interval = setInterval(() => setTime(Date.now()), 1000)
@@ -245,12 +309,18 @@ const RoundVisualization = () => {
           ? days + ' days ' + hours + ' hours ' + minutes + ' minutes ' + seconds + ' seconds'
           : 'Round ended'
       const guessCutOffTime = dayjs(roundData.guessCutOffTimestamp * 1000).format('MMM D h:mm a')
-      const currentWinnerIndex = roundContext.roundId != undefined
-        ? roundsContext.rounds[roundContext.roundId]?.currentWinner
-        : undefined
-      const currentWinner = guessesContext.guesses.find(a => a.id == roundContext.roundId + '-' + currentWinnerIndex)
-      const currentWinnerWinnings = dayjs().unix() > roundData.startTimestamp ? (dayjs().unix() - roundData.lastWinnerChange).toString() : ''
+      const currentWinnerIndex =
+        roundContext.roundId != undefined ? roundsContext.rounds[roundContext.roundId]?.currentWinner : undefined
+      const currentWinner =
+        dayjs().unix() > roundData.startTimestamp && dayjs().unix() < roundData.endTimestamp
+          ? guessesContext.guesses.find(a => a.id == roundContext.roundId + '-' + currentWinnerIndex)
+          : ''
+      const currentWinnerWinnings =
+        dayjs().unix() > roundData.startTimestamp && dayjs().unix() < roundData.endTimestamp
+          ? (dayjs().unix() - roundData.lastWinnerChange).toString()
+          : ''
       const asset = getAssetNameFromOracle(roundData['oracle'], providerContext.chainId)
+
       const roundDisplayData: RoundDisplayData = {
         asset: asset,
         startTime: startTime,
@@ -260,18 +330,19 @@ const RoundVisualization = () => {
         numberOfGuessesAllowed: roundData.numberOfGuessesAllowed
           ? roundData.numberOfGuessesAllowed.toString()
           : 'Unlimited',
-        minimumGuessSpacing: roundData.minimumGuessSpacing.toString(),
+        minimumGuessSpacing: (roundData.minimumGuessSpacing / 1e8).toString(),
         guessCost: roundData.guessCost.toString(),
         poolSize: (roundData.deposits / 1e18).toString(),
-        currentWinner: (currentWinner && currentWinnerWinnings)
-          ? currentWinner?.user.slice(0, 8) +
-            ' (' +
-            '$' +
-            currentWinner?.guess +
-            ') ' +
-            currentWinnerWinnings +
-            ' seconds'
-          : 'None'
+        currentWinner:
+          currentWinner && currentWinnerWinnings
+            ? currentWinner?.user.slice(0, 8) +
+              ' (' +
+              '$' +
+              currentWinner?.guess +
+              ') ' +
+              currentWinnerWinnings +
+              ' seconds'
+            : 'None'
       }
 
       setRoundDisplayData(roundDisplayData)
@@ -281,12 +352,11 @@ const RoundVisualization = () => {
   // ** Hook
   const theme = useTheme()
 
-  
   if (!providerContext.provider) {
     return <h1>CONNECT YOUR WALLET</h1>
   } else if (roundContext.roundId == undefined) {
     return <h1>SELECT ROUND</h1>
-  }  else {
+  } else {
     return (
       <Card>
         <CardHeader
@@ -301,7 +371,7 @@ const RoundVisualization = () => {
             <Grid item xs={6} md={6}>
               <Typography variant='body1' sx={{ mr: 4 }}>
                 <b>Asset: </b>
-                {roundDisplayData?.asset}
+                {roundDisplayData?.asset + ' ($' + price + ')'}
               </Typography>
               <Typography variant='body1' sx={{ mr: 4 }}>
                 <b>Start Time: </b>
@@ -342,9 +412,12 @@ const RoundVisualization = () => {
                 {roundDisplayData?.currentWinner}
               </Typography>
             </Grid>
+            <Grid item xs={12} md={12} minHeight={300}>
+            <Chart type='bar' options={chartOptions} data={chartData} ref={chartRef}/>
+            </Grid>
           </Grid>
-          <Box sx={{ mb: 7, display: 'flex', alignItems: 'center' }}>
-            <Chart type='bar' options={chartOptions} data={chartData} ref={chartRef} />
+          <Box sx={{ mb: 1, display: 'flex', alignItems: 'center'}}>
+            
           </Box>
         </CardContent>
       </Card>

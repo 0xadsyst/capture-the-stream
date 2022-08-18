@@ -17,11 +17,7 @@ const navigation = (): VerticalNavItemsType => {
     },
     {
       title: 'My History',
-      path: '/underConstruction'
-    },
-    {
-      title: 'Protocol Statistics',
-      path: '/underConstruction'
+      path: '/history'
     }
   ]
 }

@@ -4,13 +4,11 @@ import Button from '@mui/material/Button'
 import Typography from '@mui/material/Typography'
 import Modal from '@mui/material/Modal'
 
-import useProtocolBalance from 'src/hooks/useProtocolBalance'
-
 import { externalContractsAddressMap } from 'src/configs/externalContracts.config'
 import { CaptureTheStream__factory } from '../../generated/factories/CaptureTheStream__factory'
 import { ProviderContext } from 'src/context/providerContext'
 import { ethers } from 'ethers'
-import { RoundCtx } from 'src/context/roundContext'
+import { RoundContext } from 'src/context/roundContext'
 
 const style = {
   position: 'absolute' as const,
@@ -24,18 +22,19 @@ const style = {
   p: 4
 }
 
-const EnterRoundModal = () => {
+const UpdateWinnerModal = () => {
   const [open, setOpen] = useState(false)
   const handleOpen = () => setOpen(true)
   const handleClose = () => setOpen(false)
   const [guess, setGuess] = useState<number>(0)
-  const balance = useProtocolBalance()
   const providerContext = useContext(ProviderContext)
-  const roundContext = useContext(RoundCtx)
+  const roundContext = useContext(RoundContext)
 
   const handleUpdateWinnerClick = () => {
-    const updateWinnerTx = updateWinner(roundContext?.roundId, providerContext.provider)
-    setOpen(false)
+    if (roundContext?.roundId){
+      const updateWinnerTx = updateWinner(roundContext?.roundId, providerContext.provider)
+      setOpen(false)
+    }
   }
 
   return (
@@ -80,4 +79,4 @@ return captureTheStream.updateWinner(roundId)
   }
 }
 
-export default EnterRoundModal
+export default UpdateWinnerModal

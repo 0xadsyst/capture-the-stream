@@ -4,26 +4,29 @@ import Button from '@mui/material/Button'
 import Typography from '@mui/material/Typography'
 import Modal from '@mui/material/Modal'
 import Grid from '@mui/material/Grid'
-import Select, { SelectChangeEvent } from '@mui/material/Select'
+import Select from '@mui/material/Select'
 import MenuItem from '@mui/material/MenuItem'
 import Switch from '@mui/material/Switch'
 import FormHelperText from '@mui/material/FormHelperText'
+import FormControl from '@mui/material/FormControl';
+import InputLabel from '@mui/material/InputLabel';
 
-import { InputAdornment, TextField } from '@mui/material'
+import { TextField } from '@mui/material'
 
 import { externalContractsAddressMap } from 'src/configs/externalContracts.config'
 import { CaptureTheStream__factory } from '../../generated/factories/CaptureTheStream__factory'
 import { ProviderContext } from 'src/context/providerContext'
 import { ethers } from 'ethers'
-import { RoundCtx } from 'src/context/roundContext'
+import { RoundContext } from 'src/context/roundContext'
 import dayjs from 'dayjs'
+import SwitchBase from '@mui/material/internal/SwitchBase'
 
 const style = {
   position: 'absolute' as const,
   top: '50%',
   left: '50%',
   transform: 'translate(-50%, -50%)',
-  width: 400,
+  width: 300,
   bgcolor: 'background.paper',
   border: '2px solid #000',
   boxShadow: 24,
@@ -63,10 +66,21 @@ interface InvalidTransactionValues {
   inRoundGuessesAllowed: boolean
 }
 
+const invalidTransactionValues: InvalidTransactionValues = {
+  oracle: false,
+  startTimestamp: false,
+  endTimestamp: false,
+  guessCutOffTimestamp: false,
+  numberOfGuessesAllowed: false,
+  minimumGuessSpacing: false,
+  guessCost: false,
+  inRoundGuessesAllowed: false
+}
+
 const defaultValues: Form = {
   oracle: 'ETH',
   startTimestamp: dayjs().add(10, 'minutes').format('YYYY-MM-DD[T]HH:mm'),
-  endTimestamp: dayjs().add(2, 'days').format('YYYY-MM-DD[T]HH:mm'),
+  endTimestamp: dayjs().add(2, 'days').add(10, 'minutes').format('YYYY-MM-DD[T]HH:mm'),
   guessCutOffTimestamp: dayjs().add(10, 'minutes').format('YYYY-MM-DD[T]HH:mm'),
   numberOfGuessesAllowed: '0',
   minimumGuessSpacing: '0',
@@ -77,11 +91,15 @@ const defaultValues: Form = {
 const InitiateRoundModal = () => {
   const [open, setOpen] = useState(false)
   const [formValues, setFormValues] = useState<Form>(defaultValues)
-  const [invalidValues, setInvalidValues] = useState<InvalidTransactionValues>()
-  const handleOpen = () => setOpen(true)
+  const [invalidValues, setInvalidValues] = useState<InvalidTransactionValues>(invalidTransactionValues)
+  const handleOpen = () => {
+    setFormValues(defaultValues)
+    setInvalidValues(invalidTransactionValues)
+    setOpen(true)
+  }
   const handleClose = () => setOpen(false)
   const providerContext = useContext(ProviderContext)
-  const roundContext = useContext(RoundCtx)
+  const roundContext = useContext(RoundContext)
 
   console.log(defaultValues)
 
@@ -110,7 +128,7 @@ const InitiateRoundModal = () => {
           ? dayjs(formValues.endTimestamp).unix()
           : dayjs(formValues.guessCutOffTimestamp).unix(),
         numberOfGuessesAllowed: parseInt(formValues.numberOfGuessesAllowed),
-        minimumGuessSpacing: parseInt(formValues.minimumGuessSpacing),
+        minimumGuessSpacing: parseFloat(formValues.minimumGuessSpacing) * 1e8,
         guessCost: parseInt(formValues.guessCost),
         inRoundGuessesAllowed: formValues.inRoundGuessesAllowed
       }
@@ -168,6 +186,8 @@ return invalidTransactionValues
           </Typography>
           <Grid container spacing={4}>
             <Grid item xs={12} md={12} mt={4}>
+            <FormControl sx={{  minWidth: 80 }}>
+            <InputLabel id="oracle">Asset</InputLabel>
               <Select
                 name='oracle'
                 id='oracle'
@@ -176,12 +196,13 @@ return invalidTransactionValues
                 error={invalidValues?.oracle}
                 onChange={handleInputChange}
                 sx={{ width: 250 }}
+
               >
                 <MenuItem value={'ETH'}>ETH</MenuItem>
                 <MenuItem value={'BTC'}>BTC</MenuItem>
                 <MenuItem value={'MATIC'}>MATIC</MenuItem>
               </Select>
-              <FormHelperText>Asset</FormHelperText>
+              </FormControl>
             </Grid>
             <Grid item xs={12} md={12}>
               <TextField
@@ -222,6 +243,7 @@ return invalidTransactionValues
                 value={formValues?.numberOfGuessesAllowed}
                 error={invalidValues?.numberOfGuessesAllowed}
                 onChange={handleInputChange}
+                onFocus={e => e.target.select()}
               />
             </Grid>
             <Grid item xs={12} md={12}>
@@ -233,6 +255,7 @@ return invalidTransactionValues
                 value={formValues?.minimumGuessSpacing}
                 error={invalidValues?.minimumGuessSpacing}
                 onChange={handleInputChange}
+                onFocus={e => e.target.select()}
               />
             </Grid>
             <Grid item xs={12} md={12}>
@@ -244,6 +267,7 @@ return invalidTransactionValues
                 value={formValues?.guessCost}
                 error={invalidValues?.guessCost}
                 onChange={handleInputChange}
+                onFocus={e => e.target.select()}
               />
             </Grid>
             <Grid item xs={12} md={12}>
@@ -253,6 +277,7 @@ return invalidTransactionValues
                 onChange={handleInputChange}
                 inputProps={{ 'aria-label': 'controlled' }}
                 value={formValues?.inRoundGuessesAllowed}
+                checked={formValues?.inRoundGuessesAllowed}
               />
               In-round Guesses Allowed
             </Grid>

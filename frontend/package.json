@@ -71,7 +71,7 @@
     "marked-terminal": "latest",
     "mdi-material-ui": "^7.1.0",
     "moment": "^2.29.4",
-    "next": "latest",
+    "next": "^11.1.4",
     "nprogress": "^0.2.0",
     "react": "17.0.2",
     "react-chartjs-2": "^4.3.1",

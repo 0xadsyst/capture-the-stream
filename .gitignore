@@ -78,3 +78,4 @@ yarn-error.log*
 *.code-workspace
 packages/hardhat-ts/coverage.json
 .vercel
+!frontend/generated

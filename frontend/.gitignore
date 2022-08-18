@@ -37,4 +37,4 @@ yarn-error.log*
 *.tsbuildinfo
 
 # typechain 
-/generated/
+

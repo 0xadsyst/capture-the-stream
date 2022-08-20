@@ -3,23 +3,23 @@ import Box from '@mui/material/Box'
 import Card from '@mui/material/Card'
 
 // ** Type Import
-import { Settings } from '../../../context/settingsContext'
+import { Settings } from 'src/context/settingsContext'
 
 // ** Components
-import ModeToggler from '../../../layouts/components/shared-components/ModeToggler'
-// import ConnectButton from '../../../components/ConnectButton'
+import ModeToggler from 'src/layouts/components/shared-components/ModeToggler'
+// import ConnectButton from 'src/components/ConnectButton'
 import { ConnectButton } from '@rainbow-me/rainbowkit'
-import DepositModal from '../../../components/DepositModal'
+import DepositModal from 'src/components/DepositModal'
 
-import useRounds from '../../../hooks/useRounds'
-import useGuesses from '../../../hooks/useGuesses'
+import useRounds from 'src/hooks/useRounds'
+import useGuesses from 'src/hooks/useGuesses'
 
 import React, { useState, useEffect } from 'react'
-import { externalContractsAddressMap } from '../../../configs/externalContracts.config'
-import { CaptureTheStream__factory } from '../../../../generated/factories/CaptureTheStream__factory'
+import { externalContractsAddressMap } from 'src/configs/externalContracts.config'
+import { CaptureTheStream__factory } from 'generated/factories/CaptureTheStream__factory'
 import { ethers, BigNumber } from 'ethers'
 import { useContractRead, useNetwork, useAccount, useSigner } from 'wagmi'
-import useProtocolBalance from '../../../hooks/useProtocolBalance'
+import useProtocolBalance from 'src/hooks/useProtocolBalance'
 
 interface Props {
   hidden: boolean

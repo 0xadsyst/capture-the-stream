@@ -9,8 +9,8 @@ import InputLabel from '@mui/material/InputLabel'
 import { useEffect, useState } from 'react'
 
 // ** Web3
-import { RoundsContext, RoundType } from '../context/roundsContext' 
-import { RoundContext } from '../context/roundContext'
+import { RoundsContext, RoundType } from 'src/context/roundsContext' 
+import { RoundContext } from 'src/context/roundContext'
 
 const emptyList = [<MenuItem value={0} key ="">0</MenuItem>]
 

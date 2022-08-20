@@ -10,10 +10,10 @@ import FormHelperText from '@mui/material/FormHelperText'
 
 import { TextField } from '@mui/material'
 
-import { externalContractsAddressMap } from '../configs/externalContracts.config'
+import { externalContractsAddressMap } from 'src/configs/externalContracts.config'
 import { ethers } from 'ethers'
-import { RoundContext } from '../context/roundContext'
-import { MockChainlinkAggregator__factory } from '../../generated/factories/MockChainlinkAggregator__factory'
+import { RoundContext } from 'src/context/roundContext'
+import { MockChainlinkAggregator__factory } from 'generated/factories/MockChainlinkAggregator__factory'
 import { useContractRead, useNetwork, useProvider, useSigner, usePrepareSendTransaction } from 'wagmi'
 
 const style = {

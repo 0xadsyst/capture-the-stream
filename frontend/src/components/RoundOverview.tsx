@@ -8,13 +8,13 @@ import IconButton from '@mui/material/IconButton'
 import Typography from '@mui/material/Typography'
 import CardContent from '@mui/material/CardContent'
 
-import { RoundContext } from '../context/roundContext'
-import { RoundsContext, RoundType } from '../context/roundsContext'
+import { RoundContext } from 'src/context/roundContext'
+import { RoundsContext, RoundType } from 'src/context/roundsContext'
 import { useContext, useEffect, useState } from 'react'
 
 // ** Next
 import { useRouter } from 'next/router'
-import {getAssetNameFromOracle } from '../utils/getAssetNameFromOracle'
+import {getAssetNameFromOracle } from 'src/utils/getAssetNameFromOracle'
 import { useNetwork, useSigner } from 'wagmi'
 
 import dayjs from 'dayjs'

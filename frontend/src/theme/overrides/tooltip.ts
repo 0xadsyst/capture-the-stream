@@ -2,7 +2,7 @@
 import { Theme } from '@mui/material/styles'
 
 // ** Util Import
-import { hexToRGBA } from '../../utils/hex-to-rgba'
+import { hexToRGBA } from 'src/utils/hex-to-rgba'
 
 const Tooltip = (theme: Theme) => {
   return {

@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useContext } from 'react'
 import { BigNumber } from 'ethers'
-import { externalContractsAddressMap } from '../configs/externalContracts.config'
-import { MockDAI__factory } from '../../generated/factories/MockDAI__factory'
+import { externalContractsAddressMap } from 'src/configs/externalContracts.config'
+import { MockDAI__factory } from 'generated/factories/MockDAI__factory'
 import { useNetwork, useSigner, useAccount, useContractRead } from 'wagmi'
 
 function useDepositAssetBalance() {

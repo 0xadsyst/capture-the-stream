@@ -4,15 +4,15 @@ import Button from '@mui/material/Button'
 import Typography from '@mui/material/Typography'
 import Modal from '@mui/material/Modal'
 
-import useProtocolBalance from '../hooks/useProtocolBalance'
+import useProtocolBalance from 'src/hooks/useProtocolBalance'
 import { InputAdornment, TextField } from '@mui/material'
 
-import { externalContractsAddressMap } from '../configs/externalContracts.config'
-import { CaptureTheStream__factory } from '../../generated/factories/CaptureTheStream__factory'
+import { externalContractsAddressMap } from 'src/configs/externalContracts.config'
+import { CaptureTheStream__factory } from 'generated/factories/CaptureTheStream__factory'
 import { useNetwork, useSigner } from 'wagmi'
 import { ethers, BigNumber } from 'ethers'
-import { RoundContext } from '../context/roundContext'
-import { RoundsContext } from '../context/roundsContext'
+import { RoundContext } from 'src/context/roundContext'
+import { RoundsContext } from 'src/context/roundsContext'
 import dayjs from 'dayjs'
 
 const style = {

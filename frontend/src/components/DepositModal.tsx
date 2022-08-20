@@ -6,13 +6,13 @@ import Modal from '@mui/material/Modal'
 
 import { InputAdornment, TextField } from '@mui/material'
 
-import { externalContractsAddressMap } from '../configs/externalContracts.config'
-import { CaptureTheStream__factory } from '../../generated/factories/CaptureTheStream__factory'
-import { MockDAI__factory } from '../../generated/factories/MockDAI__factory'
+import { externalContractsAddressMap } from 'src/configs/externalContracts.config'
+import { CaptureTheStream__factory } from 'generated/factories/CaptureTheStream__factory'
+import { MockDAI__factory } from 'generated/factories/MockDAI__factory'
 import { ethers, BigNumber } from 'ethers'
 import { useNetwork, useSigner, useAccount, useContractRead } from 'wagmi'
-import useProtocolBalance from '../hooks/useProtocolBalance'
-import useDepositAssetBalance from '../hooks/useDepositAssetBalance'
+import useProtocolBalance from 'src/hooks/useProtocolBalance'
+import useDepositAssetBalance from 'src/hooks/useDepositAssetBalance'
 
 const style = {
   position: 'absolute' as const,

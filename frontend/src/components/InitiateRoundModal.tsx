@@ -12,11 +12,11 @@ import InputLabel from '@mui/material/InputLabel';
 
 import { TextField } from '@mui/material'
 
-import { externalContractsAddressMap } from '../configs/externalContracts.config'
-import { CaptureTheStream__factory } from '../../generated/factories/CaptureTheStream__factory'
+import { externalContractsAddressMap } from 'src/configs/externalContracts.config'
+import { CaptureTheStream__factory } from 'generated/factories/CaptureTheStream__factory'
 import { useNetwork, useSigner } from 'wagmi'
 import { ethers } from 'ethers'
-import { RoundContext } from '../context/roundContext'
+import { RoundContext } from 'src/context/roundContext'
 import dayjs from 'dayjs'
 
 const style = {

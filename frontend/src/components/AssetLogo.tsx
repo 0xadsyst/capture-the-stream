@@ -1,6 +1,6 @@
-import btcLogo from '../assets/btc.png'
-import ethLogo from '../assets/eth.png'
-import maticLogo from '../assets/matic.png'
+import btcLogo from 'src/assets/btc.png'
+import ethLogo from 'src/assets/eth.png'
+import maticLogo from 'src/assets/matic.png'
 
 interface Props {
     asset: string

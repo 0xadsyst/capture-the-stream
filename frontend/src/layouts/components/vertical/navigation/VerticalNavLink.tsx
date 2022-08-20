@@ -15,14 +15,14 @@ import ListItemIcon from '@mui/material/ListItemIcon'
 import ListItemButton, { ListItemButtonProps } from '@mui/material/ListItemButton'
 
 // ** Configs Import
-import themeConfig from '../../../../configs/themeConfig'
+import themeConfig from 'src/configs/themeConfig'
 
 // ** Types
-import { NavLink } from '../../../../layouts/types'
-import { Settings } from '../../../../context/settingsContext'
+import { NavLink } from 'src/layouts/types'
+import { Settings } from 'src/context/settingsContext'
 
 // ** Utils
-import { handleURLQueries } from '../../../../layouts/utils'
+import { handleURLQueries } from 'src/layouts/utils'
 
 interface Props {
   item: NavLink

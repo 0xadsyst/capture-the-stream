@@ -7,16 +7,16 @@ import useMediaQuery from '@mui/material/useMediaQuery'
 
 // ** Layout Imports
 // !Do not remove this Layout import
-import VerticalLayout from '../layouts/VerticalLayout'
+import VerticalLayout from 'src/layouts/VerticalLayout'
 
 // ** Navigation Imports
-import VerticalNavItems from '../navigation/vertical'
+import VerticalNavItems from 'src/navigation/vertical'
 
 // ** Component Import
 import VerticalAppBarContent from './components/vertical/AppBarContent'
 
 // ** Hook Import
-import { useSettings } from '../hooks/useSettings'
+import { useSettings } from 'src/hooks/useSettings'
 
 interface Props {
   children: ReactNode

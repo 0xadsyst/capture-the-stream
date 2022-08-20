@@ -1,5 +1,5 @@
 import { ReactNode } from 'react'
-import { Settings } from '../context/settingsContext'
+import { Settings } from 'src/context/settingsContext'
 
 export type ContentWidth = 'full' | 'boxed'
 

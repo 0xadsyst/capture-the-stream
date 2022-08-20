@@ -7,10 +7,10 @@ import GlobalStyles from '@mui/material/GlobalStyles'
 import { ThemeProvider, createTheme, responsiveFontSizes } from '@mui/material/styles'
 
 // ** Type Imports
-import { Settings } from '../context/settingsContext'
+import { Settings } from 'src/context/settingsContext'
 
 // ** Theme Config
-import themeConfig from '../configs/themeConfig'
+import themeConfig from 'src/configs/themeConfig'
 
 // ** Theme Override Imports
 import overrides from './overrides'

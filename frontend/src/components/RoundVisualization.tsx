@@ -10,14 +10,14 @@ import Grid from '@mui/material/Grid'
 import React, { useEffect, useState, useRef, useContext } from 'react'
 
 import { memo } from 'react'
-import { RoundContext } from '../context/roundContext'
-import { GuessesContext } from '../context/guessesContext'
-import { RoundsContext, RoundType } from '../context/roundsContext'
+import { RoundContext } from 'src/context/roundContext'
+import { GuessesContext } from 'src/context/guessesContext'
+import { RoundsContext, RoundType } from 'src/context/roundsContext'
 import { useNetwork, useSigner } from 'wagmi'
-import usePrice from '../hooks/usePrice'
+import usePrice from 'src/hooks/usePrice'
 
 import dayjs from 'dayjs'
-import { getAssetNameFromOracle } from '../utils/getAssetNameFromOracle'
+import { getAssetNameFromOracle } from 'src/utils/getAssetNameFromOracle'
 import { AssetLogo } from './AssetLogo'
 
 interface ChartData {

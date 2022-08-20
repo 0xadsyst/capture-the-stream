@@ -11,7 +11,7 @@ import Typography from '@mui/material/Typography'
 import Box, { BoxProps } from '@mui/material/Box'
 
 // ** Layout Import
-import BlankLayout from '../src/layouts/BlankLayout'
+import BlankLayout from 'src/layouts/BlankLayout'
 
 // ** Styled Components
 const BoxWrapper = styled(Box)<BoxProps>(({ theme }) => ({

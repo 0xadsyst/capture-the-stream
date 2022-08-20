@@ -8,12 +8,12 @@ import TableCell from '@mui/material/TableCell'
 import TableContainer from '@mui/material/TableContainer'
 
 import { useEffect, useState, useContext } from 'react'
-import usePrice from '../hooks/usePrice'
+import usePrice from 'src/hooks/usePrice'
 
 // ** Web3
-import { RoundContext } from '../context/roundContext'
-import { RoundsContext } from '../context/roundsContext'
-import { GuessesContext } from '../context/guessesContext'
+import { RoundContext } from 'src/context/roundContext'
+import { RoundsContext } from 'src/context/roundsContext'
+import { GuessesContext } from 'src/context/guessesContext'
 import { useNetwork, useSigner } from 'wagmi'
 import dayjs from 'dayjs'
 

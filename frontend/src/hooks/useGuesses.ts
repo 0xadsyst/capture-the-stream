@@ -2,9 +2,9 @@ import { useEffect, useState } from 'react'
 
 // ** Web3
 import { useQuery } from '@apollo/client'
-import { GUESSES_QUERY } from '../constants/queries/queries'
+import { GUESSES_QUERY } from 'src/constants/queries/queries'
 import { useContext } from 'react'
-import { GuessesContext, GuessType } from '../context/guessesContext'
+import { GuessesContext, GuessType } from 'src/context/guessesContext'
 
 interface GuessDataType {
   __typename: string

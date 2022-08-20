@@ -7,8 +7,8 @@ import Switch from '@mui/material/Switch'
 import React, { useEffect, useState } from 'react'
 
 // ** Web3
-import RoundOverview from '../src/components/RoundOverview'
-import InitiateRoundModal from '../src/components/InitiateRoundModal'
+import RoundOverview from 'src/components/RoundOverview'
+import InitiateRoundModal from 'src/components/InitiateRoundModal'
 
 const Summary = () => {
   const [showFinishedRounds, setShowFinishedRounds] = useState<boolean>(false)

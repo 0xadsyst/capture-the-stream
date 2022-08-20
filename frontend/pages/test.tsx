@@ -6,13 +6,13 @@ import Button from '@mui/material/Button'
 import React, { useEffect, useState, useContext } from 'react'
 
 // ** Web3
-import { externalContractsAddressMap } from '../src/configs/externalContracts.config'
-import { CaptureTheStream__factory } from '../generated/factories/CaptureTheStream__factory'
-import { MockDAI__factory } from '../generated/factories/MockDAI__factory'
-import { AggregatorV3Interface__factory } from '../generated/factories/AggregatorV3Interface__factory'
+import { externalContractsAddressMap } from 'src/configs/externalContracts.config'
+import { CaptureTheStream__factory } from 'generated/factories/CaptureTheStream__factory'
+import { MockDAI__factory } from 'generated/factories/MockDAI__factory'
+import { AggregatorV3Interface__factory } from 'generated/factories/AggregatorV3Interface__factory'
 import { ethers, BigNumber } from 'ethers'
-import UpdateOracleModal from '../src/components/UpdateOraclePriceModal'
-import UpdateWinnerModal from '../src/components/UpdateWinnerModal'
+import UpdateOracleModal from 'src/components/UpdateOraclePriceModal'
+import UpdateWinnerModal from 'src/components/UpdateWinnerModal'
 
 import { useContractRead, useNetwork, useProvider, useSigner, useAccount, useContractReads } from 'wagmi'
 

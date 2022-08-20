@@ -1,5 +1,5 @@
 // ** Type import
-import { VerticalNavItemsType } from '../../layouts/types'
+import { VerticalNavItemsType } from 'src/layouts/types'
 
 const navigation = (): VerticalNavItemsType => {
   return [

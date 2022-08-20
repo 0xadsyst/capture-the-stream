@@ -12,36 +12,36 @@ import { CacheProvider } from '@emotion/react'
 import type { EmotionCache } from '@emotion/cache'
 
 // ** Config Imports
-import themeConfig from '../src/configs/themeConfig'
+import themeConfig from 'src/configs/themeConfig'
 
 // ** Component Imports
-import UserLayout from '../src/layouts/UserLayout'
-import ThemeComponent from '../src/theme/ThemeComponent'
+import UserLayout from 'src/layouts/UserLayout'
+import ThemeComponent from 'src/theme/ThemeComponent'
 
 // ** Contexts
-import { SettingsConsumer, SettingsProvider } from '../src/context/settingsContext'
+import { SettingsConsumer, SettingsProvider } from 'src/context/settingsContext'
 
 // ** Utils Imports
-import { createEmotionCache } from '../src/utils/create-emotion-cache'
+import { createEmotionCache } from 'src/utils/create-emotion-cache'
 
 // ** React Perfect Scrollbar Style
 import 'react-perfect-scrollbar/dist/css/styles.css'
 
 // ** Global css styles
-import '../styles/globals.css'
+import 'styles/globals.css'
 
 // ** Web3
 import React, { useState, useEffect } from 'react'
 import { QueryClient, QueryClientProvider } from 'react-query'
 import { ethers } from 'ethers'
 
-import { RoundContext } from '../src/context/roundContext'
-import { RoundsContext, RoundType } from '../src/context/roundsContext'
-import { GuessesContext, GuessType } from '../src/context/guessesContext'
+import { RoundContext } from 'src/context/roundContext'
+import { RoundsContext, RoundType } from 'src/context/roundsContext'
+import { GuessesContext, GuessType } from 'src/context/guessesContext'
 import { ApolloClient, InMemoryCache, NormalizedCacheObject } from '@apollo/client'
-import { apolloClient } from '../src/utils/apollo-client'
+import { apolloClient } from 'src/utils/apollo-client'
 import { ApolloProvider } from '@apollo/react-components'
-import { SUPPORTED_CHAINS } from '../src/constants/chains'
+import { SUPPORTED_CHAINS } from 'src/constants/chains'
 
 const queryClient = new QueryClient()
 

@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useContext } from 'react'
 import { BigNumber } from 'ethers'
-import { externalContractsAddressMap } from '../configs/externalContracts.config'
-import { CaptureTheStream__factory } from '../../generated/factories/CaptureTheStream__factory'
+import { externalContractsAddressMap } from 'src/configs/externalContracts.config'
+import { CaptureTheStream__factory } from 'generated/factories/CaptureTheStream__factory'
 import { useNetwork, useSigner, useAccount, useContractRead } from 'wagmi'
 
 function useProtocolBalance() {

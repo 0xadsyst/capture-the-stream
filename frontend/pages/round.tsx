@@ -3,16 +3,16 @@ import Grid from '@mui/material/Grid'
 import Box from '@mui/material/Box'
 
 // ** Components Imports
-import RoundTable from '../src/components/RoundTable'
-import RoundSelector from '../src/components/RoundSelector'
-import RoundVisualization from '../src/components/RoundVisualization'
-import EnterRoundModal from '../src/components/EnterRoundModal'
+import RoundTable from 'src/components/RoundTable'
+import RoundSelector from 'src/components/RoundSelector'
+import RoundVisualization from 'src/components/RoundVisualization'
+import EnterRoundModal from 'src/components/EnterRoundModal'
 
 // ** React
 import React from 'react'
 
 // ** Web3
-import { RoundContext } from '../src/context/roundContext'
+import { RoundContext } from 'src/context/roundContext'
 import { useContext } from 'react'
 
 const Round = () => {

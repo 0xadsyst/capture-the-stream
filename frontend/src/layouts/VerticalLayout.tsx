@@ -6,10 +6,10 @@ import { styled } from '@mui/material/styles'
 import Box, { BoxProps } from '@mui/material/Box'
 
 // ** Theme Config Import
-import themeConfig from '../configs/themeConfig'
+import themeConfig from 'src/configs/themeConfig'
 
 // ** Type Import
-import { LayoutProps } from '../layouts/types'
+import { LayoutProps } from 'src/layouts/types'
 
 // ** Components
 import AppBar from './components/vertical/appBar'

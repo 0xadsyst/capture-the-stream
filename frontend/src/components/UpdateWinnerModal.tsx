@@ -4,11 +4,11 @@ import Button from '@mui/material/Button'
 import Typography from '@mui/material/Typography'
 import Modal from '@mui/material/Modal'
 
-import { externalContractsAddressMap } from '../configs/externalContracts.config'
-import { CaptureTheStream__factory } from '../../generated/factories/CaptureTheStream__factory'
+import { externalContractsAddressMap } from 'src/configs/externalContracts.config'
+import { CaptureTheStream__factory } from 'generated/factories/CaptureTheStream__factory'
 import { useNetwork, useSigner } from 'wagmi'
 import { ethers } from 'ethers'
-import { RoundContext } from '../context/roundContext'
+import { RoundContext } from 'src/context/roundContext'
 
 const style = {
   position: 'absolute' as const,

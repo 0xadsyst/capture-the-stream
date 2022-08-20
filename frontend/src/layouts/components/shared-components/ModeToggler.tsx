@@ -7,7 +7,7 @@ import WeatherNight from 'mdi-material-ui/WeatherNight'
 import WeatherSunny from 'mdi-material-ui/WeatherSunny'
 
 // ** Type Import
-import { Settings } from '../../../context/settingsContext'
+import { Settings } from 'src/context/settingsContext'
 
 interface Props {
   settings: Settings

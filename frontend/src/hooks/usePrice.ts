@@ -1,5 +1,5 @@
 import { useQuery } from 'react-query'
-import { AggregatorV3Interface__factory } from '../../generated/factories/AggregatorV3Interface__factory'
+import { AggregatorV3Interface__factory } from 'generated/factories/AggregatorV3Interface__factory'
 import { ethers } from 'ethers'
 
 import { useContractRead } from 'wagmi'

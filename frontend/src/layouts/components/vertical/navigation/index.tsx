@@ -10,8 +10,8 @@ import { styled, useTheme } from '@mui/material/styles'
 import PerfectScrollbar from 'react-perfect-scrollbar'
 
 // ** Type Import
-import { Settings } from '../../../../context/settingsContext'
-import { VerticalNavItemsType } from '../../../../layouts/types'
+import { Settings } from 'src/context/settingsContext'
+import { VerticalNavItemsType } from 'src/layouts/types'
 
 // ** Component Imports
 import Drawer from './Drawer'
@@ -19,7 +19,7 @@ import VerticalNavItems from './VerticalNavItems'
 import VerticalNavHeader from './VerticalNavHeader'
 
 // ** Util Import
-import { hexToRGBA } from '../../../../utils/hex-to-rgba'
+import { hexToRGBA } from 'src/utils/hex-to-rgba'
 
 interface Props {
   hidden: boolean

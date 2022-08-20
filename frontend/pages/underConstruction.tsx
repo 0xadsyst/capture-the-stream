@@ -16,33 +16,30 @@ import BlankLayout from 'src/layouts/BlankLayout'
 // ** Styled Components
 const BoxWrapper = styled(Box)<BoxProps>(({ theme }) => ({
   [theme.breakpoints.down('md')]: {
-    width: '90vw',
-  },
+    width: '90vw'
+  }
 }))
 
 const UnderConstruction = () => {
   return (
-    <Box className="content-center">
+    <Box className='content-center'>
       <Box
         sx={{
           p: 5,
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'center',
-          textAlign: 'center',
+          textAlign: 'center'
         }}
       >
         <BoxWrapper>
-          <Typography variant="h1">Under Construction</Typography>
-          <Typography
-            variant="h5"
-            sx={{ mb: 1, fontSize: '1.5rem !important' }}
-          >
+          <Typography variant='h1'>Under Construction</Typography>
+          <Typography variant='h5' sx={{ mb: 1, fontSize: '1.5rem !important' }}>
             Check back soon.
           </Typography>
         </BoxWrapper>
-        <Link passHref href="/">
-          <Button component="a" variant="contained" sx={{ px: 5.5 }}>
+        <Link passHref href='/'>
+          <Button component='a' variant='contained' sx={{ px: 5.5 }}>
             Back to Home
           </Button>
         </Link>
@@ -51,8 +48,6 @@ const UnderConstruction = () => {
   )
 }
 
-UnderConstruction.getLayout = (page: ReactNode) => (
-  <BlankLayout>{page}</BlankLayout>
-)
+UnderConstruction.getLayout = (page: ReactNode) => <BlankLayout>{page}</BlankLayout>
 
 export default UnderConstruction

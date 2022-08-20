@@ -71,34 +71,21 @@ if (themeConfig.routingLoader) {
   })
 }
 
-
-
-import '@rainbow-me/rainbowkit/styles.css';
-import {
-  getDefaultWallets,
-  RainbowKitProvider,
-} from '@rainbow-me/rainbowkit';
-import {
-  chain,
-  configureChains,
-  createClient,
-  WagmiConfig, useNetwork
-} from 'wagmi';
-import { alchemyProvider } from 'wagmi/providers/alchemy';
-import { publicProvider } from 'wagmi/providers/public';
+import '@rainbow-me/rainbowkit/styles.css'
+import { getDefaultWallets, RainbowKitProvider } from '@rainbow-me/rainbowkit'
+import { chain, configureChains, createClient, WagmiConfig, useNetwork } from 'wagmi'
+import { alchemyProvider } from 'wagmi/providers/alchemy'
+import { publicProvider } from 'wagmi/providers/public'
 
 const { chains, provider } = configureChains(
   [chain.polygonMumbai, chain.hardhat],
-  [
-    alchemyProvider({ apiKey: process.env.ALCHEMY_ID }),
-    publicProvider()
-  ]
-);
+  [alchemyProvider({ apiKey: process.env.ALCHEMY_ID }), publicProvider()]
+)
 
 const { connectors } = getDefaultWallets({
   appName: 'Capture the Stream',
   chains
-});
+})
 
 const wagmiClient = createClient({
   autoConnect: true,
@@ -110,18 +97,16 @@ const App = (props: ExtendedAppProps) => {
   const [round, setRound] = useState<number | undefined>()
   const [rounds, setRounds] = useState<RoundType[] | undefined>()
   const [guesses, setGuesses] = useState<GuessType[] | undefined>()
-  const [apolloContextClient, setapolloContextClient] = useState<ApolloClient<NormalizedCacheObject>>(
-    initialApolloClient
-  )
+  const [apolloContextClient, setapolloContextClient] =
+    useState<ApolloClient<NormalizedCacheObject>>(initialApolloClient)
   const { chain } = useNetwork()
-
 
   useEffect(() => {
     if (SUPPORTED_CHAINS.includes(chain?.id ?? 0)) {
       console.log('update apollo provider', provider)
       setapolloContextClient(apolloClient[chain?.id ?? 31337])
     }
-}, [chain?.id])
+  }, [chain?.id])
   const { Component, emotionCache = clientSideEmotionCache, pageProps } = props
 
   // Variables
@@ -136,9 +121,9 @@ const App = (props: ExtendedAppProps) => {
       </Head>
       <QueryClientProvider client={queryClient}>
         <SettingsProvider>
-        <WagmiConfig client={wagmiClient}>
-      <RainbowKitProvider chains={chains}>
-            <ApolloProvider client={apolloContextClient}>
+          <WagmiConfig client={wagmiClient}>
+            <RainbowKitProvider chains={chains}>
+              <ApolloProvider client={apolloContextClient}>
                 <RoundContext.Provider value={{ roundId: round ?? null, setRoundId: setRound }}>
                   <RoundsContext.Provider value={{ rounds: rounds ?? [], setRounds: setRounds }}>
                     <GuessesContext.Provider value={{ guesses: guesses ?? [], setGuesses: setGuesses }}>
@@ -154,9 +139,9 @@ const App = (props: ExtendedAppProps) => {
                     </GuessesContext.Provider>
                   </RoundsContext.Provider>
                 </RoundContext.Provider>
-            </ApolloProvider>
-          </RainbowKitProvider>
-    </WagmiConfig>
+              </ApolloProvider>
+            </RainbowKitProvider>
+          </WagmiConfig>
         </SettingsProvider>
       </QueryClientProvider>
     </CacheProvider>

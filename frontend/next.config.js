@@ -5,12 +5,12 @@ const nextConfig = {
   experimental: {
     esmExternals: true,
   },
-  webpack: (config) => {
+  webpack: config => {
     config.resolve.alias = {
-      ...config.resolve.alias,
+      ...config.resolve.alias
     }
     return config
-  },
+  }
 }
 
 module.exports = nextConfig

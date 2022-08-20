@@ -36,8 +36,12 @@ const RoundTable = () => {
   const roundContext = useContext(RoundContext)
   const roundsContext = useContext(RoundsContext)
   const guessesContext = useContext(GuessesContext)
-  const { data: signer} = useSigner()
+  const [myChain, setMyChain] = useState<number>()
   const { chain } = useNetwork()
+
+  useEffect(() => {
+    chain ? setMyChain(chain.id) : ''
+  }, [chain])
 
   const price = usePrice(oracle ?? null)
 
@@ -119,7 +123,7 @@ const RoundTable = () => {
     }
   }, [guessesContext.guesses, price, time, roundContext, roundsContext])
 
-  if (!signer || chain?.id == undefined) {
+  if (!myChain) {
     return <></>
   } else {
     return (

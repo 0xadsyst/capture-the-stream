@@ -131,8 +131,12 @@ const RoundVisualization = () => {
   const roundContext = useContext(RoundContext)
   const roundsContext = useContext(RoundsContext)
   const guessesContext = useContext(GuessesContext)
-  const { data: signer} = useSigner()
+  const [myChain, setMyChain] = useState<number>()
   const { chain } = useNetwork()
+
+  useEffect(() => {
+    chain ? setMyChain(chain.id) : ''
+  }, [chain])
 
   const chartRef = useRef<ChartJS>(null)
   const price = usePrice(oracle ?? null)
@@ -320,7 +324,7 @@ const RoundVisualization = () => {
         dayjs().unix() > roundData.startTimestamp && dayjs().unix() < roundData.endTimestamp
           ? (dayjs().unix() - roundData.lastWinnerChange).toString()
           : ''
-      const asset = getAssetNameFromOracle(roundData['oracle'], chain?.id ?? 0)
+      const asset = getAssetNameFromOracle(roundData['oracle'], myChain ?? 0)
 
       const roundDisplayData: RoundDisplayData = {
         asset: asset,
@@ -348,12 +352,12 @@ const RoundVisualization = () => {
 
       setRoundDisplayData(roundDisplayData)
     }
-  }, [chartData, time])
+  }, [chartData, myChain, time])
 
   // ** Hook
   const theme = useTheme()
 
-  if (!signer) {
+  if (!myChain) {
     return <h1>CONNECT YOUR WALLET</h1>
   } else if (roundContext.roundId == undefined) {
     return <h1>SELECT ROUND</h1>

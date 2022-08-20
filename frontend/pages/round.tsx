@@ -22,12 +22,10 @@ const Round = () => {
     <>
       <Grid container spacing={6}>
         <Grid item xs={4} md={4}>
-          <RoundSelector key={roundContext?.roundId}/>
+          <RoundSelector key={roundContext?.roundId} />
         </Grid>
         <Grid item xs={4} md={4}>
-          <Box sx={{ mt: 2, mb: 2, ml: 2, mr: 2, textAlign: 'center' }}>
-            
-          </Box>
+          <Box sx={{ mt: 2, mb: 2, ml: 2, mr: 2, textAlign: 'center' }}></Box>
         </Grid>
         <Grid item xs={4} md={4}>
           <Box sx={{ mt: 2, mb: 2, ml: 2, mr: 2, textAlign: 'right' }}>

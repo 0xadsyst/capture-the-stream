@@ -32,15 +32,12 @@ const DepositModal = () => {
   const handleClose = () => setOpen(false)
   const [amount, setAmount] = useState<number>(0)
   const { data: signer } = useSigner()
-  const [myAddress, setMyAddress] = useState('')
   const [myChain, setMyChain] = useState<number>()
-  const { address } = useAccount()
   const { chain } = useNetwork()
 
   useEffect(() => {
-    address ? setMyAddress(address) : ''
     chain ? setMyChain(chain.id) : ''
-  }, [address, chain])
+  }, [chain])
 
   const handleDepositClick = () => {
     const depositTx = deposit(amount, signer, myChain ?? 31337)

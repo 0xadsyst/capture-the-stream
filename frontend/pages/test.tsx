@@ -13,15 +13,13 @@ import { AggregatorV3Interface__factory } from 'generated/factories/AggregatorV3
 import { ethers, BigNumber } from 'ethers'
 import UpdateOracleModal from 'src/components/UpdateOraclePriceModal'
 import UpdateWinnerModal from 'src/components/UpdateWinnerModal'
+import useProtocolBalance from 'src/hooks/useProtocolBalance'
+import useDepositAssetBalance from 'src/hooks/useDepositAssetBalance'
+import usePrice from 'src/hooks/usePrice'
 
 import { useContractRead, useNetwork, useProvider, useSigner, useAccount, useContractReads } from 'wagmi'
 
 const Test = () => {
-  const [ethPrice, setEthPrice] = useState(0)
-  const [btcPrice, setBtcPrice] = useState(0)
-  const [maticPrice, setMaticPrice] = useState(0)
-  const [protocolBalance, setProtocolBalance] = useState(0)
-  const [depositAssetBalance, setDepositAssetBalance] = useState(0)
   const [roundCount, setRoundCount] = useState<number | null>()
   const { data: signer} = useSigner()
   const provider  = useProvider()
@@ -31,6 +29,12 @@ const Test = () => {
   const [myChain, setMyChain] = useState<number>()
   const [upkeepRequired, setUpkeepRequired] = useState<string>()
 
+  const protocolBalance = useProtocolBalance()
+  const depositAssetBalance = useDepositAssetBalance()
+  const ethPrice = usePrice(externalContractsAddressMap[myChain ?? 31337]['AggregatorV3InterfaceETH'])
+  const btcPrice = usePrice(externalContractsAddressMap[myChain ?? 31337]['AggregatorV3InterfaceBTC'])
+  const maticPrice = usePrice(externalContractsAddressMap[myChain ?? 31337]['AggregatorV3InterfaceMATIC'])
+
   useEffect(() =>{
     address ? setMyAddress(address) : null
     chain ? setMyChain(chain.id) : null
@@ -39,21 +43,6 @@ const Test = () => {
   const handleMintDAIClick = () => mintDAI(signer, myChain ?? 31337)
   const handleSetDepositAssetClick = () => setDepositAddress(signer, myChain ?? 31337)
   const handlePerformUpkeepClick = () => performUpkeep(signer, myChain ?? 31337)
-
-  const protocolBalanceCall = useContractRead({
-    addressOrName: externalContractsAddressMap[myChain ?? 31337]['CaptureTheStream'],
-    contractInterface: CaptureTheStream__factory.abi,
-    functionName: 'deposits',
-    args: myAddress,
-    watch: true
-  })
-
-  useEffect(() => {
-    if (protocolBalanceCall.isFetched && protocolBalanceCall.data && signer && BigNumber.isBigNumber(protocolBalanceCall.data)) {
-        const bal: BigNumber = protocolBalanceCall.data ?? BigNumber.from(0)
-        setProtocolBalance(parseFloat(ethers.utils.formatUnits(bal, 18)))
-      }
-  }, [protocolBalanceCall.data, protocolBalanceCall.isFetched, signer])
 
   const upkeepCall = useContractRead({
     addressOrName: externalContractsAddressMap[myChain ?? 31337]['CaptureTheStream'],
@@ -84,67 +73,12 @@ const Test = () => {
       }
   }, [roundCountCall.data, roundCountCall.isFetched, signer])
 
-  const depositAssetBalanceCall = useContractRead({
-    addressOrName: externalContractsAddressMap[myChain ?? 31337]['MockDAI'],
-    contractInterface: MockDAI__factory.abi,
-    functionName: 'balanceOf',
-    args: myAddress,
-    watch: true
-  })
-
-  useEffect(() => {
-    if (depositAssetBalanceCall.isFetched && depositAssetBalanceCall.data && signer && BigNumber.isBigNumber(depositAssetBalanceCall.data)) {
-      const bal: BigNumber = depositAssetBalanceCall.data ?? BigNumber.from(0)
-      setDepositAssetBalance(parseFloat(ethers.utils.formatUnits(bal, 18)))
-    }
-  }, [depositAssetBalanceCall.data, depositAssetBalanceCall.isFetched, signer])
-
-
-  const EthPriceCall = useContractRead({
-    addressOrName: externalContractsAddressMap[myChain ?? 31337]['AggregatorV3InterfaceETH'],
-    contractInterface: AggregatorV3Interface__factory.abi,
-    functionName: 'latestRoundData',
-    watch: true
-  })
-
-  useEffect(() => {
-    if (EthPriceCall.isFetched && EthPriceCall.data) {
-      setEthPrice(EthPriceCall.data[1].toNumber() / 1e8 ?? 0)
-    }
-  }, [EthPriceCall.data, EthPriceCall.isFetched])
-
-  const BtcPriceCall = useContractRead({
-    addressOrName: externalContractsAddressMap[myChain ?? 31337]['AggregatorV3InterfaceBTC'],
-    contractInterface: AggregatorV3Interface__factory.abi,
-    functionName: 'latestRoundData',
-    watch: true
-  })
-
-  useEffect(() => {
-    if (BtcPriceCall.isFetched && BtcPriceCall.data) {
-      setBtcPrice(BtcPriceCall.data[1].toNumber() / 1e8 ?? 0)
-    }
-  }, [BtcPriceCall.data, BtcPriceCall.isFetched])
-
-  const MaticPriceCall = useContractRead({
-    addressOrName: externalContractsAddressMap[myChain ?? 31337]['AggregatorV3InterfaceMATIC'],
-    contractInterface: AggregatorV3Interface__factory.abi,
-    functionName: 'latestRoundData',
-    watch: true
-  })
-
-  useEffect(() => {
-    if (MaticPriceCall.isFetched && MaticPriceCall.data) {
-      setMaticPrice(MaticPriceCall.data[1].toNumber() / 1e8 ?? 0)
-    }
-  }, [MaticPriceCall.data, MaticPriceCall.isFetched])
-
   return (
     <div>
       <p key={1}>Contract address: {externalContractsAddressMap[myChain ?? 31337]['CaptureTheStream']}</p>
       <p key={2}>My address: {myAddress}</p>
-      <p key={3}>Protocol Balance: {protocolBalance}</p>
-      <p key={"3a"}>Deposit Asset Balance: {depositAssetBalance}</p>
+      <p key={3}>Protocol Balance: {ethers.utils.formatUnits(protocolBalance, 18)}</p>
+      <p key={"3a"}>Deposit Asset Balance: {ethers.utils.formatUnits(depositAssetBalance, 18)}</p>
       <p key={4}>Deposit Asset: {externalContractsAddressMap[myChain ?? 31337]['MockDAI']}</p>
       <p key={5}>Upkeep Required: {upkeepRequired}</p>
       <p key={6}>Round Count: {roundCount}</p>

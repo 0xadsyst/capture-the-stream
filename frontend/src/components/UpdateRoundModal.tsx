@@ -22,7 +22,7 @@ const style = {
   p: 4
 }
 
-const UpdateWinnerModal = () => {
+const UpdateRoundModal = () => {
   const [open, setOpen] = useState(false)
   const handleOpen = () => setOpen(true)
   const handleClose = () => setOpen(false)
@@ -31,9 +31,9 @@ const UpdateWinnerModal = () => {
   const { chain } = useNetwork()
   const roundContext = useContext(RoundContext)
 
-  const handleUpdateWinnerClick = () => {
+  const handleUpdateRoundClick = () => {
     if (roundContext?.roundId){
-      const updateWinnerTx = updateWinner(roundContext?.roundId, signer, chain?.id ?? 31337)
+      const updateRoundTx = updateRound(roundContext?.roundId, signer, chain?.id ?? 31337)
       setOpen(false)
     }
   }
@@ -58,7 +58,7 @@ const UpdateWinnerModal = () => {
             Round: {roundContext?.roundId}
           </Typography>
 
-          <Button variant='contained' onClick={handleUpdateWinnerClick}>
+          <Button variant='contained' onClick={handleUpdateRoundClick}>
             Update Winner
           </Button>
         </Box>
@@ -67,17 +67,17 @@ const UpdateWinnerModal = () => {
   )
 }
 
-function updateWinner(roundId: number | undefined, signer: any, chain: number) {
+function updateRound(roundId: number | undefined, signer: any, chain: number) {
   console.log('updating winner, provider:', signer)
   console.log('updating winner, roundId:', roundId)
   if (signer && roundId != undefined) {
     const address = externalContractsAddressMap[chain]['CaptureTheStream']
     const captureTheStream = CaptureTheStream__factory.connect(address, signer)
     
-return captureTheStream.updateWinner(roundId)
+return captureTheStream.updateRound(roundId, false)
   } else {
     return Promise.resolve(false)
   }
 }
 
-export default UpdateWinnerModal
+export default UpdateRoundModal

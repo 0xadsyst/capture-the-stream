@@ -49,19 +49,6 @@ const _abi = [
         name: "roundId",
         type: "uint256",
       },
-    ],
-    name: "EndRound",
-    type: "event",
-  },
-  {
-    anonymous: false,
-    inputs: [
-      {
-        indexed: false,
-        internalType: "uint256",
-        name: "roundId",
-        type: "uint256",
-      },
       {
         indexed: false,
         internalType: "uint256",
@@ -387,19 +374,6 @@ const _abi = [
         name: "_roundId",
         type: "uint256",
       },
-    ],
-    name: "endRound",
-    outputs: [],
-    stateMutability: "nonpayable",
-    type: "function",
-  },
-  {
-    inputs: [
-      {
-        internalType: "uint256",
-        name: "_roundId",
-        type: "uint256",
-      },
       {
         internalType: "int256",
         name: "_guess",
@@ -479,19 +453,6 @@ const _abi = [
         internalType: "uint256[]",
         name: "",
         type: "uint256[]",
-      },
-    ],
-    stateMutability: "view",
-    type: "function",
-  },
-  {
-    inputs: [],
-    name: "guessCost",
-    outputs: [
-      {
-        internalType: "uint256",
-        name: "",
-        type: "uint256",
       },
     ],
     stateMutability: "view",
@@ -698,8 +659,13 @@ const _abi = [
         name: "_roundId",
         type: "uint256",
       },
+      {
+        internalType: "bool",
+        name: "_forceUpdate",
+        type: "bool",
+      },
     ],
-    name: "updateWinner",
+    name: "updateRound",
     outputs: [],
     stateMutability: "nonpayable",
     type: "function",

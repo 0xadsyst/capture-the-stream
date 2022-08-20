@@ -100,7 +100,7 @@ export const MainPage: FC<IMainPageProps> = (props) => {
 
   // init contracts
   const captureTheStream = useAppContracts('CaptureTheStream', ethersAppContext.chainId);
-  const mockChainlinkAggregator = useAppContracts('MockChainlinkAggregator', ethersAppContext.chainId);
+  const mockChainlinkAggregatorETH = useAppContracts('MockChainlinkAggregatorETH', ethersAppContext.chainId);
   const mockDAI = useAppContracts('MockDAI', ethersAppContext.chainId);
 
   // -----------------------------
@@ -147,11 +147,11 @@ export const MainPage: FC<IMainPageProps> = (props) => {
         ),
       },
       {
-        name: 'Mock-Chanlink-Aggregator',
+        name: 'Mock-Chanlink-AggregatorETH',
         content: (
           <GenericContract
-            contractName="MockChainlinkAggregator"
-            contract={mockChainlinkAggregator}
+            contractName="MockChainlinkAggregatorETH"
+            contract={mockChainlinkAggregatorETH}
             mainnetAdaptor={scaffoldAppProviders.mainnetAdaptor}
             blockExplorer={scaffoldAppProviders.targetNetwork.blockExplorer}
           />

@@ -8,11 +8,11 @@ import { InputAdornment, TextField } from '@mui/material'
 
 import { externalContractsAddressMap } from 'src/configs/externalContracts.config'
 import { CaptureTheStream__factory } from 'generated/factories/CaptureTheStream__factory'
-import { MockDAI__factory } from 'generated/factories/MockDAI__factory'
 import { ethers, BigNumber } from 'ethers'
 import { useNetwork, useSigner, useAccount, useContractRead } from 'wagmi'
 import useProtocolBalance from 'src/hooks/useProtocolBalance'
 import useDepositAssetBalance from 'src/hooks/useDepositAssetBalance'
+import MintDAI from 'src/components/MintDAI'
 
 const style = {
   position: 'absolute' as const,
@@ -50,6 +50,8 @@ const DepositModal = () => {
   const protocolBalance = useProtocolBalance()
   const depositAssetBalance = useDepositAssetBalance()
 
+  const mintDaiButton = [31337, 80001].includes(myChain ?? 0) ? <MintDAI signer={signer} chain={myChain ?? 31337}/> : ''
+
   return (
     <>
       <Button variant='contained' onClick={handleOpen}>
@@ -85,6 +87,8 @@ const DepositModal = () => {
                 .toString()}
             </Button>
           </Typography>
+          {mintDaiButton}
+
           <TextField
             label='Amount'
             id='amount'

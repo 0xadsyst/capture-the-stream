@@ -3,6 +3,7 @@ import { BigNumber } from 'ethers'
 import { externalContractsAddressMap } from 'src/configs/externalContracts.config'
 import { MockDAI__factory } from 'generated/factories/MockDAI__factory'
 import { useNetwork, useSigner, useAccount, useContractRead } from 'wagmi'
+import {SUPPORTED_CHAINS} from 'src/constants/chains'
 
 function useDepositAssetBalance() {
   const [balance, setBalance] = useState<BigNumber>(BigNumber.from(0))
@@ -17,8 +18,10 @@ function useDepositAssetBalance() {
     chain ? setMyChain(chain.id) : null
   }, [address, chain])
 
+  const contractAddress = SUPPORTED_CHAINS.includes(myChain ?? 0) ? externalContractsAddressMap[myChain ?? 0]['MockDAI'] : ''
+
   const balanceCall = useContractRead({
-    addressOrName: externalContractsAddressMap[myChain ?? 31337]['MockDAI'],
+    addressOrName: contractAddress,
     contractInterface: MockDAI__factory.abi,
     functionName: 'balanceOf',
     args: myAddress,

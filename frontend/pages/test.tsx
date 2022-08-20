@@ -8,20 +8,21 @@ import React, { useEffect, useState, useContext } from 'react'
 // ** Web3
 import { externalContractsAddressMap } from 'src/configs/externalContracts.config'
 import { CaptureTheStream__factory } from 'generated/factories/CaptureTheStream__factory'
-import { MockDAI__factory } from 'generated/factories/MockDAI__factory'
 import { ethers, BigNumber } from 'ethers'
 import UpdateOracleModal from 'src/components/UpdateOraclePriceModal'
 import UpdateWinnerModal from 'src/components/UpdateRoundModal'
 import useProtocolBalance from 'src/hooks/useProtocolBalance'
 import useDepositAssetBalance from 'src/hooks/useDepositAssetBalance'
 import usePrice from 'src/hooks/usePrice'
+import MintDAI from 'src/components/MintDAI'
+import { SUPPORTED_CHAINS } from 'src/constants/chains'
 
 import { useContractRead, useNetwork, useProvider, useSigner, useAccount, useContractReads } from 'wagmi'
 
 const Test = () => {
   const [roundCount, setRoundCount] = useState<number | null>()
-  const { data: signer} = useSigner()
-  const provider  = useProvider()
+  const { data: signer } = useSigner()
+  const provider = useProvider()
   const { chain } = useNetwork()
   const { address } = useAccount()
   const [myAddress, setMyAddress] = useState('')
@@ -30,21 +31,37 @@ const Test = () => {
 
   const protocolBalance = useProtocolBalance()
   const depositAssetBalance = useDepositAssetBalance()
-  const ethPrice = usePrice(externalContractsAddressMap[myChain ?? 31337]['AggregatorV3InterfaceETH'])
-  const btcPrice = usePrice(externalContractsAddressMap[myChain ?? 31337]['AggregatorV3InterfaceBTC'])
-  const maticPrice = usePrice(externalContractsAddressMap[myChain ?? 31337]['AggregatorV3InterfaceMATIC'])
+  const ethContractAddress = SUPPORTED_CHAINS.includes(myChain ?? 0)
+    ? externalContractsAddressMap[myChain ?? 0]['AggregatorV3InterfaceETH']
+    : ''
+  const btcContractAddress = SUPPORTED_CHAINS.includes(myChain ?? 0)
+    ? externalContractsAddressMap[myChain ?? 0]['AggregatorV3InterfaceETH']
+    : ''
+  const maticContractAddress = SUPPORTED_CHAINS.includes(myChain ?? 0)
+    ? externalContractsAddressMap[myChain ?? 0]['AggregatorV3InterfaceETH']
+    : ''
+  const captureTheStreamContractAddress = SUPPORTED_CHAINS.includes(myChain ?? 0)
+    ? externalContractsAddressMap[myChain ?? 0]['AggregatorV3InterfaceETH']
+    : ''
+  const daiContractAddress = SUPPORTED_CHAINS.includes(myChain ?? 0)
+    ? externalContractsAddressMap[myChain ?? 0]['MockDAI']
+    : ''
 
-  useEffect(() =>{
+  const ethPrice = usePrice(ethContractAddress)
+  const btcPrice = usePrice(btcContractAddress)
+  const maticPrice = usePrice(maticContractAddress)
+
+  useEffect(() => {
     address ? setMyAddress(address) : null
     chain ? setMyChain(chain.id) : null
-  },[address, chain])
+  }, [address, chain])
 
-  const handleMintDAIClick = () => mintDAI(signer, myChain ?? 31337)
-  const handleSetDepositAssetClick = () => setDepositAddress(signer, myChain ?? 31337)
-  const handlePerformUpkeepClick = () => performUpkeep(signer, myChain ?? 31337)
+  const handleSetDepositAssetClick = () =>
+    setDepositAddress(signer, myChain ?? 31337, captureTheStreamContractAddress, daiContractAddress)
+  const handlePerformUpkeepClick = () => performUpkeep(signer, myChain ?? 31337, captureTheStreamContractAddress)
 
   const upkeepCall = useContractRead({
-    addressOrName: externalContractsAddressMap[myChain ?? 31337]['CaptureTheStream'],
+    addressOrName: captureTheStreamContractAddress,
     contractInterface: CaptureTheStream__factory.abi,
     functionName: 'checkUpkeep',
     args: ethers.utils.randomBytes(1),
@@ -53,13 +70,13 @@ const Test = () => {
 
   useEffect(() => {
     if (upkeepCall.isFetched && upkeepCall.data && signer) {
-        const upkeepRequiredData = upkeepCall.data ?? ''
-        setUpkeepRequired(upkeepRequiredData.toString())
-      }
+      const upkeepRequiredData = upkeepCall.data ?? ''
+      setUpkeepRequired(upkeepRequiredData.toString())
+    }
   }, [upkeepCall.data, upkeepCall.isFetched, signer])
 
   const roundCountCall = useContractRead({
-    addressOrName: externalContractsAddressMap[myChain ?? 31337]['CaptureTheStream'],
+    addressOrName: captureTheStreamContractAddress,
     contractInterface: CaptureTheStream__factory.abi,
     functionName: 'roundCount',
     watch: true
@@ -67,18 +84,18 @@ const Test = () => {
 
   useEffect(() => {
     if (roundCountCall.isFetched && roundCountCall.data && signer) {
-        const roundCountData = roundCountCall.data ?? null
-        setRoundCount(parseInt(roundCountData.toString()))
-      }
+      const roundCountData = roundCountCall.data ?? null
+      setRoundCount(parseInt(roundCountData.toString()))
+    }
   }, [roundCountCall.data, roundCountCall.isFetched, signer])
 
   return (
     <div>
-      <p key={1}>Contract address: {externalContractsAddressMap[myChain ?? 31337]['CaptureTheStream']}</p>
+      <p key={1}>Contract address: {captureTheStreamContractAddress}</p>
       <p key={2}>My address: {myAddress}</p>
       <p key={3}>Protocol Balance: {ethers.utils.formatUnits(protocolBalance, 18)}</p>
-      <p key={"3a"}>Deposit Asset Balance: {ethers.utils.formatUnits(depositAssetBalance, 18)}</p>
-      <p key={4}>Deposit Asset: {externalContractsAddressMap[myChain ?? 31337]['MockDAI']}</p>
+      <p key={'3a'}>Deposit Asset Balance: {ethers.utils.formatUnits(depositAssetBalance, 18)}</p>
+      <p key={4}>Deposit Asset: {daiContractAddress}</p>
       <p key={5}>Upkeep Required: {upkeepRequired}</p>
       <p key={6}>Round Count: {roundCount}</p>
       <p key={7}>Current Network: {myChain}</p>
@@ -87,9 +104,7 @@ const Test = () => {
       <p key={10}>MATIC Price: {maticPrice}</p>
       <Grid container spacing={12}>
         <Grid item>
-          <Button variant='contained' onClick={handleMintDAIClick}>
-            Mint DAI
-          </Button>
+          <MintDAI signer={signer} chain={myChain ?? 31337} />
           <Button variant='contained' onClick={handleSetDepositAssetClick}>
             Set Deposit Asset
           </Button>
@@ -106,23 +121,15 @@ const Test = () => {
 
 export default Test
 
-async function mintDAI(signer: any, chain: number) {
+async function setDepositAddress(
+  signer: any,
+  chain: number,
+  captureTheStreamContractAddress: string,
+  daiContractAddress: string
+) {
   if (signer) {
-    const address = externalContractsAddressMap[chain]['MockDAI']
-    const myAddress = signer._address
-    const daiContract = MockDAI__factory.connect(address, signer)
-    const amount = ethers.utils.parseUnits('1000', 18)
-
-    return daiContract.mint(myAddress, amount)
-  } else {
-    return Promise.resolve(false)
-  }
-}
-
-async function setDepositAddress(signer: any, chain: number) {
-  if (signer) {
-    const contractAddress = externalContractsAddressMap[chain]['CaptureTheStream']
-    const address = externalContractsAddressMap[chain]['MockDAI']
+    const contractAddress = captureTheStreamContractAddress
+    const address = daiContractAddress
     const captureTheStreamContract = CaptureTheStream__factory.connect(contractAddress, signer)
 
     return captureTheStreamContract.setDepositAsset(address)
@@ -131,9 +138,9 @@ async function setDepositAddress(signer: any, chain: number) {
   }
 }
 
-async function performUpkeep(signer: any, chain: number) {
+async function performUpkeep(signer: any, chain: number, captureTheStreamContractAddress: string) {
   if (signer) {
-    const address = externalContractsAddressMap[chain]['CaptureTheStream']
+    const address = captureTheStreamContractAddress
     const captureTheStreamContract = CaptureTheStream__factory.connect(address, signer)
     const upkeepRequired = await captureTheStreamContract.checkUpkeep(ethers.utils.randomBytes(1))
 

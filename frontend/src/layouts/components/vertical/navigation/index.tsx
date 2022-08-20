@@ -99,8 +99,6 @@ const Navigation = (props: Props) => {
     }
   }
 
-  const ScrollWrapper = hidden ? Box : PerfectScrollbar
-
   return (
     <Drawer {...props}>
       <VerticalNavHeader {...props} />
@@ -114,19 +112,6 @@ const Navigation = (props: Props) => {
         }}
       />
       <Box sx={{ height: '100%', position: 'relative', overflow: 'hidden' }}>
-        {/* @ts-ignore */}
-        <ScrollWrapper
-          containerRef={(ref: any) => handleInfiniteScroll(ref)}
-          {...(hidden
-            ? {
-                onScroll: (container: any) => scrollMenu(container),
-                sx: { height: '100%', overflowY: 'auto', overflowX: 'hidden' }
-              }
-            : {
-                options: { wheelPropagation: false },
-                onScrollY: (container: any) => scrollMenu(container)
-              })}
-        >
           {beforeVerticalNavMenuContent ? beforeVerticalNavMenuContent(props) : null}
           <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
             {userVerticalNavMenuContent ? (
@@ -143,7 +128,6 @@ const Navigation = (props: Props) => {
               </List>
             )}
           </Box>
-        </ScrollWrapper>
       </Box>
       {afterVerticalNavMenuContent ? afterVerticalNavMenuContent(props) : null}
     </Drawer>

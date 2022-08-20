@@ -3,6 +3,7 @@ import { BigNumber } from 'ethers'
 import { externalContractsAddressMap } from 'src/configs/externalContracts.config'
 import { CaptureTheStream__factory } from 'generated/factories/CaptureTheStream__factory'
 import { useNetwork, useSigner, useAccount, useContractRead } from 'wagmi'
+import {SUPPORTED_CHAINS} from 'src/constants/chains'
 
 function useProtocolBalance() {
   const [balance, setBalance] = useState<BigNumber>(BigNumber.from(0))
@@ -17,8 +18,10 @@ function useProtocolBalance() {
     chain ? setMyChain(chain.id) : null
   }, [address, chain])
 
+  const contractAddress = SUPPORTED_CHAINS.includes(myChain ?? 0) ? externalContractsAddressMap[myChain ?? 0]['CaptureTheStream'] : ''
+
   const balanceCall = useContractRead({
-    addressOrName: externalContractsAddressMap[myChain ?? 31337]['CaptureTheStream'],
+    addressOrName: contractAddress,
     contractInterface: CaptureTheStream__factory.abi,
     functionName: 'deposits',
     args: myAddress,

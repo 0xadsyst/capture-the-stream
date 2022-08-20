@@ -1,10 +1,4 @@
 {
-  "ts-node": {
-    "experimentalSpecifierResolution": "node",
-    "moduleTypes": {
-      "@web3-onboard/react/dist/hooks" : "cjs"
-    }
-  },
   "compilerOptions": {
     "baseUrl": ".",
     "target": "es6",

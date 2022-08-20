@@ -1,4 +1,4 @@
-import { externalContractsAddressMap } from 'src/configs/externalContracts.config'
+import { externalContractsAddressMap } from '../configs/externalContracts.config'
 
 export const getAssetNameFromOracle = (oracleAddress: string, chainId: number | undefined) : string => {
     if (oracleAddress && chainId) {

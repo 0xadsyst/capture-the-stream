@@ -7,7 +7,7 @@ import MuiAppBar, { AppBarProps } from '@mui/material/AppBar'
 import MuiToolbar, { ToolbarProps } from '@mui/material/Toolbar'
 
 // ** Type Import
-import { Settings } from 'src/context/settingsContext'
+import { Settings } from '../../../../context/settingsContext'
 
 interface Props {
   hidden: boolean

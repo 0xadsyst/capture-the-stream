@@ -7,19 +7,17 @@ import Grid from '@mui/material/Grid'
 import Select from '@mui/material/Select'
 import MenuItem from '@mui/material/MenuItem'
 import Switch from '@mui/material/Switch'
-import FormHelperText from '@mui/material/FormHelperText'
 import FormControl from '@mui/material/FormControl';
 import InputLabel from '@mui/material/InputLabel';
 
 import { TextField } from '@mui/material'
 
-import { externalContractsAddressMap } from 'src/configs/externalContracts.config'
+import { externalContractsAddressMap } from '../configs/externalContracts.config'
 import { CaptureTheStream__factory } from '../../generated/factories/CaptureTheStream__factory'
-import { ProviderContext } from 'src/context/providerContext'
+import { useNetwork, useSigner } from 'wagmi'
 import { ethers } from 'ethers'
-import { RoundContext } from 'src/context/roundContext'
+import { RoundContext } from '../context/roundContext'
 import dayjs from 'dayjs'
-import SwitchBase from '@mui/material/internal/SwitchBase'
 
 const style = {
   position: 'absolute' as const,
@@ -98,10 +96,9 @@ const InitiateRoundModal = () => {
     setOpen(true)
   }
   const handleClose = () => setOpen(false)
-  const providerContext = useContext(ProviderContext)
-  const roundContext = useContext(RoundContext)
-
-  console.log(defaultValues)
+  const { data: signer} = useSigner()
+  const { chain } = useNetwork()
+    const roundContext = useContext(RoundContext)
 
   const handleInputChange = (e: any) => {
     const { name, value, checked, type } = e.target
@@ -115,11 +112,11 @@ const InitiateRoundModal = () => {
 
   const handleSubmit = () => {
     console.log('formValues: ', formValues)
-    if (providerContext.provider) {
-      console.log('chain:', providerContext.provider.network.chainId)
+    if (signer) {
+      console.log('chain:', chain?.id)
       const txValues: TransactionValues = {
         oracle:
-          externalContractsAddressMap[providerContext.provider.network.chainId][
+          externalContractsAddressMap[chain?.id ?? 31337][
             'AggregatorV3Interface' + formValues.oracle
           ],
         startTimestamp: dayjs(formValues.startTimestamp).unix(),
@@ -136,9 +133,8 @@ const InitiateRoundModal = () => {
       setInvalidValues(validateTxValues(txValues))
       if (Object.values(invalidTransactionValues).every(v => v == false)) {
         console.log('Looks good, submit: ', txValues)
-        const initiateRoundTx = initiateRound(txValues, providerContext.provider)
+        const initiateRoundTx = initiateRound(txValues, signer, chain?.id ?? 31337)
       } else {
-        console.log('oracle', txValues.oracle.substring(0, 2))
         console.log('Issues with data: ', txValues, invalidTransactionValues)
       }
     } else {
@@ -308,12 +304,10 @@ return invalidTransactionValues
   )
 }
 
-function initiateRound(txValues: TransactionValues, provider: ethers.providers.Web3Provider | undefined) {
-  console.log('provider: ', provider)
-
-  if (provider) {
-    const address = externalContractsAddressMap[provider.network.chainId]['CaptureTheStream']
-    const captureTheStream = CaptureTheStream__factory.connect(address, provider.getSigner())
+function initiateRound(txValues: TransactionValues, signer: any, chain: number) {
+  if (signer) {
+    const address = externalContractsAddressMap[chain]['CaptureTheStream']
+    const captureTheStream = CaptureTheStream__factory.connect(address, signer)
     
 return captureTheStream.initiateRound(
       txValues.oracle,

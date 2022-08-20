@@ -6,7 +6,7 @@ import { styled, useTheme } from '@mui/material/styles'
 import MuiSwipeableDrawer, { SwipeableDrawerProps } from '@mui/material/SwipeableDrawer'
 
 // ** Type Import
-import { Settings } from 'src/context/settingsContext'
+import { Settings } from '../../../../context/settingsContext'
 
 interface Props {
   hidden: boolean

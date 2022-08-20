@@ -10,14 +10,14 @@ import Grid from '@mui/material/Grid'
 import React, { useEffect, useState, useRef, useContext } from 'react'
 
 import { memo } from 'react'
-import { RoundContext } from 'src/context/roundContext'
-import { GuessesContext } from 'src/context/guessesContext'
-import { RoundsContext, RoundType } from 'src/context/roundsContext'
-import { ProviderContext } from 'src/context/providerContext'
+import { RoundContext } from '../context/roundContext'
+import { GuessesContext } from '../context/guessesContext'
+import { RoundsContext, RoundType } from '../context/roundsContext'
+import { useNetwork, useSigner } from 'wagmi'
 import usePrice from '../hooks/usePrice'
 
 import dayjs from 'dayjs'
-import { getAssetNameFromOracle } from 'src/utils/getAssetNameFromOracle'
+import { getAssetNameFromOracle } from '../utils/getAssetNameFromOracle'
 import { AssetLogo } from './AssetLogo'
 
 interface ChartData {
@@ -131,7 +131,8 @@ const RoundVisualization = () => {
   const roundContext = useContext(RoundContext)
   const roundsContext = useContext(RoundsContext)
   const guessesContext = useContext(GuessesContext)
-  const providerContext = useContext(ProviderContext)
+  const { data: signer} = useSigner()
+  const { chain } = useNetwork()
 
   const chartRef = useRef<ChartJS>(null)
   const price = usePrice(oracle ?? null)
@@ -319,7 +320,7 @@ const RoundVisualization = () => {
         dayjs().unix() > roundData.startTimestamp && dayjs().unix() < roundData.endTimestamp
           ? (dayjs().unix() - roundData.lastWinnerChange).toString()
           : ''
-      const asset = getAssetNameFromOracle(roundData['oracle'], providerContext.chainId)
+      const asset = getAssetNameFromOracle(roundData['oracle'], chain?.id ?? 0)
 
       const roundDisplayData: RoundDisplayData = {
         asset: asset,
@@ -352,7 +353,7 @@ const RoundVisualization = () => {
   // ** Hook
   const theme = useTheme()
 
-  if (!providerContext.provider) {
+  if (!signer) {
     return <h1>CONNECT YOUR WALLET</h1>
   } else if (roundContext.roundId == undefined) {
     return <h1>SELECT ROUND</h1>

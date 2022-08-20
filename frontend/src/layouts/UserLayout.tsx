@@ -7,16 +7,16 @@ import useMediaQuery from '@mui/material/useMediaQuery'
 
 // ** Layout Imports
 // !Do not remove this Layout import
-import VerticalLayout from 'src/layouts/VerticalLayout'
+import VerticalLayout from '../layouts/VerticalLayout'
 
 // ** Navigation Imports
-import VerticalNavItems from 'src/navigation/vertical'
+import VerticalNavItems from '../navigation/vertical'
 
 // ** Component Import
 import VerticalAppBarContent from './components/vertical/AppBarContent'
 
 // ** Hook Import
-import { useSettings } from 'src/hooks/useSettings'
+import { useSettings } from '../hooks/useSettings'
 
 interface Props {
   children: ReactNode
@@ -44,7 +44,7 @@ const UserLayout = ({ children }: Props) => {
       saveSettings={saveSettings}
       verticalNavItems={VerticalNavItems()} // Navigation Items
       verticalAppBarContent={(
-        props // AppBar Content
+        props: any // AppBar Content
       ) => (
         <VerticalAppBarContent
           hidden={hidden}

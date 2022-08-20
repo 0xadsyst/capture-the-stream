@@ -8,7 +8,7 @@ import Document, { Html, Head, Main, NextScript } from 'next/document'
 import createEmotionServer from '@emotion/server/create-instance'
 
 // ** Utils Imports
-import { createEmotionCache } from 'src/utils/create-emotion-cache'
+import { createEmotionCache } from '../src/utils/create-emotion-cache'
 
 class CustomDocument extends Document {
   render() {
@@ -39,6 +39,7 @@ CustomDocument.getInitialProps = async ctx => {
 
   ctx.renderPage = () =>
     originalRenderPage({
+      // eslint-disable-next-line react/display-name
       enhanceApp: App => props => (
         <App
           {...props} // @ts-ignore
@@ -46,6 +47,8 @@ CustomDocument.getInitialProps = async ctx => {
         />
       )
     })
+
+    
 
   const initialProps = await Document.getInitialProps(ctx)
   const emotionStyles = extractCriticalToChunks(initialProps.html)

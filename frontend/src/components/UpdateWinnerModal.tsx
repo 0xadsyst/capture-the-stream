@@ -4,11 +4,11 @@ import Button from '@mui/material/Button'
 import Typography from '@mui/material/Typography'
 import Modal from '@mui/material/Modal'
 
-import { externalContractsAddressMap } from 'src/configs/externalContracts.config'
+import { externalContractsAddressMap } from '../configs/externalContracts.config'
 import { CaptureTheStream__factory } from '../../generated/factories/CaptureTheStream__factory'
-import { ProviderContext } from 'src/context/providerContext'
+import { useNetwork, useSigner } from 'wagmi'
 import { ethers } from 'ethers'
-import { RoundContext } from 'src/context/roundContext'
+import { RoundContext } from '../context/roundContext'
 
 const style = {
   position: 'absolute' as const,
@@ -27,18 +27,19 @@ const UpdateWinnerModal = () => {
   const handleOpen = () => setOpen(true)
   const handleClose = () => setOpen(false)
   const [guess, setGuess] = useState<number>(0)
-  const providerContext = useContext(ProviderContext)
+  const { data: signer} = useSigner()
+  const { chain } = useNetwork()
   const roundContext = useContext(RoundContext)
 
   const handleUpdateWinnerClick = () => {
     if (roundContext?.roundId){
-      const updateWinnerTx = updateWinner(roundContext?.roundId, providerContext.provider)
+      const updateWinnerTx = updateWinner(roundContext?.roundId, signer, chain?.id ?? 31337)
       setOpen(false)
     }
   }
 
   return (
-    <div>
+    <>
       <Button variant='contained' onClick={handleOpen}>
         UPDATE WINNER
       </Button>
@@ -62,16 +63,16 @@ const UpdateWinnerModal = () => {
           </Button>
         </Box>
       </Modal>
-    </div>
+    </>
   )
 }
 
-function updateWinner(roundId: number | undefined, provider: ethers.providers.Web3Provider | undefined) {
-  console.log('updating winner, provider:', provider)
+function updateWinner(roundId: number | undefined, signer: any, chain: number) {
+  console.log('updating winner, provider:', signer)
   console.log('updating winner, roundId:', roundId)
-  if (provider && roundId != undefined) {
-    const address = externalContractsAddressMap[provider.network.chainId]['CaptureTheStream']
-    const captureTheStream = CaptureTheStream__factory.connect(address, provider.getSigner())
+  if (signer && roundId != undefined) {
+    const address = externalContractsAddressMap[chain]['CaptureTheStream']
+    const captureTheStream = CaptureTheStream__factory.connect(address, signer)
     
 return captureTheStream.updateWinner(roundId)
   } else {

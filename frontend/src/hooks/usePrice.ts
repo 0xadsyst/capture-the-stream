@@ -1,39 +1,30 @@
 import { useQuery } from 'react-query'
 import { AggregatorV3Interface__factory } from '../../generated/factories/AggregatorV3Interface__factory'
 import { ethers } from 'ethers'
-import { ProviderContext } from 'src/context/providerContext'
 
-import { useEffect, useState, useContext } from 'react'
+import { useContractRead } from 'wagmi'
+
+import { useEffect, useState } from 'react'
 
 function usePrice(oracle: string | null) {
-  const [price, setPrice] = useState<number | undefined>()
-  const providerContext = useContext(ProviderContext)
+  const [price, setPrice] = useState(0)
 
-  const { data } = useQuery([oracle + 'price'], () => fetchPrice(providerContext.provider, oracle), {
-    refetchInterval: 5000,
-    enabled: !!providerContext.provider
+  const priceCall = useContractRead({
+    addressOrName: oracle ?? '',
+    contractInterface: AggregatorV3Interface__factory.abi,
+    functionName: 'latestRoundData',
+    watch: true
   })
 
   useEffect(() => {
-    let price
-    if (data?.length) {
-      price = data[1].toNumber() / 1e8
+    if (priceCall.isFetched && priceCall.data) {
+      console.log()
+      setPrice(priceCall.data[1].toNumber() / 1e8 ?? 0)
     }
-    setPrice(price)
-  }, [data])
+  }, [priceCall.data, priceCall.isFetched])
 
+  
   return price
-}
-
-function fetchPrice(provider: ethers.providers.Web3Provider | undefined, oracle: string | null) {
-  if (provider && oracle != null) {
-    const address = oracle
-    const aggregator = AggregatorV3Interface__factory.connect(address, provider)
-
-    return aggregator.latestRoundData()
-  } else {
-    return null
-  }
 }
 
 export default usePrice

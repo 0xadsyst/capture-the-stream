@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react'
 import { useQuery } from '@apollo/client'
 import { GUESSES_QUERY } from '../constants/queries/queries'
 import { useContext } from 'react'
-import { GuessesContext, GuessType } from 'src/context/guessesContext'
+import { GuessesContext, GuessType } from '../context/guessesContext'
 
 interface GuessDataType {
   __typename: string

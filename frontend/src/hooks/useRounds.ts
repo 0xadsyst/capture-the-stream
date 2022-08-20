@@ -4,7 +4,7 @@ import {  useEffect, useState } from 'react'
 import { useQuery, getApolloContext} from '@apollo/react-components'
 import { ROUNDS_QUERY } from '../constants/queries/queries'
 import { useContext } from 'react'
-import { RoundsContext, RoundType } from 'src/context/roundsContext'
+import { RoundsContext, RoundType } from '../context/roundsContext'
 
 
 interface RoundDataType {

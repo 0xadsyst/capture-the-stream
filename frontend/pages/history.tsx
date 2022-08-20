@@ -2,14 +2,14 @@
 import Grid from '@mui/material/Grid'
 
 // ** Components Imports
-import HistoryTable from 'src/components/HistoryTable'
+import HistoryTable from '../src/components/HistoryTable'
 
 
 // ** React
 import React from 'react'
 
 // ** Web3
-import { RoundContext } from 'src/context/roundContext'
+import { RoundContext } from '../src/context/roundContext'
 import { useContext } from 'react'
 
 const History = () => {

@@ -8,14 +8,14 @@ import IconButton from '@mui/material/IconButton'
 import Typography from '@mui/material/Typography'
 import CardContent from '@mui/material/CardContent'
 
-import { RoundContext } from 'src/context/roundContext'
-import { RoundsContext, RoundType } from 'src/context/roundsContext'
+import { RoundContext } from '../context/roundContext'
+import { RoundsContext, RoundType } from '../context/roundsContext'
 import { useContext, useEffect, useState } from 'react'
 
 // ** Next
 import { useRouter } from 'next/router'
-import {getAssetNameFromOracle } from 'src/utils/getAssetNameFromOracle'
-import { ProviderContext } from 'src/context/providerContext'
+import {getAssetNameFromOracle } from '../utils/getAssetNameFromOracle'
+import { useNetwork, useSigner } from 'wagmi'
 
 import dayjs from 'dayjs'
 import {AssetLogo} from './AssetLogo'
@@ -30,7 +30,8 @@ const RoundOverview = (props: Props) => {
   const [roundOverviewCards, setroundOverviewCards] = useState<any[]>([])
   const roundsContext = useContext(RoundsContext)
   const roundContext = useContext(RoundContext)
-  const providerContext = useContext(ProviderContext)
+  const { data: signer} = useSigner()
+  const { chain } = useNetwork()
 
   const router = useRouter()
   const theme = useTheme()
@@ -48,7 +49,7 @@ const RoundOverview = (props: Props) => {
       newroundOverviewCards.push(createRoundOverviewCard(round))
     })
     setroundOverviewCards(newroundOverviewCards)
-  }, [roundsContext.rounds, providerContext.chainId])
+  }, [roundsContext.rounds, chain?.id])
 
 
   function createRoundOverviewCard(round: RoundType) {
@@ -56,7 +57,7 @@ const RoundOverview = (props: Props) => {
     const endTimeString = dayjs(round['endTimestamp'] * 1000).format("MMM D hh:mm a")
     const guessCutOffTimestamp = dayjs(round['guessCutOffTimestamp'] * 1000).format("MMM D hh:mm a")
     const numberOfGuessesAllowed = round['numberOfGuessesAllowed'] == 0 ? "Unlimited" : round['numberOfGuessesAllowed']
-    const asset = getAssetNameFromOracle(round['oracle'], providerContext.chainId ?? 0)
+    const asset = getAssetNameFromOracle(round['oracle'], chain?.id ?? 0)
 
     return (
       <Grid item xs={4} md={4} key={round.roundId}>
@@ -91,7 +92,7 @@ const RoundOverview = (props: Props) => {
   }
 
 
-  if (!providerContext.provider) {
+  if (!signer) {
     return <></>
   } else {
     return <>{roundOverviewCards}</>

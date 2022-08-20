@@ -10,11 +10,11 @@ import FormHelperText from '@mui/material/FormHelperText'
 
 import { TextField } from '@mui/material'
 
-import { externalContractsAddressMap } from 'src/configs/externalContracts.config'
-import { ProviderContext } from 'src/context/providerContext'
+import { externalContractsAddressMap } from '../configs/externalContracts.config'
 import { ethers } from 'ethers'
-import { RoundContext } from 'src/context/roundContext'
-import { MockChainlinkAggregator__factory } from 'generated/factories/MockChainlinkAggregator__factory'
+import { RoundContext } from '../context/roundContext'
+import { MockChainlinkAggregator__factory } from '../../generated/factories/MockChainlinkAggregator__factory'
+import { useContractRead, useNetwork, useProvider, useSigner, usePrepareSendTransaction } from 'wagmi'
 
 const style = {
   position: 'absolute' as const,
@@ -48,8 +48,10 @@ const UpdateOracleModal = () => {
   const [formValues, setFormValues] = useState<Form>(defaultValues)
   const handleOpen = () => setOpen(true)
   const handleClose = () => setOpen(false)
-  const providerContext = useContext(ProviderContext)
+  const provider  = useProvider()
   const roundContext = useContext(RoundContext)
+  const { chain } = useNetwork()
+  const { data: signer} = useSigner()
 
   const handleInputChange = (e: any) => {
     const { name, value } = e.target
@@ -61,15 +63,15 @@ const UpdateOracleModal = () => {
 
   const handleSubmit = () => {
     console.log('formValues: ', formValues)
-    if (providerContext.provider) {
+    if (provider) {
       const txValues: TransactionValues = {
         oracle:
-          externalContractsAddressMap[providerContext.provider.network.chainId][
+          externalContractsAddressMap[chain?.id ?? 0][
             'AggregatorV3Interface' + formValues.oracle
           ],
         newPrice: parseFloat(formValues.newPrice) * 1e8
       }
-      const updateOracleTx = updateOracle(txValues, providerContext.provider)
+      const updateOracleTx = updateOracle(txValues, signer)
     } else {
       console.log('No provider')
     }
@@ -128,11 +130,9 @@ const UpdateOracleModal = () => {
   )
 }
 
-function updateOracle(txValues: TransactionValues, provider: ethers.providers.Web3Provider | undefined) {
-  console.log('provider: ', provider)
-
-  if (provider) {
-    const aggregatorContract = MockChainlinkAggregator__factory.connect(txValues.oracle, provider.getSigner())
+function updateOracle(txValues: TransactionValues, signer: any) {
+  if (signer) {
+    const aggregatorContract = MockChainlinkAggregator__factory.connect(txValues.oracle, signer)
     
 return aggregatorContract.updateAnswer(txValues.newPrice)
   } else {

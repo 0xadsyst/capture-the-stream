@@ -4,15 +4,15 @@ import Button from '@mui/material/Button'
 import Typography from '@mui/material/Typography'
 import Modal from '@mui/material/Modal'
 
-import useProtocolBalance from 'src/hooks/useProtocolBalance'
+import useProtocolBalance from '../hooks/useProtocolBalance'
 import { InputAdornment, TextField } from '@mui/material'
 
-import { externalContractsAddressMap } from 'src/configs/externalContracts.config'
+import { externalContractsAddressMap } from '../configs/externalContracts.config'
 import { CaptureTheStream__factory } from '../../generated/factories/CaptureTheStream__factory'
-import { ProviderContext } from 'src/context/providerContext'
+import { useNetwork, useSigner } from 'wagmi'
 import { ethers, BigNumber } from 'ethers'
-import { RoundContext } from 'src/context/roundContext'
-import { RoundsContext } from 'src/context/roundsContext'
+import { RoundContext } from '../context/roundContext'
+import { RoundsContext } from '../context/roundsContext'
 import dayjs from 'dayjs'
 
 const style = {
@@ -34,14 +34,15 @@ const EnterRoundModal = () => {
   const handleOpen = () => setOpen(true)
   const handleClose = () => setOpen(false)
   const [guess, setGuess] = useState<string>('0')
-  const balance = parseFloat(ethers.utils.formatUnits(useProtocolBalance(), 18)).toFixed(2).toString()
-  const providerContext = useContext(ProviderContext)
+  const balance = useProtocolBalance()
+  const { data: signer } = useSigner()
+  const { chain } = useNetwork()
   const roundContext = useContext(RoundContext)
   const roundsContext = useContext(RoundsContext)
 
   const handleEnterRoundClick = () => {
     if (roundContext?.roundId != null) {
-      const enterRoundTx = enterRound(roundContext?.roundId, parseFloat(guess) * 1e8, providerContext.provider)
+      const enterRoundTx = enterRound(roundContext?.roundId, parseFloat(guess) * 1e8, signer, chain?.id ?? 31337)
       setOpen(false)
     }
   }
@@ -49,15 +50,21 @@ const EnterRoundModal = () => {
   useEffect(() => {
     if (roundContext?.roundId != null) {
       setRoundCost(roundsContext.rounds[roundContext.roundId].guessCost / 1e18)
-      console.log(roundsContext.rounds[roundContext.roundId].guessCutOffTimestamp)
-      console.log(dayjs().unix())
-      if (roundsContext.rounds[roundContext.roundId].guessCutOffTimestamp < dayjs().unix()) {
+    }
+  }, [roundContext, roundsContext])
+
+  useEffect(() => {
+    if (roundContext?.roundId != null) {
+      if (
+        roundsContext.rounds[roundContext.roundId].guessCutOffTimestamp < dayjs().unix() ||
+        roundCost > parseFloat(ethers.utils.formatUnits(balance, 18))
+      ) {
         setDisabled(true)
       } else {
         setDisabled(false)
       }
     }
-  }, [roundContext?.roundId])
+  }, [roundContext, roundsContext, balance, roundCost])
 
   return (
     <>
@@ -76,7 +83,7 @@ const EnterRoundModal = () => {
             Round: {roundContext?.roundId}
           </Typography>
           <Typography id='modal-modal-title' variant='h6' component='h2'>
-            Current Balance: {balance} DAI
+            Current Balance: {parseFloat(ethers.utils.formatUnits(balance, 18)).toFixed(2).toString()} DAI
           </Typography>
           <Typography id='modal-modal-title' variant='h6' component='h2'>
             Round Cost: {roundCost} DAI
@@ -96,7 +103,7 @@ const EnterRoundModal = () => {
             onFocus={e => e.target.select()}
           />
 
-          <Button variant='contained' onClick={handleEnterRoundClick} disabled={roundCost > parseInt(balance)}>
+          <Button variant='contained' onClick={handleEnterRoundClick} disabled={disabled}>
             Enter Round
           </Button>
         </Box>
@@ -105,14 +112,14 @@ const EnterRoundModal = () => {
   )
 }
 
-function enterRound(roundId: number | undefined, guess: number, provider: ethers.providers.Web3Provider | undefined) {
+function enterRound(roundId: number | undefined, guess: number, signer: any, chain: number) {
   console.log('guess: ', guess)
-  console.log('provider: ', provider)
+  console.log('signer: ', signer)
   console.log('roundId: ', roundId)
 
-  if (provider && roundId != undefined) {
-    const address = externalContractsAddressMap[provider.network.chainId]['CaptureTheStream']
-    const captureTheStream = CaptureTheStream__factory.connect(address, provider.getSigner())
+  if (signer && roundId != undefined && chain) {
+    const address = externalContractsAddressMap[chain]['CaptureTheStream']
+    const captureTheStream = CaptureTheStream__factory.connect(address, signer)
 
     return captureTheStream.enterRound(roundId, guess)
   } else {

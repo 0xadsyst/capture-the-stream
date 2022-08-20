@@ -11,7 +11,7 @@ import Typography from '@mui/material/Typography'
 import Box, { BoxProps } from '@mui/material/Box'
 
 // ** Layout Import
-import BlankLayout from 'src/layouts/BlankLayout'
+import BlankLayout from '../src/layouts/BlankLayout'
 
 // ** Styled Components
 const BoxWrapper = styled(Box)<BoxProps>(({ theme }) => ({
@@ -20,14 +20,14 @@ const BoxWrapper = styled(Box)<BoxProps>(({ theme }) => ({
   }
 }))
 
-const Error404 = () => {
+const Error500 = () => {
   return (
     <Box className='content-center'>
       <Box sx={{ p: 5, display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center' }}>
         <BoxWrapper>
-          <Typography variant='h1'>404</Typography>
+          <Typography variant='h1'>500</Typography>
           <Typography variant='h5' sx={{ mb: 1, fontSize: '1.5rem !important' }}>
-            Page Not Found ⚠️
+            Internal server error
           </Typography>
         </BoxWrapper>
         <Link passHref href='/'>
@@ -40,6 +40,6 @@ const Error404 = () => {
   )
 }
 
-Error404.getLayout = (page: ReactNode) => <BlankLayout>{page}</BlankLayout>
+Error500.getLayout = (page: ReactNode) => <BlankLayout>{page}</BlankLayout>
 
-export default Error404
+export default Error500

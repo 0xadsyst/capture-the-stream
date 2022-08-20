@@ -15,17 +15,14 @@ import ListItemIcon from '@mui/material/ListItemIcon'
 import ListItemButton, { ListItemButtonProps } from '@mui/material/ListItemButton'
 
 // ** Configs Import
-import themeConfig from 'src/configs/themeConfig'
+import themeConfig from '../../../../configs/themeConfig'
 
 // ** Types
-import { NavLink } from 'src/layouts/types'
-import { Settings } from 'src/context/settingsContext'
-
-// ** Custom Components Imports
-import UserIcon from 'src/layouts/components/UserIcon'
+import { NavLink } from '../../../../layouts/types'
+import { Settings } from '../../../../context/settingsContext'
 
 // ** Utils
-import { handleURLQueries } from 'src/layouts/utils'
+import { handleURLQueries } from '../../../../layouts/utils'
 
 interface Props {
   item: NavLink
@@ -88,7 +85,7 @@ const VerticalNavLink = ({ item, navVisible, toggleNavVisibility }: Props) => {
           component={'a'}
           className={isNavLinkActive() ? 'active' : ''}
           {...(item.openInNewTab ? { target: '_blank' } : null)}
-          onClick={e => {
+          onClick={(e: any) => {
             if (item.path === undefined) {
               e.preventDefault()
               e.stopPropagation()

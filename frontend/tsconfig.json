@@ -1,7 +1,12 @@
 {
+  "ts-node": {
+    "experimentalSpecifierResolution": "node",
+    "moduleTypes": {
+      "@web3-onboard/react/dist/hooks" : "cjs"
+    }
+  },
   "compilerOptions": {
     "baseUrl": ".",
-    "rootDirs": ["src", "generated"],
     "target": "es6",
     "lib": [
       "dom",
@@ -19,12 +24,12 @@
     "resolveJsonModule": true,
     "isolatedModules": true,
     "jsx": "preserve",
-    "incremental": true,
-    "paths": {
-    }
+    "incremental": true
   },
   "include": [
-    "src"
+    "next-env.d.ts",
+    "**/*.ts",
+    "**/*.tsx"
   ],
   "exclude": [
     "node_modules"

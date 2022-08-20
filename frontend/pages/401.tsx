@@ -11,7 +11,7 @@ import Typography from '@mui/material/Typography'
 import Box, { BoxProps } from '@mui/material/Box'
 
 // ** Layout Import
-import BlankLayout from 'src/layouts/BlankLayout'
+import BlankLayout from '../src/layouts/BlankLayout'
 
 // ** Styled Components
 const BoxWrapper = styled(Box)<BoxProps>(({ theme }) => ({
@@ -20,14 +20,14 @@ const BoxWrapper = styled(Box)<BoxProps>(({ theme }) => ({
   }
 }))
 
-const UnderConstruction = () => {
+const Error401 = () => {
   return (
     <Box className='content-center'>
       <Box sx={{ p: 5, display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center' }}>
         <BoxWrapper>
-          <Typography variant='h1'>Under Construction</Typography>
+          <Typography variant='h1'>401</Typography>
           <Typography variant='h5' sx={{ mb: 1, fontSize: '1.5rem !important' }}>
-            We're still working on this, check back soon.
+            Not authorized!
           </Typography>
         </BoxWrapper>
         <Link passHref href='/'>
@@ -40,6 +40,6 @@ const UnderConstruction = () => {
   )
 }
 
-UnderConstruction.getLayout = (page: ReactNode) => <BlankLayout>{page}</BlankLayout>
+Error401.getLayout = (page: ReactNode) => <BlankLayout>{page}</BlankLayout>
 
-export default UnderConstruction
+export default Error401

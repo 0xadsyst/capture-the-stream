@@ -10,10 +10,10 @@ import { styled, useTheme } from '@mui/material/styles'
 import Typography, { TypographyProps } from '@mui/material/Typography'
 
 // ** Type Import
-import { Settings } from 'src/context/settingsContext'
+import { Settings } from '../../../../context/settingsContext'
 
 // ** Configs
-import themeConfig from 'src/configs/themeConfig'
+import themeConfig from '../../../../configs/themeConfig'
 
 interface Props {
   hidden: boolean

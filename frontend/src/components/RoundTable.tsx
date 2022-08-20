@@ -11,10 +11,10 @@ import { useEffect, useState, useContext } from 'react'
 import usePrice from '../hooks/usePrice'
 
 // ** Web3
-import { RoundContext } from 'src/context/roundContext'
-import { RoundsContext } from 'src/context/roundsContext'
-import { GuessesContext } from 'src/context/guessesContext'
-import { ProviderContext } from 'src/context/providerContext'
+import { RoundContext } from '../context/roundContext'
+import { RoundsContext } from '../context/roundsContext'
+import { GuessesContext } from '../context/guessesContext'
+import { useNetwork, useSigner } from 'wagmi'
 import dayjs from 'dayjs'
 
 interface RowType {
@@ -36,7 +36,8 @@ const RoundTable = () => {
   const roundContext = useContext(RoundContext)
   const roundsContext = useContext(RoundsContext)
   const guessesContext = useContext(GuessesContext)
-  const providerContext = useContext(ProviderContext)
+  const { data: signer} = useSigner()
+  const { chain } = useNetwork()
 
   const price = usePrice(oracle ?? null)
 
@@ -118,7 +119,7 @@ const RoundTable = () => {
     }
   }, [guessesContext.guesses, price, time, roundContext, roundsContext])
 
-  if (!providerContext.provider || roundContext.roundId == undefined) {
+  if (!signer || chain?.id == undefined) {
     return <></>
   } else {
     return (

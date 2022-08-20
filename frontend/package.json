@@ -8,7 +8,6 @@
     "start": "next start",
     "lint": "next lint",
     "typechain": "typechain --target=ethers-v5 --out-dir generated \"generated/abis/*.json \" "
-
   },
   "dependencies": {
     "@apollo/react-components": "^4.0.0",

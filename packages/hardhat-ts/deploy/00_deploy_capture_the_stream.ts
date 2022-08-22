@@ -15,6 +15,7 @@ const func: DeployFunction = async (hre: THardhatRuntimeEnvironmentExtended) => 
   const captureTheStream = await deploy('CaptureTheStream', {
     // Learn more about args here: https://www.npmjs.com/package/hardhat-deploy#deploymentsdeploy
     from: deployer,
+    gasPrice: "50000000000",
     // args: ["Hello"],
     log: true,
   });

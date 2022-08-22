@@ -6,7 +6,7 @@ envConfig({ path: '../../../.env' });
 const ehre = require('hardhat');
 
 const func: DeployFunction = async (hre: THardhatRuntimeEnvironmentExtended) => {
-  if (process.env.HARDHAT_TARGET_NETWORK == 'localhost') {
+  if (['localhost', 'mumbai'].includes(process.env.HARDHAT_TARGET_NETWORK ?? '')) {
     const { getNamedAccounts, deployments } = hre;
     const { deploy } = deployments;
     const { deployer } = await getNamedAccounts();
@@ -14,6 +14,7 @@ const func: DeployFunction = async (hre: THardhatRuntimeEnvironmentExtended) => 
     const mockDai = await deploy('MockDAI', {
       // Learn more about args here: https://www.npmjs.com/package/hardhat-deploy#deploymentsdeploy
       from: deployer,
+      gasPrice: '50000000000',
       // args: ["Hello"],
       log: true,
     });

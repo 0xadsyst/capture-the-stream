@@ -10,7 +10,6 @@ import { externalContractsAddressMap } from 'src/configs/externalContracts.confi
 import { CaptureTheStream__factory } from 'generated/factories/CaptureTheStream__factory'
 import { ethers, BigNumber } from 'ethers'
 import UpdateOracleModal from 'src/components/UpdateOraclePriceModal'
-import UpdateWinnerModal from 'src/components/UpdateRoundModal'
 import useProtocolBalance from 'src/hooks/useProtocolBalance'
 import useDepositAssetBalance from 'src/hooks/useDepositAssetBalance'
 import usePrice from 'src/hooks/usePrice'
@@ -21,6 +20,7 @@ import { useContractRead, useNetwork, useProvider, useSigner, useAccount, useCon
 
 const Test = () => {
   const [roundCount, setRoundCount] = useState<number | null>()
+  const [depositAsset, setDepositAddress] = useState<string | null>()
   const { data: signer } = useSigner()
   const provider = useProvider()
   const { chain } = useNetwork()
@@ -57,8 +57,22 @@ const Test = () => {
   }, [address, chain])
 
   const handleSetDepositAssetClick = () =>
-    setDepositAddress(signer, myChain ?? 31337, captureTheStreamContractAddress, daiContractAddress)
+    setNewDepositAddress(signer, myChain ?? 31337, captureTheStreamContractAddress, daiContractAddress)
   const handlePerformUpkeepClick = () => performUpkeep(signer, myChain ?? 31337, captureTheStreamContractAddress)
+
+  const depositAssetCall = useContractRead({
+    addressOrName: captureTheStreamContractAddress,
+    contractInterface: CaptureTheStream__factory.abi,
+    functionName: 'depositAsset',
+    watch: true
+  })
+
+  useEffect(() => {
+    if (depositAssetCall.isFetched && depositAssetCall.data && signer) {
+      const depositAssetData = depositAssetCall.data.toString() ?? null
+      setDepositAddress(depositAssetData.toString())
+    }
+  }, [depositAssetCall.data, depositAssetCall.isFetched, signer])
 
   const upkeepCall = useContractRead({
     addressOrName: captureTheStreamContractAddress,
@@ -94,14 +108,14 @@ const Test = () => {
       <p key={1}>Contract address: {captureTheStreamContractAddress}</p>
       <p key={2}>My address: {myAddress}</p>
       <p key={3}>Protocol Balance: {ethers.utils.formatUnits(protocolBalance, 18)}</p>
-      <p key={'3a'}>Deposit Asset Balance: {ethers.utils.formatUnits(depositAssetBalance, 18)}</p>
-      <p key={4}>Deposit Asset: {daiContractAddress}</p>
-      <p key={5}>Upkeep Required: {upkeepRequired}</p>
-      <p key={6}>Round Count: {roundCount}</p>
-      <p key={7}>Current Network: {myChain}</p>
-      <p key={8}>ETH Price: {ethPrice}</p>
-      <p key={9}>BTC Price: {btcPrice}</p>
-      <p key={10}>MATIC Price: {maticPrice}</p>
+      <p key={4}>Deposit Asset Balance: {ethers.utils.formatUnits(depositAssetBalance, 18)}</p>
+      <p key={5}>Deposit Asset: {depositAsset}</p>
+      <p key={6}>Upkeep Required: {upkeepRequired}</p>
+      <p key={7}>Round Count: {roundCount}</p>
+      <p key={8}>Current Network: {myChain}</p>
+      <p key={9}>ETH Price: {ethPrice}</p>
+      <p key={10}>BTC Price: {btcPrice}</p>
+      <p key={11}>MATIC Price: {maticPrice}</p>
       <Grid container spacing={12}>
         <Grid item>
           <MintDAI signer={signer} chain={myChain ?? 31337} />
@@ -112,7 +126,6 @@ const Test = () => {
             Perform Upkeep
           </Button>
           <UpdateOracleModal />
-          <UpdateWinnerModal />
         </Grid>
       </Grid>
     </div>
@@ -121,7 +134,7 @@ const Test = () => {
 
 export default Test
 
-async function setDepositAddress(
+async function setNewDepositAddress(
   signer: any,
   chain: number,
   captureTheStreamContractAddress: string,

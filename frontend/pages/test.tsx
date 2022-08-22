@@ -35,13 +35,13 @@ const Test = () => {
     ? externalContractsAddressMap[myChain ?? 0]['AggregatorV3InterfaceETH']
     : ''
   const btcContractAddress = SUPPORTED_CHAINS.includes(myChain ?? 0)
-    ? externalContractsAddressMap[myChain ?? 0]['AggregatorV3InterfaceETH']
+    ? externalContractsAddressMap[myChain ?? 0]['AggregatorV3InterfaceBTC']
     : ''
   const maticContractAddress = SUPPORTED_CHAINS.includes(myChain ?? 0)
-    ? externalContractsAddressMap[myChain ?? 0]['AggregatorV3InterfaceETH']
+    ? externalContractsAddressMap[myChain ?? 0]['AggregatorV3InterfaceMATIC']
     : ''
   const captureTheStreamContractAddress = SUPPORTED_CHAINS.includes(myChain ?? 0)
-    ? externalContractsAddressMap[myChain ?? 0]['AggregatorV3InterfaceETH']
+    ? externalContractsAddressMap[myChain ?? 0]['CaptureTheStream']
     : ''
   const daiContractAddress = SUPPORTED_CHAINS.includes(myChain ?? 0)
     ? externalContractsAddressMap[myChain ?? 0]['MockDAI']

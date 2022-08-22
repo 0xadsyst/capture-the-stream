@@ -12,7 +12,7 @@ export const externalContractsAddressMap: TExternalContractsAddressMap = {
     AggregatorV3InterfaceETH: '0x0715A7794a1dc8e42615F059dD6e406A6594651A',
     AggregatorV3InterfaceBTC: '0x007A22900a3B98143368Bd5906f8E17e9867581b',
     AggregatorV3InterfaceMATIC: '0xd0D5e3DB44DE05E9F294BB0a3bEEaF030DE24Ada',
-    CaptureTheStream: '0xF877d5E1368E2c0D15eAFA3BB9E7853e95DFf6C2',
+    CaptureTheStream: '0xAd0776BCF4010BEB805982Ec83aBbd21098b77eA',
     MockDAI: '0x9b8e31E409b1cef401AbF174A95e17d26fdB502e'
   },
   [0]: {

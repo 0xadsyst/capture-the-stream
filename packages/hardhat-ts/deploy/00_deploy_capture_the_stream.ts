@@ -22,7 +22,12 @@ const func: DeployFunction = async (hre: THardhatRuntimeEnvironmentExtended) => 
   if (newOwnerAddress.substring(0, 1) != '0x') {
     const signer = (await getHardhatSigners(hre)).deployer;
     const captureTheStreamContract = CaptureTheStream__factory.connect(captureTheStream.address, signer);
-    await captureTheStreamContract.transferOwnership(process.env.NEW_OWNER_ADDRESS ?? '');
+    const currentOwner = await captureTheStreamContract.owner();
+    if (signer.address != currentOwner) {
+      console.log('Deployer is not the current owner, owner is: ' + currentOwner);
+    } else {
+      await captureTheStreamContract.transferOwnership(process.env.NEW_OWNER_ADDRESS ?? '');
+    }
   } else {
     console.log('New owner address not set in .env, contract is owned by deployer');
   }

@@ -311,12 +311,12 @@ contract CaptureTheStream is KeeperCompatibleInterface, Ownable {
 
     /**
      * @notice Function for Chainlink keeper to check whether upkeep is required.
-     * @param calldata Required by Chainlink Keeper, but unused.
+     * @param checkData Required by Chainlink Keeper, but unused.
      * @return upkeepNeeded True if upkeep is required.
      * @return performData Data for the upkeep, an encoded uint256 array of round numbers to be updated.
      */
     function checkUpkeep(
-        bytes calldata /* checkData */
+        bytes calldata checkData
     ) external view override returns (bool upkeepNeeded, bytes memory performData) {
         (uint256 updatesRequired, uint256[] memory roundsToUpdate) = getRoundsToUpdate();
         upkeepNeeded = updatesRequired > 0;

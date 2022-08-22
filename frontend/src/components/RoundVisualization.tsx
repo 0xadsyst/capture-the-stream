@@ -55,12 +55,22 @@ interface LineDatasetType {
 
 import {
   Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  BarElement,
+  LineElement,
+  PointElement,
+  Title,
+  Tooltip,
+  Legend,
   InteractionAxis,
-  registerables
+  BarController,
+  LineController
 } from 'chart.js'
 import { Chart } from 'react-chartjs-2'
+import { minHeight } from '@mui/system'
 
-ChartJS.register(...registerables)
+ChartJS.register(CategoryScale, LinearScale, BarElement, LineElement, PointElement, Title, Tooltip, Legend, BarController,  LineController)
 
 const yAxis: InteractionAxis = 'y'
 

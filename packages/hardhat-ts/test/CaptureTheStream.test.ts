@@ -6,8 +6,8 @@ import { expect } from 'chai';
 import {
   CaptureTheStream,
   CaptureTheStream__factory,
-  MockChainlinkAggregator,
-  MockChainlinkAggregator__factory,
+  MockChainlinkAggregatorETH,
+  MockChainlinkAggregatorETH__factory,
   MockDAI,
   MockDAI__factory,
 } from 'generated/contract-types';
@@ -27,7 +27,7 @@ const {
 
 describe('CTS', function () {
   let captureTheStreamContract: CaptureTheStream;
-  let mockChainlinkAggregatorContract: MockChainlinkAggregator;
+  let mockChainlinkAggregatorETHContract: MockChainlinkAggregatorETH;
   let mockDAIContract: MockDAI;
   let deployer: SignerWithAddress;
   let deployerAddress: string;
@@ -38,13 +38,13 @@ describe('CTS', function () {
 
     const captureTheStreamFactory = new CaptureTheStream__factory(deployer);
     captureTheStreamContract = await captureTheStreamFactory.deploy();
-    const mockChainlinkAggregatorFactory = new MockChainlinkAggregator__factory(deployer);
-    mockChainlinkAggregatorContract = await mockChainlinkAggregatorFactory.deploy(18, 0);
+    const mockChainlinkAggregatorETHFactory = new MockChainlinkAggregatorETH__factory(deployer);
+    mockChainlinkAggregatorETHContract = await mockChainlinkAggregatorETHFactory.deploy(18, 0);
     const mockDAIFactory = new MockDAI__factory(deployer);
     mockDAIContract = await mockDAIFactory.deploy();
 
     await captureTheStreamContract.deployed();
-    await mockChainlinkAggregatorContract.deployed();
+    await mockChainlinkAggregatorETHContract.deployed();
     await mockDAIContract.deployed();
   });
 
@@ -104,7 +104,7 @@ describe('CTS', function () {
 
     before(() => {
       baseData = {
-        oracle: mockChainlinkAggregatorContract.address,
+        oracle: mockChainlinkAggregatorETHContract.address,
         startTimestamp: parseInt((Date.now() / 1000).toString()) + 100,
         endTimestamp: parseInt((Date.now() / 1000).toString()) + 1000,
         guessCutOffTimestamp: parseInt((Date.now() / 1000).toString()) + 1000,

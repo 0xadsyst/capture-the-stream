@@ -13,6 +13,10 @@ import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/utils/Strings.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
+/**
+ * @title Capture the Stream
+ * @author Adsyst (https://github.com/0xadsyst)
+ */
 contract CaptureTheStream is KeeperCompatibleInterface, Ownable {
     using SafeMath for uint256;
     using SignedSafeMath for int256;
@@ -89,16 +93,28 @@ contract CaptureTheStream is KeeperCompatibleInterface, Ownable {
         depositAsset = IERC20(0xE81Fca457ba225C7D0921207f0b24444b9303944); // MockDAI
     }
 
+    /**
+     * @notice Gets the latest price from a Chainlink oracle.
+     * @param _oracle Address of oracle.
+     * @return price Price returned by oracle call.
+     */
     function getLatestPrice(address _oracle) public view returns (int256) {
         AggregatorV3Interface priceFeed = AggregatorV3Interface(_oracle);
         (, int256 price, , , ) = priceFeed.latestRoundData();
         return price;
     }
 
-    function getRoundGuesses(uint256 _roundId) public view returns (Guess[] memory) {
-        return rounds[_roundId].guesses;
-    }
-
+    /**
+     * @notice Initiates a new round with the specified settings.
+     * @param _oracle Address of oracle.
+     * @param _startTimestamp Timestamp that the round begins (UTC).
+     * @param _endTimestamp Timestamp that the round ends (UTC).
+     * @param _guessCutOffTimestamp Timestamp when guesses are no longer allowed (UTC).
+     * @param _numberOfGuessesAllowed Total number of guesses allowed.
+     * @param _minimumGuessSpacing Minimum spacing between guesses.
+     * @param _guessCost Cost in deposit asset tokens to make a guess (assuming 18 decimals currents).
+     * @param _inRoundGuessesAllowed If in round guesses are allowed, the guess cutoff is set to the end timestamp.
+     */
     function initiateRound(
         address _oracle,
         uint256 _startTimestamp,
@@ -127,6 +143,9 @@ contract CaptureTheStream is KeeperCompatibleInterface, Ownable {
         roundCount++;
     }
 
+    /**
+     * @notice Function to complete initiate round event emission.
+     */
     function emitInitiateRound() internal {
         emit InitiateRound(
             roundCount,
@@ -141,16 +160,28 @@ contract CaptureTheStream is KeeperCompatibleInterface, Ownable {
         );
     }
 
+    /**
+     * @notice Owner only function to set the address of the allowed deposit. Will be removed in production version.
+     * @param _asset Address of the new deposit asset.
+     */
     function setDepositAsset(address _asset) public onlyOwner {
         depositAsset = IERC20(_asset);
     }
 
+    /**
+     * @notice Deposit some amount of the deposit asset into the protocol.
+     * @param _depositAmount Amount to deposit.
+     */
     function deposit(uint256 _depositAmount) public {
         depositAsset.safeTransferFrom(msg.sender, address(this), _depositAmount);
         deposits[msg.sender] += _depositAmount;
         emit Deposit(msg.sender, _depositAmount, deposits[msg.sender]);
     }
 
+    /**
+     * @notice Withdraw some amount of the deposit asset from the protocol.
+     * @param _withdrawAmount Amount to withdraw.
+     */
     function withdraw(uint256 _withdrawAmount) public {
         require(_withdrawAmount <= deposits[msg.sender]);
         deposits[msg.sender] -= _withdrawAmount;
@@ -158,6 +189,11 @@ contract CaptureTheStream is KeeperCompatibleInterface, Ownable {
         emit Withdraw(msg.sender, _withdrawAmount, deposits[msg.sender]);
     }
 
+    /**
+     * @notice Enter a guess into a round.
+     * @param _roundId ID number of the round to make the guess.
+     * @param _guess Price in USD of the guess. Needs to use the same amount of decimals as the oracle.
+     */
     function enterRound(uint256 _roundId, int256 _guess) public {
         Round memory round = rounds[_roundId];
         require(deposits[msg.sender] >= round.guessCost, "Not enough funds to enter round");
@@ -188,6 +224,11 @@ contract CaptureTheStream is KeeperCompatibleInterface, Ownable {
         );
     }
 
+    /**
+     * @notice Update the winner of a round, or close it out if it is finished.
+     * @param _roundId Id number of the round to update.
+     * @param _forceUpdate Set to true to force an update to a round where the winner has not changed.
+     */
     function updateRound(uint256 _roundId, bool _forceUpdate) public {
         Round memory round = rounds[_roundId];
         require(block.timestamp >= round.startTimestamp, "Round hasn't started");
@@ -247,13 +288,19 @@ contract CaptureTheStream is KeeperCompatibleInterface, Ownable {
         }
     }
 
+    /**
+     * @notice Internal function to get the closest guess in a round.
+     * @param _roundId ID number of the round to update.
+     * @param _price Current price retrieved from the oracle.
+     * @return bestGuessIndex The index number of the closest guess.
+     */
     function getBestGuess(uint256 _roundId, int256 _price) internal view returns (uint256) {
         uint256 bestGuessIndex;
         uint256 minPriceDifference = 2**256 - 1;
 
         for (uint256 i = 0; i < rounds[_roundId].guesses.length; i++) {
             uint256 priceDifference = SignedMath.abs(_price.sub(rounds[_roundId].guesses[i].guess));
-            
+
             if (priceDifference < minPriceDifference) {
                 bestGuessIndex = i;
                 minPriceDifference = priceDifference;
@@ -262,6 +309,12 @@ contract CaptureTheStream is KeeperCompatibleInterface, Ownable {
         return bestGuessIndex;
     }
 
+    /**
+     * @notice Function for Chainlink keeper to check whether upkeep is required.
+     * @param calldata Required by Chainlink Keeper, but unused.
+     * @return upkeepNeeded True if upkeep is required.
+     * @return performData Data for the upkeep, an encoded uint256 array of round numbers to be updated.
+     */
     function checkUpkeep(
         bytes calldata /* checkData */
     ) external view override returns (bool upkeepNeeded, bytes memory performData) {
@@ -274,6 +327,11 @@ contract CaptureTheStream is KeeperCompatibleInterface, Ownable {
         performData = abi.encode(roundsToUpdateFinal);
     }
 
+    /**
+     * @notice View function to return an array of the rounds to update.
+     * @return updatesRequired Count of the number of rounds that need to be updated.
+     * @return roundsToUpdate Array of round numbers to be updated, note that this array is longer than required and is filtered in checkUpkeep.
+     */
     function getRoundsToUpdate() public view returns (uint256, uint256[] memory) {
         uint256[] memory roundsToUpdate = new uint256[](roundCount);
         uint256 updatesRequired = 0;
@@ -281,11 +339,11 @@ contract CaptureTheStream is KeeperCompatibleInterface, Ownable {
             if (block.timestamp >= rounds[_roundId].startTimestamp && block.timestamp < rounds[_roundId].endTimestamp) {
                 int256 price = getLatestPrice(rounds[_roundId].oracle);
 
-                uint256 bestGuessIndex = getBestGuess(_roundId, price);   
+                uint256 bestGuessIndex = getBestGuess(_roundId, price);
 
                 if (bestGuessIndex != rounds[_roundId].currentWinnerIndex) {
                     roundsToUpdate[updatesRequired] = _roundId;
-                    updatesRequired++;                    
+                    updatesRequired++;
                 }
             } else if (!rounds[_roundId].roundClosed && block.timestamp >= rounds[_roundId].endTimestamp) {
                 roundsToUpdate[updatesRequired] = _roundId;
@@ -295,6 +353,10 @@ contract CaptureTheStream is KeeperCompatibleInterface, Ownable {
         return (updatesRequired, roundsToUpdate);
     }
 
+    /**
+     * @notice Perform the updates on rounds specified in the call data.
+     * @param performData An encoded uint256 array of round numbers to be updated.
+     */
     function performUpkeep(bytes calldata performData) external override {
         uint256[] memory roundsToUpdate = abi.decode(performData, (uint256[]));
         for (uint256 i = 0; i < roundsToUpdate.length; i++) {

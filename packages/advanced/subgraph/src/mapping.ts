@@ -1,5 +1,11 @@
 import { BigInt, Address } from '@graphprotocol/graph-ts';
-import { CaptureTheStream, EndWinner, EnterRound, InitiateRound, StartWinner } from '../generated/captureTheStream/CaptureTheStream';
+import {
+  CaptureTheStream,
+  EndWinner,
+  EnterRound,
+  InitiateRound,
+  StartWinner,
+} from '../generated/captureTheStream/CaptureTheStream';
 import { Round, Guess } from '../generated/schema';
 
 export function handleInitiateRound(event: InitiateRound): void {
@@ -20,6 +26,7 @@ export function handleInitiateRound(event: InitiateRound): void {
     entity.lastWinnerChange = event.params.startTimestamp;
     entity.currentWinner = new BigInt(0);
     entity.deposits = new BigInt(0);
+    entity.roundClosed = false;
   }
   entity.save();
 }
@@ -58,6 +65,14 @@ export function handleEndWinner(event: EndWinner): void {
   if (entity) {
     entity.winningTime = entity.winningTime.plus(event.params.timeWinning);
     entity.save();
+  }
+
+  const roundId = event.params.roundId.toString();
+
+  let roundEntity = Round.load(roundId);
+  if (roundEntity && event.block.timestamp >= roundEntity.endTimestamp) {
+    roundEntity.roundClosed = true;
+    roundEntity.save();
   }
 }
 

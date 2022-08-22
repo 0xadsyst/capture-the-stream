@@ -196,6 +196,9 @@ contract CaptureTheStream is KeeperCompatibleInterface, Ownable {
         int256 price = getLatestPrice(round.oracle);
 
         uint256 timeSinceLastWinnerChange = block.timestamp.sub(round.lastWinnerChange);
+        if (block.timestamp >= round.endTimestamp) {
+            timeSinceLastWinnerChange = round.endTimestamp.sub(round.lastWinnerChange);
+        }
         uint256 previousWinnerIndex = round.currentWinnerIndex;
 
         Guess memory previousWinnerGuess = round.guesses[previousWinnerIndex];
@@ -213,7 +216,7 @@ contract CaptureTheStream is KeeperCompatibleInterface, Ownable {
         if (block.timestamp < round.endTimestamp) {
             uint256 bestGuessIndex = getBestGuess(_roundId, price);
             require(
-                bestGuessIndex == round.currentWinnerIndex || _forceUpdate,
+                bestGuessIndex != round.currentWinnerIndex || _forceUpdate,
                 "No change to current winner, updates can be forced using _forceUpdate = true"
             );
             rounds[_roundId].lastWinnerChange = block.timestamp;
@@ -247,9 +250,10 @@ contract CaptureTheStream is KeeperCompatibleInterface, Ownable {
     function getBestGuess(uint256 _roundId, int256 _price) internal view returns (uint256) {
         uint256 bestGuessIndex;
         uint256 minPriceDifference = 2**256 - 1;
+
         for (uint256 i = 0; i < rounds[_roundId].guesses.length; i++) {
             uint256 priceDifference = SignedMath.abs(_price.sub(rounds[_roundId].guesses[i].guess));
-
+            
             if (priceDifference < minPriceDifference) {
                 bestGuessIndex = i;
                 minPriceDifference = priceDifference;
@@ -270,31 +274,31 @@ contract CaptureTheStream is KeeperCompatibleInterface, Ownable {
         performData = abi.encode(roundsToUpdateFinal);
     }
 
-    function performUpkeep(bytes calldata performData) external override {
-        uint256[] memory roundsToUpdate = abi.decode(performData, (uint256[]));
-        for (uint256 i = 0; i < roundsToUpdate.length; i++) {
-            updateRound(roundsToUpdate[i], false);
-        }
-    }
-
     function getRoundsToUpdate() public view returns (uint256, uint256[] memory) {
-        uint256[] memory needsUpdating = new uint256[](roundCount);
+        uint256[] memory roundsToUpdate = new uint256[](roundCount);
         uint256 updatesRequired = 0;
         for (uint256 _roundId = 0; _roundId < roundCount; _roundId++) {
             if (block.timestamp >= rounds[_roundId].startTimestamp && block.timestamp < rounds[_roundId].endTimestamp) {
                 int256 price = getLatestPrice(rounds[_roundId].oracle);
 
-                uint256 bestGuessIndex = getBestGuess(_roundId, price);
+                uint256 bestGuessIndex = getBestGuess(_roundId, price);   
 
                 if (bestGuessIndex != rounds[_roundId].currentWinnerIndex) {
-                    needsUpdating[updatesRequired] = _roundId;
-                    updatesRequired++;
+                    roundsToUpdate[updatesRequired] = _roundId;
+                    updatesRequired++;                    
                 }
             } else if (!rounds[_roundId].roundClosed && block.timestamp >= rounds[_roundId].endTimestamp) {
-                needsUpdating[updatesRequired] = _roundId;
+                roundsToUpdate[updatesRequired] = _roundId;
                 updatesRequired++;
             }
         }
-        return (updatesRequired, needsUpdating);
+        return (updatesRequired, roundsToUpdate);
+    }
+
+    function performUpkeep(bytes calldata performData) external override {
+        uint256[] memory roundsToUpdate = abi.decode(performData, (uint256[]));
+        for (uint256 i = 0; i < roundsToUpdate.length; i++) {
+            updateRound(roundsToUpdate[i], false);
+        }
     }
 }

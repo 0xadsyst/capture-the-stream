@@ -29,6 +29,7 @@ export const ROUNDS_QUERY = gql`
       currentWinner
       lastWinnerChange
       deposits
+      roundClosed
     }
   }
 `

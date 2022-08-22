@@ -28,4 +28,5 @@ dataSources:
           handler: handleEndWinner
         - event: StartWinner(uint256,uint256,address,int256,int256)
           handler: handleStartWinner
+
       file: ./src/mapping.ts

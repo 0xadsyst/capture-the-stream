@@ -73,11 +73,15 @@ const RoundTable = () => {
         let upper = 'Infinity'
         const borderColor = '#F4D35E'
         let border = 0
+        let decimalsForDisplay = 3
+        price > 10  ? decimalsForDisplay = 2 : decimalsForDisplay = 3
+        price > 100 ? decimalsForDisplay = 1 : decimalsForDisplay = 2
+        price > 1000 ? decimalsForDisplay = 0 : decimalsForDisplay = 1
         if (index != 0) {
-          lower = ((+guessData['guess'] + +sortedData[index - 1].guess) / 2).toString()
+          lower = ((+guessData['guess'] + +sortedData[index - 1].guess) / 2).toFixed(decimalsForDisplay)
         }
         if (index != sortedData.length - 1) {
-          upper = ((+guessData['guess'] + +sortedData[index + 1].guess) / 2).toString()
+          upper = ((+guessData['guess'] + +sortedData[index + 1].guess) / 2).toFixed(decimalsForDisplay)
         }
         if (lower == '0' && upper == 'Infinity') {
           priceNeeded = '0 - Infinity'
@@ -95,9 +99,11 @@ const RoundTable = () => {
           } else if (dayjs().unix() < roundData.endTimestamp) {
             border = 5
             winningTime += dayjs().unix() - roundData?.lastWinnerChange
-          } else {
-            winningTime += roundData.endTimestamp - roundData?.lastWinnerChange
+          } else if (!roundData.roundClosed) {
+            winningTime += roundData?.endTimestamp - roundData?.lastWinnerChange
+
           }
+
         }
         const winnings =
           dayjs().unix() > roundData.startTimestamp
@@ -108,7 +114,7 @@ const RoundTable = () => {
             guessId: guessData['guessId'],
             user: guessData['user'],
             guess: guessData['guess'],
-            difference: (price ?? guessData['guess']) - guessData['guess'],
+            difference: parseFloat(((price ?? guessData['guess']) - guessData['guess']).toFixed(decimalsForDisplay)),
             winningTime: winningTime,
             winnings: winnings.toFixed(4),
             priceNeeded: priceNeeded,

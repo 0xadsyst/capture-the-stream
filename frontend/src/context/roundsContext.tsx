@@ -13,6 +13,7 @@ export interface RoundType {
   currentWinner: number
   lastWinnerChange: number
   deposits: number
+  roundClosed: boolean
 }
 
 export interface RoundsContextInterface {

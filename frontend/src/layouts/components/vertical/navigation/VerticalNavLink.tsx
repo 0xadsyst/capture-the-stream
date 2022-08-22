@@ -21,9 +21,6 @@ import themeConfig from 'src/configs/themeConfig'
 import { NavLink } from 'src/layouts/types'
 import { Settings } from 'src/context/settingsContext'
 
-// ** Custom Components Imports
-import UserIcon from 'src/layouts/components/UserIcon'
-
 // ** Utils
 import { handleURLQueries } from 'src/layouts/utils'
 
@@ -88,7 +85,7 @@ const VerticalNavLink = ({ item, navVisible, toggleNavVisibility }: Props) => {
           component={'a'}
           className={isNavLinkActive() ? 'active' : ''}
           {...(item.openInNewTab ? { target: '_blank' } : null)}
-          onClick={e => {
+          onClick={(e: any) => {
             if (item.path === undefined) {
               e.preventDefault()
               e.stopPropagation()

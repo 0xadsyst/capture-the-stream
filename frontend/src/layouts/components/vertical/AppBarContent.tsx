@@ -7,15 +7,19 @@ import { Settings } from 'src/context/settingsContext'
 
 // ** Components
 import ModeToggler from 'src/layouts/components/shared-components/ModeToggler'
-import ConnectButton from 'src/components/ConnectButton'
-import useProtocolBalance from '../../../hooks/useProtocolBalance'
-import DepositModal from '../../../components/DepositModal'
+// import ConnectButton from 'src/components/ConnectButton'
+import { ConnectButton } from '@rainbow-me/rainbowkit'
+import DepositModal from 'src/components/DepositModal'
 
-import useRounds from '../../../hooks/useRounds'
-import useGuesses from '../../../hooks/useGuesses'
-import useProvider from '../../../hooks/useProvider'
+import useRounds from 'src/hooks/useRounds'
+import useGuesses from 'src/hooks/useGuesses'
 
-import {ethers} from 'ethers'
+import React, { useState, useEffect } from 'react'
+import { externalContractsAddressMap } from 'src/configs/externalContracts.config'
+import { CaptureTheStream__factory } from 'generated/factories/CaptureTheStream__factory'
+import { ethers, BigNumber } from 'ethers'
+import { useContractRead, useNetwork, useAccount, useSigner } from 'wagmi'
+import useProtocolBalance from 'src/hooks/useProtocolBalance'
 
 interface Props {
   hidden: boolean
@@ -25,24 +29,50 @@ interface Props {
 }
 
 const AppBarContent = (props: Props) => {
-  // ** Props
   const { hidden, settings, saveSettings, toggleNavVisibility } = props
+  const { chain } = useNetwork()
+  const { address } = useAccount()
+  const [myAddress, setMyAddress] = useState('')
+  const [myChain, setMyChain] = useState<number>()
+  const { data: signer } = useSigner()
 
-  // ** Hook
-  const balance = parseFloat(ethers.utils.formatUnits(useProtocolBalance(), 18)).toFixed(2).toString()
+  useEffect(() => {
+    address ? setMyAddress(address) : null
+    chain ? setMyChain(chain.id) : null
+  }, [address, chain])
+  // ** Props
+
   const rounds = useRounds()
   const guesses = useGuesses()
-  const provider = useProvider()
+  const protocolBalance = useProtocolBalance()
 
   return (
-    <Box sx={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+    <Box
+      sx={{
+        width: '100%',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between'
+      }}
+    >
       <Box className='actions-left' sx={{ mr: 2, display: 'flex', alignItems: 'center' }}>
         <ModeToggler settings={settings} saveSettings={saveSettings} />
       </Box>
       <Box className='actions-middle' sx={{ mt: 4, mr: 12, display: 'flex', textAlign: 'left' }}>
         <Card>
-          <Box sx={{ mt: 2, mb: 2, ml: 2, mr: 2, textAlign: 'center' }}>Balance: {balance} DAI</Box>
-          <Box sx={{ mt: 2, mb: 2, ml: 2, mr: 2, display: 'flex', alignItems: 'center' }}>
+          <Box sx={{ mt: 2, mb: 2, ml: 2, mr: 2, textAlign: 'center' }}>
+            Balance: {parseFloat(ethers.utils.formatUnits(protocolBalance, 18)).toFixed(2).toString()} DAI
+          </Box>
+          <Box
+            sx={{
+              mt: 2,
+              mb: 2,
+              ml: 2,
+              mr: 2,
+              display: 'flex',
+              alignItems: 'center'
+            }}
+          >
             <DepositModal />
           </Box>
         </Card>

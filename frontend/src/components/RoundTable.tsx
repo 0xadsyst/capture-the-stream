@@ -8,13 +8,13 @@ import TableCell from '@mui/material/TableCell'
 import TableContainer from '@mui/material/TableContainer'
 
 import { useEffect, useState, useContext } from 'react'
-import usePrice from '../hooks/usePrice'
+import usePrice from 'src/hooks/usePrice'
 
 // ** Web3
 import { RoundContext } from 'src/context/roundContext'
 import { RoundsContext } from 'src/context/roundsContext'
 import { GuessesContext } from 'src/context/guessesContext'
-import { ProviderContext } from 'src/context/providerContext'
+import { useNetwork, useSigner } from 'wagmi'
 import dayjs from 'dayjs'
 
 interface RowType {
@@ -36,7 +36,12 @@ const RoundTable = () => {
   const roundContext = useContext(RoundContext)
   const roundsContext = useContext(RoundsContext)
   const guessesContext = useContext(GuessesContext)
-  const providerContext = useContext(ProviderContext)
+  const [myChain, setMyChain] = useState<number>()
+  const { chain } = useNetwork()
+
+  useEffect(() => {
+    chain ? setMyChain(chain.id) : ''
+  }, [chain])
 
   const price = usePrice(oracle ?? null)
 
@@ -68,11 +73,15 @@ const RoundTable = () => {
         let upper = 'Infinity'
         const borderColor = '#F4D35E'
         let border = 0
+        let decimalsForDisplay = 3
+        price > 10  ? decimalsForDisplay = 2 : decimalsForDisplay = 3
+        price > 100 ? decimalsForDisplay = 1 : decimalsForDisplay = 2
+        price > 1000 ? decimalsForDisplay = 0 : decimalsForDisplay = 1
         if (index != 0) {
-          lower = ((+guessData['guess'] + +sortedData[index - 1].guess) / 2).toString()
+          lower = ((+guessData['guess'] + +sortedData[index - 1].guess) / 2).toFixed(decimalsForDisplay)
         }
         if (index != sortedData.length - 1) {
-          upper = ((+guessData['guess'] + +sortedData[index + 1].guess) / 2).toString()
+          upper = ((+guessData['guess'] + +sortedData[index + 1].guess) / 2).toFixed(decimalsForDisplay)
         }
         if (lower == '0' && upper == 'Infinity') {
           priceNeeded = '0 - Infinity'
@@ -90,9 +99,11 @@ const RoundTable = () => {
           } else if (dayjs().unix() < roundData.endTimestamp) {
             border = 5
             winningTime += dayjs().unix() - roundData?.lastWinnerChange
-          } else {
-            winningTime += roundData.endTimestamp - roundData?.lastWinnerChange
+          } else if (!roundData.roundClosed) {
+            winningTime += roundData?.endTimestamp - roundData?.lastWinnerChange
+
           }
+
         }
         const winnings =
           dayjs().unix() > roundData.startTimestamp
@@ -103,7 +114,7 @@ const RoundTable = () => {
             guessId: guessData['guessId'],
             user: guessData['user'],
             guess: guessData['guess'],
-            difference: (price ?? guessData['guess']) - guessData['guess'],
+            difference: parseFloat(((price ?? guessData['guess']) - guessData['guess']).toFixed(decimalsForDisplay)),
             winningTime: winningTime,
             winnings: winnings.toFixed(4),
             priceNeeded: priceNeeded,
@@ -118,7 +129,7 @@ const RoundTable = () => {
     }
   }, [guessesContext.guesses, price, time, roundContext, roundsContext])
 
-  if (!providerContext.provider || roundContext.roundId == undefined) {
+  if (!myChain) {
     return <></>
   } else {
     return (

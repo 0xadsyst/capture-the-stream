@@ -13,7 +13,7 @@ import { useEffect, useState, useContext } from 'react'
 import { RoundContext } from 'src/context/roundContext'
 import { RoundsContext } from 'src/context/roundsContext'
 import { GuessesContext } from 'src/context/guessesContext'
-import { ProviderContext } from 'src/context/providerContext'
+import { useNetwork, useSigner } from 'wagmi'
 import { useRouter } from 'next/router'
 
 interface RowType {
@@ -31,7 +31,8 @@ const HistoryTable = () => {
   const roundContext = useContext(RoundContext)
   const roundsContext = useContext(RoundsContext)
   const guessesContext = useContext(GuessesContext)
-  const providerContext = useContext(ProviderContext)
+  const { data: signer} = useSigner()
+  const { chain } = useNetwork()
   const router = useRouter()
 
   function handleRoundClick(roundId: string) {
@@ -42,15 +43,14 @@ const HistoryTable = () => {
   }
 
   useEffect(() => {
-    if (providerContext.provider) {
-      providerContext.provider
-        .getSigner()
+    if (signer) {
+      signer
         .getAddress()
         .then(value => {
           setMyAddress(value)
         })
     }
-  }, [providerContext.provider])
+  }, [signer])
 
   useEffect(() => {
     const interval = setInterval(() => setTime(Date.now()), 1000)

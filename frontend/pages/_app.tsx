@@ -28,7 +28,7 @@ import { createEmotionCache } from 'src/utils/create-emotion-cache'
 import 'react-perfect-scrollbar/dist/css/styles.css'
 
 // ** Global css styles
-import '../../styles/globals.css'
+import 'styles/globals.css'
 
 // ** Web3
 import React, { useState, useEffect } from 'react'
@@ -38,7 +38,6 @@ import { ethers } from 'ethers'
 import { RoundContext } from 'src/context/roundContext'
 import { RoundsContext, RoundType } from 'src/context/roundsContext'
 import { GuessesContext, GuessType } from 'src/context/guessesContext'
-import { ProviderContext } from 'src/context/providerContext'
 import { ApolloClient, InMemoryCache, NormalizedCacheObject } from '@apollo/client'
 import { apolloClient } from 'src/utils/apollo-client'
 import { ApolloProvider } from '@apollo/react-components'
@@ -72,23 +71,42 @@ if (themeConfig.routingLoader) {
   })
 }
 
+import '@rainbow-me/rainbowkit/styles.css'
+import { getDefaultWallets, RainbowKitProvider } from '@rainbow-me/rainbowkit'
+import { chain, configureChains, createClient, WagmiConfig, useNetwork } from 'wagmi'
+import { alchemyProvider } from 'wagmi/providers/alchemy'
+import { publicProvider } from 'wagmi/providers/public'
+
+const { chains, provider } = configureChains(
+  [chain.polygonMumbai, chain.hardhat],
+  [alchemyProvider({ apiKey: process.env.ALCHEMY_ID }), publicProvider()]
+)
+
+const { connectors } = getDefaultWallets({
+  appName: 'Capture the Stream',
+  chains
+})
+
+const wagmiClient = createClient({
+  autoConnect: true,
+  connectors,
+  provider
+})
 
 const App = (props: ExtendedAppProps) => {
   const [round, setRound] = useState<number | undefined>()
   const [rounds, setRounds] = useState<RoundType[] | undefined>()
   const [guesses, setGuesses] = useState<GuessType[] | undefined>()
-  const [provider, setProvider] = useState<ethers.providers.Web3Provider | undefined>()
-  const [chainId, setChainId] = useState<number | undefined>()
-  const [apolloContextClient, setapolloContextClient] = useState<ApolloClient<NormalizedCacheObject>>(
-    initialApolloClient
-  )
+  const [apolloContextClient, setapolloContextClient] =
+    useState<ApolloClient<NormalizedCacheObject>>(initialApolloClient)
+  const { chain } = useNetwork()
 
   useEffect(() => {
-    if (SUPPORTED_CHAINS.includes(chainId ?? 0)) {
+    if (SUPPORTED_CHAINS.includes(chain?.id ?? 0)) {
       console.log('update apollo provider', provider)
-      setapolloContextClient(apolloClient[chainId ?? 31337])
+      setapolloContextClient(apolloClient[chain?.id ?? 31337])
     }
-}, [chainId])
+  }, [chain?.id])
   const { Component, emotionCache = clientSideEmotionCache, pageProps } = props
 
   // Variables
@@ -103,8 +121,9 @@ const App = (props: ExtendedAppProps) => {
       </Head>
       <QueryClientProvider client={queryClient}>
         <SettingsProvider>
-          <ProviderContext.Provider value={{ provider: provider ?? undefined, setProvider: setProvider, chainId: chainId ?? undefined, setChainId: setChainId  }}>
-            <ApolloProvider client={apolloContextClient}>
+          <WagmiConfig client={wagmiClient}>
+            <RainbowKitProvider chains={chains}>
+              <ApolloProvider client={apolloContextClient}>
                 <RoundContext.Provider value={{ roundId: round ?? null, setRoundId: setRound }}>
                   <RoundsContext.Provider value={{ rounds: rounds ?? [], setRounds: setRounds }}>
                     <GuessesContext.Provider value={{ guesses: guesses ?? [], setGuesses: setGuesses }}>
@@ -120,8 +139,9 @@ const App = (props: ExtendedAppProps) => {
                     </GuessesContext.Provider>
                   </RoundsContext.Provider>
                 </RoundContext.Provider>
-            </ApolloProvider>
-          </ProviderContext.Provider>
+              </ApolloProvider>
+            </RainbowKitProvider>
+          </WagmiConfig>
         </SettingsProvider>
       </QueryClientProvider>
     </CacheProvider>

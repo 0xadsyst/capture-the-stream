@@ -13,8 +13,8 @@ import { memo } from 'react'
 import { RoundContext } from 'src/context/roundContext'
 import { GuessesContext } from 'src/context/guessesContext'
 import { RoundsContext, RoundType } from 'src/context/roundsContext'
-import { ProviderContext } from 'src/context/providerContext'
-import usePrice from '../hooks/usePrice'
+import { useNetwork, useSigner } from 'wagmi'
+import usePrice from 'src/hooks/usePrice'
 
 import dayjs from 'dayjs'
 import { getAssetNameFromOracle } from 'src/utils/getAssetNameFromOracle'
@@ -131,7 +131,12 @@ const RoundVisualization = () => {
   const roundContext = useContext(RoundContext)
   const roundsContext = useContext(RoundsContext)
   const guessesContext = useContext(GuessesContext)
-  const providerContext = useContext(ProviderContext)
+  const [myChain, setMyChain] = useState<number>()
+  const { chain } = useNetwork()
+
+  useEffect(() => {
+    chain ? setMyChain(chain.id) : ''
+  }, [chain])
 
   const chartRef = useRef<ChartJS>(null)
   const price = usePrice(oracle ?? null)
@@ -141,7 +146,6 @@ const RoundVisualization = () => {
     const currentChartMin = chartOptions.scales.x.min
     const currentChartMax = chartOptions.scales.x.max
     const currentChartPrecision = chartOptions.scales.x.ticks.precision
-    console.log(currentChartMin, currentChartMax)
     let precision = 0
 
     let chartMin = 0
@@ -172,10 +176,6 @@ const RoundVisualization = () => {
       newOptions.scales.x.min != currentChartMin ||
       newOptions.scales.x.max != currentChartMax
     ) {
-      console.log('Updating options')
-      console.log(newOptions.scales.x.ticks.precision, currentChartPrecision)
-      console.log(newOptions.scales.x.min, currentChartMin)
-      console.log(newOptions.scales.x.max, currentChartMax)
       setChartOptions(newOptions)
       chart?.update()
     }
@@ -189,8 +189,6 @@ const RoundVisualization = () => {
     const newLineDataset: LineDatasetType = newData['datasets'].pop()
 
     if (newLineDataset != undefined) {
-      console.log('newData', newData)
-      console.log('newLineDataset', newLineDataset)
       newLineDataset['data'].map(p => {
         p['x'] = price
       })
@@ -217,10 +215,8 @@ const RoundVisualization = () => {
       sortedData.map((guessData, index) => {
         let borderColor = '#bbbbbb'
         let borderWidth = 2
-        console.log('guess', guessData['guess'])
-        console.log('price', price)
-        let lower = Math.min(guessData['guess'] * 0.99, (price ?? 1e10) * 0.99)
-        let upper = Math.max(guessData['guess'] * 1.01, (price ?? 0) * 1.01)
+        let lower = Math.min(guessData['guess'] * 0.99, price > 0 ? price * 0.99 : 1e10)
+        let upper = Math.max(guessData['guess'] * 1.01, price > 0 ? price * 1.01 : 0)
 
         if (index != 0) {
           lower = (+guessData['guess'] + +sortedData[index - 1].guess) / 2
@@ -319,7 +315,7 @@ const RoundVisualization = () => {
         dayjs().unix() > roundData.startTimestamp && dayjs().unix() < roundData.endTimestamp
           ? (dayjs().unix() - roundData.lastWinnerChange).toString()
           : ''
-      const asset = getAssetNameFromOracle(roundData['oracle'], providerContext.chainId)
+      const asset = getAssetNameFromOracle(roundData['oracle'], myChain ?? 0)
 
       const roundDisplayData: RoundDisplayData = {
         asset: asset,
@@ -347,12 +343,12 @@ const RoundVisualization = () => {
 
       setRoundDisplayData(roundDisplayData)
     }
-  }, [chartData, time])
+  }, [chartData, myChain, time])
 
   // ** Hook
   const theme = useTheme()
 
-  if (!providerContext.provider) {
+  if (!myChain) {
     return <h1>CONNECT YOUR WALLET</h1>
   } else if (roundContext.roundId == undefined) {
     return <h1>SELECT ROUND</h1>

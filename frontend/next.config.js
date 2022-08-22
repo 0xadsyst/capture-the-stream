@@ -1,16 +1,16 @@
-const path = require('path')
-
-module.exports = {
+/** @type {import('next').NextConfig} */
+const nextConfig = {
   trailingSlash: true,
-  reactStrictMode: false,
+  reactStrictMode: true,
   experimental: {
-    esmExternals: false,
+    esmExternals: true,
   },
   webpack: config => {
     config.resolve.alias = {
       ...config.resolve.alias
     }
-
     return config
   }
 }
+
+module.exports = nextConfig

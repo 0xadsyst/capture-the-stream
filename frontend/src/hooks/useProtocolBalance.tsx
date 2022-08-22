@@ -1,41 +1,41 @@
 import React, { useState, useEffect, useContext } from 'react'
-import { ethers, BigNumber } from 'ethers'
+import { BigNumber } from 'ethers'
 import { externalContractsAddressMap } from 'src/configs/externalContracts.config'
-import { CaptureTheStream__factory } from '../../generated/factories/CaptureTheStream__factory'
-import { useQuery } from 'react-query'
-import { ProviderContext, ProviderType } from 'src/context/providerContext'
-import { SUPPORTED_CHAINS } from 'src/constants/chains'
+import { CaptureTheStream__factory } from 'generated/factories/CaptureTheStream__factory'
+import { useNetwork, useSigner, useAccount, useContractRead } from 'wagmi'
+import {SUPPORTED_CHAINS} from 'src/constants/chains'
 
 function useProtocolBalance() {
   const [balance, setBalance] = useState<BigNumber>(BigNumber.from(0))
-  const providerContext = useContext(ProviderContext)
+  const { data: signer } = useSigner()
+  const { chain } = useNetwork()
+  const { address } = useAccount()
+  const [myAddress, setMyAddress] = useState('')
+  const [myChain, setMyChain] = useState<number>()
 
-  const { isLoading, isError, data, error } = useQuery(['balance'], () => fetchBalance(providerContext), {
-    refetchInterval: 5000,
-    enabled: providerContext.provider != undefined && SUPPORTED_CHAINS.includes(providerContext.chainId ?? 0)
+  useEffect(() => {
+    address ? setMyAddress(address) : null
+    chain ? setMyChain(chain.id) : null
+  }, [address, chain])
+
+  const contractAddress = SUPPORTED_CHAINS.includes(myChain ?? 0) ? externalContractsAddressMap[myChain ?? 0]['CaptureTheStream'] : ''
+
+  const balanceCall = useContractRead({
+    addressOrName: contractAddress,
+    contractInterface: CaptureTheStream__factory.abi,
+    functionName: 'deposits',
+    args: myAddress,
+    watch: true
   })
 
   useEffect(() => {
-    let bal = BigNumber.from(0)
-    if (data && providerContext.provider) {
-      bal = data
+    if (balanceCall.isFetched && balanceCall.data && signer && BigNumber.isBigNumber(balanceCall.data)) {
+      const bal = balanceCall.data ?? BigNumber.from(0)
+      setBalance(bal)
     }
-    setBalance(bal)
-  }, [data, providerContext.provider])
+  }, [balanceCall.data, balanceCall.isFetched, signer])
 
   return balance
-}
-
-async function fetchBalance(providerContext: ProviderType) {
-  if (providerContext.provider && providerContext.chainId) {
-    const address = externalContractsAddressMap[providerContext.chainId]['CaptureTheStream']
-    const captureTheStream = CaptureTheStream__factory.connect(address, providerContext.provider)
-    const myAddress = await providerContext.provider.getSigner().getAddress()
-
-    return captureTheStream.deposits(myAddress)
-  } else {
-    return undefined
-  }
 }
 
 export default useProtocolBalance

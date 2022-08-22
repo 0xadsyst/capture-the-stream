@@ -44,7 +44,7 @@ const UserLayout = ({ children }: Props) => {
       saveSettings={saveSettings}
       verticalNavItems={VerticalNavItems()} // Navigation Items
       verticalAppBarContent={(
-        props // AppBar Content
+        props: any // AppBar Content
       ) => (
         <VerticalAppBarContent
           hidden={hidden}

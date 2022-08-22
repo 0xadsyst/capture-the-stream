@@ -2,7 +2,7 @@ import {  useEffect, useState } from 'react'
 
 // ** Web3
 import { useQuery, getApolloContext} from '@apollo/react-components'
-import { ROUNDS_QUERY } from '../constants/queries/queries'
+import { ROUNDS_QUERY } from 'src/constants/queries/queries'
 import { useContext } from 'react'
 import { RoundsContext, RoundType } from 'src/context/roundsContext'
 
@@ -20,7 +20,9 @@ startTimestamp: string
   inRoundGuessesAllowed: string
   currentWinner: string
   lastWinnerChange: string
-  deposits: string}
+  deposits: string
+  roundClosed: string
+}
 
 const emptyRoundData: RoundDataType[] = []
 
@@ -44,7 +46,6 @@ const useRounds = () => {
   }, [error])
 
   useEffect(() => {
-    console.log("loadedData:", data)
       setQueryData(data?.rounds ?? [])
   }, [data, loading])
 
@@ -63,6 +64,7 @@ const useRounds = () => {
       currentWinner: parseInt(r["currentWinner"]),
       lastWinnerChange: parseInt(r["lastWinnerChange"]),      
       deposits: parseInt(r["deposits"]),
+      roundClosed: Boolean(r["roundClosed"]),
     })
     )
     setRoundList(roundList)

@@ -23,11 +23,19 @@ const BoxWrapper = styled(Box)<BoxProps>(({ theme }) => ({
 const UnderConstruction = () => {
   return (
     <Box className='content-center'>
-      <Box sx={{ p: 5, display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center' }}>
+      <Box
+        sx={{
+          p: 5,
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          textAlign: 'center'
+        }}
+      >
         <BoxWrapper>
           <Typography variant='h1'>Under Construction</Typography>
           <Typography variant='h5' sx={{ mb: 1, fontSize: '1.5rem !important' }}>
-            We're still working on this, check back soon.
+            Check back soon.
           </Typography>
         </BoxWrapper>
         <Link passHref href='/'>

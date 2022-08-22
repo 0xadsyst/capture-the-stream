@@ -6,7 +6,7 @@ import Box from '@mui/material/Box'
 import RoundTable from 'src/components/RoundTable'
 import RoundSelector from 'src/components/RoundSelector'
 import RoundVisualization from 'src/components/RoundVisualization'
-import EnterRoundModal from '../components/EnterRoundModal'
+import EnterRoundModal from 'src/components/EnterRoundModal'
 
 // ** React
 import React from 'react'
@@ -22,12 +22,10 @@ const Round = () => {
     <>
       <Grid container spacing={6}>
         <Grid item xs={4} md={4}>
-          <RoundSelector key={roundContext?.roundId}/>
+          <RoundSelector key={roundContext?.roundId} />
         </Grid>
         <Grid item xs={4} md={4}>
-          <Box sx={{ mt: 2, mb: 2, ml: 2, mr: 2, textAlign: 'center' }}>
-            
-          </Box>
+          <Box sx={{ mt: 2, mb: 2, ml: 2, mr: 2, textAlign: 'center' }}></Box>
         </Grid>
         <Grid item xs={4} md={4}>
           <Box sx={{ mt: 2, mb: 2, ml: 2, mr: 2, textAlign: 'right' }}>

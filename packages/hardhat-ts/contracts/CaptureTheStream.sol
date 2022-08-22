@@ -42,17 +42,37 @@ contract CaptureTheStream is KeeperCompatibleInterface, Ownable {
 
     mapping(address => uint256) public deposits;
     mapping(uint256 => Round) public rounds;
-    uint256 public roundCount;    
+    uint256 public roundCount;
 
     IERC20 public depositAsset;
 
     event Deposit(address user, uint256 depositAmount, uint256 balance);
     event Withdraw(address user, uint256 withdrawAmount, uint256 balance);
-    event EndRound(uint256 roundId);
-    event EnterRound(uint256 roundId, uint256 guessIndex, address user, uint256 balance, int256 guess, uint256 guessCost);
-    event StartWinner(uint256 roundId, uint256 winningGuessIndex, address winnerAddress, int256 winningGuess, int256 currentPrice);
-    event EndWinner(uint256 roundId, uint256 winningGuessIndex, address winnerAddress, int256 winningGuess, int256 currentPrice, uint256 timeWinning);
+    event EnterRound(
+        uint256 roundId,
+        uint256 guessIndex,
+        address user,
+        uint256 balance,
+        int256 guess,
+        uint256 guessCost
+    );
+    event StartWinner(
+        uint256 roundId,
+        uint256 winningGuessIndex,
+        address winnerAddress,
+        int256 winningGuess,
+        int256 currentPrice
+    );
+    event EndWinner(
+        uint256 roundId,
+        uint256 winningGuessIndex,
+        address winnerAddress,
+        int256 winningGuess,
+        int256 currentPrice,
+        uint256 timeWinning
+    );
     event WinningGuesses(Guess[] winningGuesses);
+
     event InitiateRound(
         uint256 roundId,
         address oracle,
@@ -121,7 +141,7 @@ contract CaptureTheStream is KeeperCompatibleInterface, Ownable {
         );
     }
 
-    function setDepositAsset (address _asset) public onlyOwner {
+    function setDepositAsset(address _asset) public onlyOwner {
         depositAsset = IERC20(_asset);
     }
 
@@ -143,7 +163,10 @@ contract CaptureTheStream is KeeperCompatibleInterface, Ownable {
         require(deposits[msg.sender] >= round.guessCost, "Not enough funds to enter round");
         require(block.timestamp <= round.endTimestamp, "Round has finished");
         require(block.timestamp <= round.guessCutOffTimestamp, "Round entries have closed");
-        require(round.numberOfGuessesAllowed == 0 || round.guesses.length < round.numberOfGuessesAllowed, "Round guesses are full");
+        require(
+            round.numberOfGuessesAllowed == 0 || round.guesses.length < round.numberOfGuessesAllowed,
+            "Round guesses are full"
+        );
 
         for (uint256 i = 0; i < round.guesses.length; i++) {
             uint256 guessDiff = SignedMath.abs(_guess - round.guesses[i].guess);
@@ -155,64 +178,82 @@ contract CaptureTheStream is KeeperCompatibleInterface, Ownable {
         deposits[msg.sender] = deposits[msg.sender].sub(round.guessCost);
         rounds[_roundId].deposits = round.deposits.add(round.guessCost);
 
-        emit EnterRound(_roundId, rounds[_roundId].guesses.length - 1, msg.sender, deposits[msg.sender], _guess, round.guessCost);
+        emit EnterRound(
+            _roundId,
+            rounds[_roundId].guesses.length - 1,
+            msg.sender,
+            deposits[msg.sender],
+            _guess,
+            round.guessCost
+        );
     }
 
-    function updateWinner(uint256 _roundId) public {
+    function updateRound(uint256 _roundId, bool _forceUpdate) public {
         Round memory round = rounds[_roundId];
-        require(block.timestamp >= round.startTimestamp && block.timestamp <= round.endTimestamp, "Not within time range of round");
+        require(block.timestamp >= round.startTimestamp, "Round hasn't started");
+        require(!round.roundClosed, "Round is already closed");
 
         int256 price = getLatestPrice(round.oracle);
 
-        uint256 bestGuessIndex = getBestGuess(_roundId, price);
+        uint256 timeSinceLastWinnerChange = block.timestamp.sub(round.lastWinnerChange);
+        if (block.timestamp >= round.endTimestamp) {
+            timeSinceLastWinnerChange = round.endTimestamp.sub(round.lastWinnerChange);
+        }
+        uint256 previousWinnerIndex = round.currentWinnerIndex;
 
-        if (bestGuessIndex == round.currentWinnerIndex) {
-            revert("No change to current winner");
-        } else {
-            uint256 timeSinceLastWinnerChange = block.timestamp.sub(round.lastWinnerChange);
-            uint256 previousWinnerIndex = round.currentWinnerIndex;
-            Guess memory previousWinnerGuess = round.guesses[previousWinnerIndex];
+        Guess memory previousWinnerGuess = round.guesses[previousWinnerIndex];
+        rounds[_roundId].guesses[previousWinnerIndex].timeWinning += timeSinceLastWinnerChange;
 
-            emit EndWinner(_roundId, previousWinnerIndex, previousWinnerGuess.user, previousWinnerGuess.guess, price, timeSinceLastWinnerChange);
+        emit EndWinner(
+            _roundId,
+            previousWinnerIndex,
+            previousWinnerGuess.user,
+            previousWinnerGuess.guess,
+            price,
+            timeSinceLastWinnerChange
+        );
 
-            rounds[_roundId].guesses[previousWinnerIndex].timeWinning += timeSinceLastWinnerChange;
+        if (block.timestamp < round.endTimestamp) {
+            uint256 bestGuessIndex = getBestGuess(_roundId, price);
+            require(
+                bestGuessIndex != round.currentWinnerIndex || _forceUpdate,
+                "No change to current winner, updates can be forced using _forceUpdate = true"
+            );
             rounds[_roundId].lastWinnerChange = block.timestamp;
             rounds[_roundId].currentWinnerIndex = bestGuessIndex;
-
-            emit StartWinner(_roundId, bestGuessIndex, round.guesses[bestGuessIndex].user, round.guesses[bestGuessIndex].guess, price);
-        }
-    }
-
-    function endRound(uint256 _roundId) public {
-        Round memory round = rounds[_roundId];
-        require(block.timestamp >= round.endTimestamp, "Round has not finished");
-
-        int256 price = getLatestPrice(round.oracle);
-
-        uint256 timeSinceLastWinnerChange = round.endTimestamp.sub(round.lastWinnerChange);
-        uint256 previousWinnerIndex = round.currentWinnerIndex;
-        Guess memory previousWinnerGuess = round.guesses[previousWinnerIndex];
-        emit EndWinner(_roundId, previousWinnerIndex, previousWinnerGuess.user, previousWinnerGuess.guess, price, timeSinceLastWinnerChange);
-
-        uint256 roundLength = round.endTimestamp.sub(round.startTimestamp);
-        for (uint256 i = 0; i < round.guesses.length; i++) {
-            if (round.guesses[i].timeWinning > 0) {
-                Guess memory guess = round.guesses[i];
-                uint256 winnings = round.deposits.mul(guess.timeWinning).div(roundLength);
-                require(winnings <= round.deposits, "Error, winnings were calculated as greater than round deposits");
-                deposits[guess.user] += winnings;
+            emit StartWinner(
+                _roundId,
+                bestGuessIndex,
+                round.guesses[bestGuessIndex].user,
+                round.guesses[bestGuessIndex].guess,
+                price
+            );
+        } else {
+            uint256 roundLength = round.endTimestamp.sub(round.startTimestamp);
+            for (uint256 i = 0; i < round.guesses.length; i++) {
+                if (round.guesses[i].timeWinning > 0) {
+                    Guess memory guess = round.guesses[i];
+                    uint256 winnings = round.deposits.mul(guess.timeWinning).div(roundLength);
+                    require(
+                        winnings <= round.deposits,
+                        "Error, winnings were calculated as greater than round deposits"
+                    );
+                    deposits[guess.user] += winnings;
+                }
             }
+
+            rounds[_roundId].roundClosed = true;
+            emit WinningGuesses(round.guesses);
         }
-        emit WinningGuesses(round.guesses);
-        emit EndRound(_roundId);
     }
 
     function getBestGuess(uint256 _roundId, int256 _price) internal view returns (uint256) {
         uint256 bestGuessIndex;
         uint256 minPriceDifference = 2**256 - 1;
+
         for (uint256 i = 0; i < rounds[_roundId].guesses.length; i++) {
             uint256 priceDifference = SignedMath.abs(_price.sub(rounds[_roundId].guesses[i].guess));
-
+            
             if (priceDifference < minPriceDifference) {
                 bestGuessIndex = i;
                 minPriceDifference = priceDifference;
@@ -233,35 +274,31 @@ contract CaptureTheStream is KeeperCompatibleInterface, Ownable {
         performData = abi.encode(roundsToUpdateFinal);
     }
 
-    function performUpkeep(bytes calldata performData) external override {
-        uint256[] memory roundsToUpdate = abi.decode(performData, (uint256[]));
-        for (uint256 i = 0; i < roundsToUpdate.length; i++) {
-            if (!rounds[roundsToUpdate[i]].roundClosed && block.timestamp >= rounds[roundsToUpdate[i]].endTimestamp) {
-                endRound(roundsToUpdate[i]);
-            } else {
-                updateWinner(roundsToUpdate[i]);
-            }
-        }
-    }
-
     function getRoundsToUpdate() public view returns (uint256, uint256[] memory) {
-        uint256[] memory needsUpdating = new uint256[](roundCount);
+        uint256[] memory roundsToUpdate = new uint256[](roundCount);
         uint256 updatesRequired = 0;
         for (uint256 _roundId = 0; _roundId < roundCount; _roundId++) {
-            if (block.timestamp >= rounds[_roundId].startTimestamp && block.timestamp <= rounds[_roundId].endTimestamp) {
+            if (block.timestamp >= rounds[_roundId].startTimestamp && block.timestamp < rounds[_roundId].endTimestamp) {
                 int256 price = getLatestPrice(rounds[_roundId].oracle);
 
-                uint256 bestGuessIndex = getBestGuess(_roundId, price);
+                uint256 bestGuessIndex = getBestGuess(_roundId, price);   
 
                 if (bestGuessIndex != rounds[_roundId].currentWinnerIndex) {
-                    needsUpdating[updatesRequired] = _roundId;
-                    updatesRequired++;
+                    roundsToUpdate[updatesRequired] = _roundId;
+                    updatesRequired++;                    
                 }
             } else if (!rounds[_roundId].roundClosed && block.timestamp >= rounds[_roundId].endTimestamp) {
-                needsUpdating[updatesRequired] = _roundId;
+                roundsToUpdate[updatesRequired] = _roundId;
                 updatesRequired++;
             }
         }
-        return (updatesRequired, needsUpdating);
+        return (updatesRequired, roundsToUpdate);
+    }
+
+    function performUpkeep(bytes calldata performData) external override {
+        uint256[] memory roundsToUpdate = abi.decode(performData, (uint256[]));
+        for (uint256 i = 0; i < roundsToUpdate.length; i++) {
+            updateRound(roundsToUpdate[i], false);
+        }
     }
 }

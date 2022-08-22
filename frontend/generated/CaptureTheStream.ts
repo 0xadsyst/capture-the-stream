@@ -47,12 +47,10 @@ export interface CaptureTheStreamInterface extends utils.Interface {
     "deposit(uint256)": FunctionFragment;
     "depositAsset()": FunctionFragment;
     "deposits(address)": FunctionFragment;
-    "endRound(uint256)": FunctionFragment;
     "enterRound(uint256,int256)": FunctionFragment;
     "getLatestPrice(address)": FunctionFragment;
     "getRoundGuesses(uint256)": FunctionFragment;
     "getRoundsToUpdate()": FunctionFragment;
-    "guessCost()": FunctionFragment;
     "initiateRound(address,uint256,uint256,uint256,uint256,uint256,uint256,bool)": FunctionFragment;
     "owner()": FunctionFragment;
     "performUpkeep(bytes)": FunctionFragment;
@@ -61,7 +59,7 @@ export interface CaptureTheStreamInterface extends utils.Interface {
     "rounds(uint256)": FunctionFragment;
     "setDepositAsset(address)": FunctionFragment;
     "transferOwnership(address)": FunctionFragment;
-    "updateWinner(uint256)": FunctionFragment;
+    "updateRound(uint256,bool)": FunctionFragment;
     "withdraw(uint256)": FunctionFragment;
   };
 
@@ -71,12 +69,10 @@ export interface CaptureTheStreamInterface extends utils.Interface {
       | "deposit"
       | "depositAsset"
       | "deposits"
-      | "endRound"
       | "enterRound"
       | "getLatestPrice"
       | "getRoundGuesses"
       | "getRoundsToUpdate"
-      | "guessCost"
       | "initiateRound"
       | "owner"
       | "performUpkeep"
@@ -85,7 +81,7 @@ export interface CaptureTheStreamInterface extends utils.Interface {
       | "rounds"
       | "setDepositAsset"
       | "transferOwnership"
-      | "updateWinner"
+      | "updateRound"
       | "withdraw"
   ): FunctionFragment;
 
@@ -106,10 +102,6 @@ export interface CaptureTheStreamInterface extends utils.Interface {
     values: [PromiseOrValue<string>]
   ): string;
   encodeFunctionData(
-    functionFragment: "endRound",
-    values: [PromiseOrValue<BigNumberish>]
-  ): string;
-  encodeFunctionData(
     functionFragment: "enterRound",
     values: [PromiseOrValue<BigNumberish>, PromiseOrValue<BigNumberish>]
   ): string;
@@ -125,7 +117,6 @@ export interface CaptureTheStreamInterface extends utils.Interface {
     functionFragment: "getRoundsToUpdate",
     values?: undefined
   ): string;
-  encodeFunctionData(functionFragment: "guessCost", values?: undefined): string;
   encodeFunctionData(
     functionFragment: "initiateRound",
     values: [
@@ -165,8 +156,8 @@ export interface CaptureTheStreamInterface extends utils.Interface {
     values: [PromiseOrValue<string>]
   ): string;
   encodeFunctionData(
-    functionFragment: "updateWinner",
-    values: [PromiseOrValue<BigNumberish>]
+    functionFragment: "updateRound",
+    values: [PromiseOrValue<BigNumberish>, PromiseOrValue<boolean>]
   ): string;
   encodeFunctionData(
     functionFragment: "withdraw",
@@ -183,7 +174,6 @@ export interface CaptureTheStreamInterface extends utils.Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(functionFragment: "deposits", data: BytesLike): Result;
-  decodeFunctionResult(functionFragment: "endRound", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "enterRound", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "getLatestPrice",
@@ -197,7 +187,6 @@ export interface CaptureTheStreamInterface extends utils.Interface {
     functionFragment: "getRoundsToUpdate",
     data: BytesLike
   ): Result;
-  decodeFunctionResult(functionFragment: "guessCost", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "initiateRound",
     data: BytesLike
@@ -222,14 +211,13 @@ export interface CaptureTheStreamInterface extends utils.Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "updateWinner",
+    functionFragment: "updateRound",
     data: BytesLike
   ): Result;
   decodeFunctionResult(functionFragment: "withdraw", data: BytesLike): Result;
 
   events: {
     "Deposit(address,uint256,uint256)": EventFragment;
-    "EndRound(uint256)": EventFragment;
     "EndWinner(uint256,uint256,address,int256,int256,uint256)": EventFragment;
     "EnterRound(uint256,uint256,address,uint256,int256,uint256)": EventFragment;
     "InitiateRound(uint256,address,uint256,uint256,uint256,uint256,uint256,uint256,bool)": EventFragment;
@@ -240,7 +228,6 @@ export interface CaptureTheStreamInterface extends utils.Interface {
   };
 
   getEvent(nameOrSignatureOrTopic: "Deposit"): EventFragment;
-  getEvent(nameOrSignatureOrTopic: "EndRound"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "EndWinner"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "EnterRound"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "InitiateRound"): EventFragment;
@@ -261,13 +248,6 @@ export type DepositEvent = TypedEvent<
 >;
 
 export type DepositEventFilter = TypedEventFilter<DepositEvent>;
-
-export interface EndRoundEventObject {
-  roundId: BigNumber;
-}
-export type EndRoundEvent = TypedEvent<[BigNumber], EndRoundEventObject>;
-
-export type EndRoundEventFilter = TypedEventFilter<EndRoundEvent>;
 
 export interface EndWinnerEventObject {
   roundId: BigNumber;
@@ -421,11 +401,6 @@ export interface CaptureTheStream extends BaseContract {
       overrides?: CallOverrides
     ): Promise<[BigNumber]>;
 
-    endRound(
-      _roundId: PromiseOrValue<BigNumberish>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<ContractTransaction>;
-
     enterRound(
       _roundId: PromiseOrValue<BigNumberish>,
       _guess: PromiseOrValue<BigNumberish>,
@@ -445,8 +420,6 @@ export interface CaptureTheStream extends BaseContract {
     getRoundsToUpdate(
       overrides?: CallOverrides
     ): Promise<[BigNumber, BigNumber[]]>;
-
-    guessCost(overrides?: CallOverrides): Promise<[BigNumber]>;
 
     initiateRound(
       _oracle: PromiseOrValue<string>,
@@ -516,8 +489,9 @@ export interface CaptureTheStream extends BaseContract {
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
 
-    updateWinner(
+    updateRound(
       _roundId: PromiseOrValue<BigNumberish>,
+      _forceUpdate: PromiseOrValue<boolean>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
 
@@ -546,11 +520,6 @@ export interface CaptureTheStream extends BaseContract {
     overrides?: CallOverrides
   ): Promise<BigNumber>;
 
-  endRound(
-    _roundId: PromiseOrValue<BigNumberish>,
-    overrides?: Overrides & { from?: PromiseOrValue<string> }
-  ): Promise<ContractTransaction>;
-
   enterRound(
     _roundId: PromiseOrValue<BigNumberish>,
     _guess: PromiseOrValue<BigNumberish>,
@@ -570,8 +539,6 @@ export interface CaptureTheStream extends BaseContract {
   getRoundsToUpdate(
     overrides?: CallOverrides
   ): Promise<[BigNumber, BigNumber[]]>;
-
-  guessCost(overrides?: CallOverrides): Promise<BigNumber>;
 
   initiateRound(
     _oracle: PromiseOrValue<string>,
@@ -641,8 +608,9 @@ export interface CaptureTheStream extends BaseContract {
     overrides?: Overrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
 
-  updateWinner(
+  updateRound(
     _roundId: PromiseOrValue<BigNumberish>,
+    _forceUpdate: PromiseOrValue<boolean>,
     overrides?: Overrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
 
@@ -671,11 +639,6 @@ export interface CaptureTheStream extends BaseContract {
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
-    endRound(
-      _roundId: PromiseOrValue<BigNumberish>,
-      overrides?: CallOverrides
-    ): Promise<void>;
-
     enterRound(
       _roundId: PromiseOrValue<BigNumberish>,
       _guess: PromiseOrValue<BigNumberish>,
@@ -695,8 +658,6 @@ export interface CaptureTheStream extends BaseContract {
     getRoundsToUpdate(
       overrides?: CallOverrides
     ): Promise<[BigNumber, BigNumber[]]>;
-
-    guessCost(overrides?: CallOverrides): Promise<BigNumber>;
 
     initiateRound(
       _oracle: PromiseOrValue<string>,
@@ -764,8 +725,9 @@ export interface CaptureTheStream extends BaseContract {
       overrides?: CallOverrides
     ): Promise<void>;
 
-    updateWinner(
+    updateRound(
       _roundId: PromiseOrValue<BigNumberish>,
+      _forceUpdate: PromiseOrValue<boolean>,
       overrides?: CallOverrides
     ): Promise<void>;
 
@@ -786,9 +748,6 @@ export interface CaptureTheStream extends BaseContract {
       depositAmount?: null,
       balance?: null
     ): DepositEventFilter;
-
-    "EndRound(uint256)"(roundId?: null): EndRoundEventFilter;
-    EndRound(roundId?: null): EndRoundEventFilter;
 
     "EndWinner(uint256,uint256,address,int256,int256,uint256)"(
       roundId?: null,
@@ -904,11 +863,6 @@ export interface CaptureTheStream extends BaseContract {
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
-    endRound(
-      _roundId: PromiseOrValue<BigNumberish>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<BigNumber>;
-
     enterRound(
       _roundId: PromiseOrValue<BigNumberish>,
       _guess: PromiseOrValue<BigNumberish>,
@@ -926,8 +880,6 @@ export interface CaptureTheStream extends BaseContract {
     ): Promise<BigNumber>;
 
     getRoundsToUpdate(overrides?: CallOverrides): Promise<BigNumber>;
-
-    guessCost(overrides?: CallOverrides): Promise<BigNumber>;
 
     initiateRound(
       _oracle: PromiseOrValue<string>,
@@ -969,8 +921,9 @@ export interface CaptureTheStream extends BaseContract {
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
 
-    updateWinner(
+    updateRound(
       _roundId: PromiseOrValue<BigNumberish>,
+      _forceUpdate: PromiseOrValue<boolean>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
 
@@ -998,11 +951,6 @@ export interface CaptureTheStream extends BaseContract {
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
-    endRound(
-      _roundId: PromiseOrValue<BigNumberish>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<PopulatedTransaction>;
-
     enterRound(
       _roundId: PromiseOrValue<BigNumberish>,
       _guess: PromiseOrValue<BigNumberish>,
@@ -1020,8 +968,6 @@ export interface CaptureTheStream extends BaseContract {
     ): Promise<PopulatedTransaction>;
 
     getRoundsToUpdate(overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
-    guessCost(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     initiateRound(
       _oracle: PromiseOrValue<string>,
@@ -1063,8 +1009,9 @@ export interface CaptureTheStream extends BaseContract {
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;
 
-    updateWinner(
+    updateRound(
       _roundId: PromiseOrValue<BigNumberish>,
+      _forceUpdate: PromiseOrValue<boolean>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;
 

@@ -266,9 +266,9 @@ const RoundVisualization = () => {
     if (active && payload && payload.length && tooltipData) {
       const tooltip: any[] = []
       tooltipData[label].map((guess : any, index) => {
-        if (!guess.disabled && guess.user && guess.guess) {
+        if (!guess.disabled && guess.name && guess.guess) {
           if (guess.lowest) {
-            tooltip.push(<div className='label' id={guess.user + guess.guess}>{' < $' + guess.upper}</div>)
+            tooltip.push(<div className='label' id={guess.name}>{' < $' + guess.upper}</div>)
           } else if (guess.highest) {
             tooltip.push(<div className='label'>{' > $' + guess.lower}</div>)
           } else {

@@ -10,6 +10,8 @@ export const GUESSES_QUERY = gql`
       guess
       guessCost
       winningTime
+      disableEndTimestamp
+      enableEndTimestamp
     }
   }
 `
@@ -30,6 +32,22 @@ export const ROUNDS_QUERY = gql`
       lastWinnerChange
       deposits
       roundClosed
+    }
+  }
+`
+
+export const POWERUP_QUERY = gql`
+  query GetPowerUps {
+    powerUps {
+      id
+      user
+      roundId
+      status
+      typeOf
+      length
+      endTime
+      selectableTarget
+      target
     }
   }
 `

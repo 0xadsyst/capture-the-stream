@@ -13,12 +13,10 @@ import DepositModal from 'src/components/DepositModal'
 
 import useRounds from 'src/hooks/useRounds'
 import useGuesses from 'src/hooks/useGuesses'
+import usePowerUps from 'src/hooks/usePowerUps'
 
-import React, { useState, useEffect } from 'react'
-import { externalContractsAddressMap } from 'src/configs/externalContracts.config'
-import { CaptureTheStream__factory } from 'generated/factories/CaptureTheStream__factory'
-import { ethers, BigNumber } from 'ethers'
-import { useContractRead, useNetwork, useAccount, useSigner } from 'wagmi'
+import React from 'react'
+import { ethers } from 'ethers'
 import useProtocolBalance from 'src/hooks/useProtocolBalance'
 
 interface Props {
@@ -29,21 +27,11 @@ interface Props {
 }
 
 const AppBarContent = (props: Props) => {
-  const { hidden, settings, saveSettings, toggleNavVisibility } = props
-  const { chain } = useNetwork()
-  const { address } = useAccount()
-  const [myAddress, setMyAddress] = useState('')
-  const [myChain, setMyChain] = useState<number>()
-  const { data: signer } = useSigner()
-
-  useEffect(() => {
-    address ? setMyAddress(address) : null
-    chain ? setMyChain(chain.id) : null
-  }, [address, chain])
-  // ** Props
+  const { settings, saveSettings, toggleNavVisibility } = props
 
   const rounds = useRounds()
   const guesses = useGuesses()
+  const powerUps = usePowerUps()
   const protocolBalance = useProtocolBalance()
 
   return (

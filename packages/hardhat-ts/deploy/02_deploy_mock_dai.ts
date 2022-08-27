@@ -5,6 +5,8 @@ envConfig({ path: '../../../.env' });
 
 const ehre = require('hardhat');
 
+const ethernal = require('hardhat-ethernal');
+
 const func: DeployFunction = async (hre: THardhatRuntimeEnvironmentExtended) => {
   if (['localhost', 'mumbai'].includes(process.env.HARDHAT_TARGET_NETWORK ?? '')) {
     const { getNamedAccounts, deployments } = hre;
@@ -19,13 +21,15 @@ const func: DeployFunction = async (hre: THardhatRuntimeEnvironmentExtended) => 
       log: true,
     });
 
-    /*
-    // Getting a previously deployed contract
-    const YourContract = await ethers.getContract("YourContract", deployer);
-    await YourContract.setPurpose("Hello");
-    
-    //const yourContract = await ethers.getContractAt('YourContract', "0xaAC799eC2d00C013f1F11c37E654e59B0429DF6A") //<-- if you want to instantiate a version of a contract at a specific address!
-  */
+
+    if (!(process.env.HARDHAT_TARGET_NETWORK == 'localhost')) {
+      return;
+    }
+  
+    await ehre.ethernal.push({
+      name: 'MockDAI',
+      address: mockDai.address,
+    });
   }
 };
 export default func;

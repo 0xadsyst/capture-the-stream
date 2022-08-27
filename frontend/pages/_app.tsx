@@ -36,8 +36,7 @@ import { QueryClient, QueryClientProvider } from 'react-query'
 import { ethers } from 'ethers'
 
 import { RoundContext } from 'src/context/roundContext'
-import { RoundsContext, RoundType } from 'src/context/roundsContext'
-import { GuessesContext, GuessType } from 'src/context/guessesContext'
+import { SubgraphDataContext, SubgraphDataContextInterface, RoundType, GuessType, PowerUpType} from 'src/context/subgraphDataContext'
 import { ApolloClient, InMemoryCache, NormalizedCacheObject } from '@apollo/client'
 import { apolloClient } from 'src/utils/apollo-client'
 import { ApolloProvider } from '@apollo/react-components'
@@ -97,17 +96,26 @@ const App = (props: ExtendedAppProps) => {
   const [round, setRound] = useState<number | undefined>()
   const [rounds, setRounds] = useState<RoundType[] | undefined>()
   const [guesses, setGuesses] = useState<GuessType[] | undefined>()
+  const [powerUps, setPowerUps] = useState<PowerUpType[] | undefined>()
   const [apolloContextClient, setapolloContextClient] =
     useState<ApolloClient<NormalizedCacheObject>>(initialApolloClient)
   const { chain } = useNetwork()
 
   useEffect(() => {
     if (SUPPORTED_CHAINS.includes(chain?.id ?? 0)) {
-      console.log('update apollo provider', provider)
       setapolloContextClient(apolloClient[chain?.id ?? 31337])
     }
   }, [chain?.id])
   const { Component, emotionCache = clientSideEmotionCache, pageProps } = props
+
+  const subgraphDataContextValue: SubgraphDataContextInterface = {
+    rounds: rounds ?? [],
+    setRounds: setRounds,
+    guesses: guesses ?? [],
+    setGuesses: setGuesses,
+    powerUps: powerUps ?? [],
+    setPowerUps: setPowerUps
+  }
 
   // Variables
   const getLayout = Component.getLayout ?? (page => <UserLayout>{page}</UserLayout>)
@@ -125,8 +133,7 @@ const App = (props: ExtendedAppProps) => {
             <RainbowKitProvider chains={chains}>
               <ApolloProvider client={apolloContextClient}>
                 <RoundContext.Provider value={{ roundId: round ?? null, setRoundId: setRound }}>
-                  <RoundsContext.Provider value={{ rounds: rounds ?? [], setRounds: setRounds }}>
-                    <GuessesContext.Provider value={{ guesses: guesses ?? [], setGuesses: setGuesses }}>
+                  <SubgraphDataContext.Provider value={subgraphDataContextValue}>
                       <SettingsConsumer>
                         {({ settings }) => {
                           return (
@@ -136,8 +143,7 @@ const App = (props: ExtendedAppProps) => {
                           )
                         }}
                       </SettingsConsumer>
-                    </GuessesContext.Provider>
-                  </RoundsContext.Provider>
+                  </SubgraphDataContext.Provider>
                 </RoundContext.Provider>
               </ApolloProvider>
             </RainbowKitProvider>

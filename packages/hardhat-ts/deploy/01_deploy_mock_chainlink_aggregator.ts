@@ -2,35 +2,43 @@ import { DeployFunction } from 'hardhat-deploy/types';
 import { THardhatRuntimeEnvironmentExtended } from 'helpers/types/THardhatRuntimeEnvironmentExtended';
 import { config as envConfig } from 'dotenv';
 envConfig({ path: '../../.env' });
+const ehre = require('hardhat');
+
+const ethernal = require('hardhat-ethernal');
 
 const func: DeployFunction = async (hre: THardhatRuntimeEnvironmentExtended) => {
   if (process.env.HARDHAT_TARGET_NETWORK == 'localhost') {
     const { getNamedAccounts, deployments } = hre;
     const { deploy } = deployments;
     const { deployer } = await getNamedAccounts();
-    await deploy('MockChainlinkAggregatorETH', {
+    const mockChainlinkAggregatorETH = await deploy('MockChainlinkAggregatorETH', {
       from: deployer,
       args: [18, 0],
       log: true,
     });
-    await deploy('MockChainlinkAggregatorBTC', {
+    const mockChainlinkAggregatorBTC = await deploy('MockChainlinkAggregatorBTC', {
       from: deployer,
       args: [18, 0],
       log: true,
     });
-    await deploy('MockChainlinkAggregatorMATIC', {
+    const mockChainlinkAggregatorMATIC = await deploy('MockChainlinkAggregatorMATIC', {
       from: deployer,
       args: [18, 0],
       log: true,
     });
 
-    /*
-    // Getting a previously deployed contract
-    const YourContract = await ethers.getContract("YourContract", deployer);
-    await YourContract.setPurpose("Hello");
-    
-    //const yourContract = await ethers.getContractAt('YourContract', "0xaAC799eC2d00C013f1F11c37E654e59B0429DF6A") //<-- if you want to instantiate a version of a contract at a specific address!
-  */
+    // await ehre.ethernal.push({
+    //   name: 'MockChainlinkAggregatorETH',
+    //   address: mockChainlinkAggregatorETH.address,
+    // });
+    // await ehre.ethernal.push({
+    //   name: 'MockChainlinkAggregatorBTC',
+    //   address: mockChainlinkAggregatorBTC.address,
+    // });
+    // await ehre.ethernal.push({
+    //   name: 'MockChainlinkAggregatorMATIC',
+    //   address: mockChainlinkAggregatorMATIC.address,
+    // });
   }
 };
 export default func;

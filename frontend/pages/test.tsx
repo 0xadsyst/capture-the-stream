@@ -12,6 +12,7 @@ import { ethers, BigNumber } from 'ethers'
 import UpdateOracleModal from 'src/components/UpdateOraclePriceModal'
 import useProtocolBalance from 'src/hooks/useProtocolBalance'
 import useDepositAssetBalance from 'src/hooks/useDepositAssetBalance'
+import FulfillPowerUpModal from 'src/components/FulfillPowerUpModal'
 import usePrice from 'src/hooks/usePrice'
 import MintDAI from 'src/components/MintDAI'
 import { SUPPORTED_CHAINS } from 'src/constants/chains'
@@ -28,7 +29,8 @@ const Test = () => {
   const [myAddress, setMyAddress] = useState('')
   const [myChain, setMyChain] = useState<number>()
   const [upkeepRequired, setUpkeepRequired] = useState<string>()
-
+  const [vrfCoordinator, setVrfCoordinator] = useState<string>()
+  
   const protocolBalance = useProtocolBalance()
   const depositAssetBalance = useDepositAssetBalance()
   const ethContractAddress = SUPPORTED_CHAINS.includes(myChain ?? 0)
@@ -74,20 +76,20 @@ const Test = () => {
     }
   }, [depositAssetCall.data, depositAssetCall.isFetched, signer])
 
-  const upkeepCall = useContractRead({
-    addressOrName: captureTheStreamContractAddress,
-    contractInterface: CaptureTheStream__factory.abi,
-    functionName: 'checkUpkeep',
-    args: ethers.utils.randomBytes(1),
-    watch: true
-  })
+  // const upkeepCall = useContractRead({
+  //   addressOrName: captureTheStreamContractAddress,
+  //   contractInterface: CaptureTheStream__factory.abi,
+  //   functionName: 'checkUpkeep',
+  //   args: ethers.utils.randomBytes(1),
+  //   watch: true
+  // })
 
-  useEffect(() => {
-    if (upkeepCall.isFetched && upkeepCall.data && signer) {
-      const upkeepRequiredData = upkeepCall.data ?? ''
-      setUpkeepRequired(upkeepRequiredData.toString())
-    }
-  }, [upkeepCall.data, upkeepCall.isFetched, signer])
+  // useEffect(() => {
+  //   if (upkeepCall.isFetched && upkeepCall.data && signer) {
+  //     const upkeepRequiredData = upkeepCall.data ?? ''
+  //     setUpkeepRequired(upkeepRequiredData.toString())
+  //   }
+  // }, [upkeepCall.data, upkeepCall.isFetched, signer])
 
   const roundCountCall = useContractRead({
     addressOrName: captureTheStreamContractAddress,
@@ -126,6 +128,7 @@ const Test = () => {
             Perform Upkeep
           </Button>
           <UpdateOracleModal />
+          <FulfillPowerUpModal />
         </Grid>
       </Grid>
     </div>
@@ -156,6 +159,7 @@ async function performUpkeep(signer: any, chain: number, captureTheStreamContrac
     const address = captureTheStreamContractAddress
     const captureTheStreamContract = CaptureTheStream__factory.connect(address, signer)
     const upkeepRequired = await captureTheStreamContract.checkUpkeep(ethers.utils.randomBytes(1))
+    console.log("upkeepRequired", upkeepRequired)
 
     return captureTheStreamContract.performUpkeep(upkeepRequired[1])
   } else {

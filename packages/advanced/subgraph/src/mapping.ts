@@ -2,11 +2,13 @@ import { BigInt, Address } from '@graphprotocol/graph-ts';
 import {
   CaptureTheStream,
   EndWinner,
-  EnterRound,
+  NewGuess,
   InitiateRound,
   StartWinner,
+  PowerUpEvent,
 } from '../generated/captureTheStream/CaptureTheStream';
-import { Round, Guess } from '../generated/schema';
+import { Round, Guess, PowerUp } from '../generated/schema';
+import { log } from '@graphprotocol/graph-ts'
 
 export function handleInitiateRound(event: InitiateRound): void {
   const id = event.params.roundId.toString();
@@ -31,7 +33,7 @@ export function handleInitiateRound(event: InitiateRound): void {
   entity.save();
 }
 
-export function handleEnterRound(event: EnterRound): void {
+export function handleNewGuess(event: NewGuess): void {
   const guessId = event.params.roundId.toString() + '-' + event.params.guessIndex.toString();
 
   let guessEntity = Guess.load(guessId);
@@ -44,6 +46,8 @@ export function handleEnterRound(event: EnterRound): void {
     guessEntity.guess = event.params.guess;
     guessEntity.guessCost = event.params.guessCost;
     guessEntity.winningTime = new BigInt(0);
+    guessEntity.disableEndTimestamp = event.params.disableEndTimestamp;
+    guessEntity.enableEndTimestamp = event.params.enableEndTimestamp;
   }
   guessEntity.save();
 
@@ -85,5 +89,49 @@ export function handleStartWinner(event: StartWinner): void {
     roundEntity.currentWinner = event.params.winningGuessIndex;
     roundEntity.lastWinnerChange = event.block.timestamp;
     roundEntity.save();
+  }
+}
+
+export function handlePowerUpEvent(event: PowerUpEvent): void {
+  const id = event.params.id.toString();
+  log.info('Power up processing id:', [id])
+
+  let entity = PowerUp.load(id);
+
+  if (!entity) {
+    entity = new PowerUp(id);
+  }
+  log.info('power up entity:', [entity.id])
+
+  entity.user = event.params.user;
+  entity.roundId = event.params.roundId;
+  entity.status = event.params.status;
+  entity.typeOf = event.params.typeOf;
+  entity.length = event.params.length;
+  entity.endTime = event.params.endTime;
+  entity.selectableTarget = event.params.selectableTarget;
+  entity.target = event.params.target;
+
+  log.warning('user: ' + entity.user.toHexString(), [])
+  log.warning('roundId: ' + entity.roundId.toString(), [])
+  log.warning('status: ' + entity.status, [])
+  log.warning('typeOf: ' + entity.typeOf, [])
+  log.warning('length: ' + entity.length.toString(), [])
+  log.warning('endTime: ' + entity.endTime.toString(), [])
+  log.warning('selectableTarget: ' + entity.selectableTarget.toString(), [])
+  log.warning('target: ' + entity.target.toString(), [])
+
+  entity.save();
+
+  if (entity.status == 'USED' && (entity.typeOf == 'DISABLE_GUESS' || entity.typeOf == 'TAKEOVER_GUESS')) {
+    const guessId = entity.roundId.toString() + '-' + entity.target.toString();
+    let guessEntity = Guess.load(guessId);
+    if (guessEntity) {
+      guessEntity.disableEndTimestamp = event.params.endTime;
+      
+      guessEntity.save()
+    }
+
+    
   }
 }

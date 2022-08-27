@@ -7,6 +7,8 @@ export type { MockChainlinkAggregatorBTC } from "./MockChainlinkAggregatorBTC";
 export type { MockChainlinkAggregatorETH } from "./MockChainlinkAggregatorETH";
 export type { MockChainlinkAggregatorMATIC } from "./MockChainlinkAggregatorMATIC";
 export type { MockDAI } from "./MockDAI";
+export type { MockVRFCoordinatorV2 } from "./MockVRFCoordinatorV2";
+export type { VRFv2Consumer } from "./VRFv2Consumer";
 export * as factories from "./factories";
 export { CaptureTheStream__factory } from "./factories/CaptureTheStream__factory";
 export { MockChainlinkAggregator__factory } from "./factories/MockChainlinkAggregator__factory";
@@ -14,3 +16,5 @@ export { MockChainlinkAggregatorBTC__factory } from "./factories/MockChainlinkAg
 export { MockChainlinkAggregatorETH__factory } from "./factories/MockChainlinkAggregatorETH__factory";
 export { MockChainlinkAggregatorMATIC__factory } from "./factories/MockChainlinkAggregatorMATIC__factory";
 export { MockDAI__factory } from "./factories/MockDAI__factory";
+export { MockVRFCoordinatorV2__factory } from "./factories/MockVRFCoordinatorV2__factory";
+export { VRFv2Consumer__factory } from "./factories/VRFv2Consumer__factory";

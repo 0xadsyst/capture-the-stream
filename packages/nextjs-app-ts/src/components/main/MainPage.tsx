@@ -104,6 +104,7 @@ export const MainPage: FC<IMainPageProps> = (props) => {
   const mockChainlinkAggregatorBTC = useAppContracts('MockChainlinkAggregatorBTC', ethersAppContext.chainId);
   const mockChainlinkAggregatorMATIC = useAppContracts('MockChainlinkAggregatorMATIC', ethersAppContext.chainId);
   const mockDAI = useAppContracts('MockDAI', ethersAppContext.chainId);
+  const mockVRFCoordinatorV2 = useAppContracts('MockVRFCoordinatorV2', ethersAppContext.chainId);
 
   // -----------------------------
   // .... 🎇 End of examples
@@ -176,6 +177,17 @@ export const MainPage: FC<IMainPageProps> = (props) => {
           <GenericContract
             contractName="MockChainlinkAggregatorMATIC"
             contract={mockChainlinkAggregatorMATIC}
+            mainnetAdaptor={scaffoldAppProviders.mainnetAdaptor}
+            blockExplorer={scaffoldAppProviders.targetNetwork.blockExplorer}
+          />
+        ),
+      },
+      {
+        name: 'Mock-Chanlink-VRF',
+        content: (
+          <GenericContract
+            contractName="MockVRFCoordinatorV2"
+            contract={mockVRFCoordinatorV2}
             mainnetAdaptor={scaffoldAppProviders.mainnetAdaptor}
             blockExplorer={scaffoldAppProviders.targetNetwork.blockExplorer}
           />

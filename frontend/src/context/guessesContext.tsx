@@ -7,6 +7,8 @@ export interface GuessType {
   user: string
   guess: number
   winningTime: number
+  disableEndTimestamp: number
+  enableEndTimestamp: number
 }
 
 export interface GuessesContextInterface {
@@ -14,7 +16,7 @@ export interface GuessesContextInterface {
   setGuesses: Dispatch<SetStateAction<GuessType[] | undefined>>
 }
 
-export const GuessesContext = createContext<GuessesContextInterface>({
+export const SubgraphDataContext = createContext<GuessesContextInterface>({
   guesses: [],
   setGuesses: () => null
 });

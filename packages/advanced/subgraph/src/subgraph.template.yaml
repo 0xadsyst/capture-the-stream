@@ -4,11 +4,11 @@ schema:
 dataSources:
   - kind: ethereum/contract
     name: captureTheStream
-    network: localhost
+    network: mumbai
     source:
-      address: "{{localhost_CaptureTheStreamAddress}}"
+      address: "{{mumbai_CaptureTheStreamAddress}}"
       abi: CaptureTheStream
-      startBlock: 1
+      startBlock: 27544515
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.6
@@ -18,15 +18,17 @@ dataSources:
         - Guess
       abis:
         - name: CaptureTheStream
-          file: ./abis/localhost_CaptureTheStream.json
+          file: ./abis/mumbai_CaptureTheStream.json
       eventHandlers:
         - event: InitiateRound(uint256,address,uint256,uint256,uint256,uint256,uint256,uint256,bool)
           handler: handleInitiateRound
-        - event: EnterRound(uint256,uint256,address,uint256,int256,uint256)
-          handler: handleEnterRound
+        - event: NewGuess(uint256,uint256,address,uint256,int256,uint256,uint256,uint256)
+          handler: handleNewGuess
         - event: EndWinner(uint256,uint256,address,int256,int256,uint256)
           handler: handleEndWinner
         - event: StartWinner(uint256,uint256,address,int256,int256)
           handler: handleStartWinner
+        - event: PowerUpEvent(string,address,uint256,string,string,uint256,uint256,bool,uint256)
+          handler: handlePowerUpEvent
 
       file: ./src/mapping.ts

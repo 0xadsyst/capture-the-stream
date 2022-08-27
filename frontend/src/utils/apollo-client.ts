@@ -6,7 +6,7 @@ const apolloClientLocalhost = new ApolloClient({
 })
 
 export const apolloClientMumbai = new ApolloClient({
-  uri: 'https://api.thegraph.com/subgraphs/name/0xadsyst/capture-the-stream-mumbai',
+  uri: 'https://api.thegraph.com/subgraphs/name/0xadsyst/cts-mumbai-cl-hackathon',
   cache: new InMemoryCache()
 })
 

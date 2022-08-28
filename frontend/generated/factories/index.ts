@@ -7,3 +7,5 @@ export { MockChainlinkAggregatorBTC__factory } from "./MockChainlinkAggregatorBT
 export { MockChainlinkAggregatorETH__factory } from "./MockChainlinkAggregatorETH__factory";
 export { MockChainlinkAggregatorMATIC__factory } from "./MockChainlinkAggregatorMATIC__factory";
 export { MockDAI__factory } from "./MockDAI__factory";
+export { MockVRFCoordinatorV2__factory } from "./MockVRFCoordinatorV2__factory";
+export { VRFv2Consumer__factory } from "./VRFv2Consumer__factory";

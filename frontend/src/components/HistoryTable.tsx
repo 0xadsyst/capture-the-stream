@@ -11,8 +11,7 @@ import { useEffect, useState, useContext } from 'react'
 
 // ** Web3
 import { RoundContext } from 'src/context/roundContext'
-import { RoundsContext } from 'src/context/roundsContext'
-import { GuessesContext } from 'src/context/guessesContext'
+import { SubgraphDataContext } from 'src/context/subgraphDataContext'
 import { useNetwork, useSigner } from 'wagmi'
 import { useRouter } from 'next/router'
 
@@ -29,8 +28,7 @@ const HistoryTable = () => {
   const [myAddress, setMyAddress] = useState<string>('')
   const [time, setTime] = useState(Date.now())
   const roundContext = useContext(RoundContext)
-  const roundsContext = useContext(RoundsContext)
-  const guessesContext = useContext(GuessesContext)
+  const subgraphDataContext = useContext(SubgraphDataContext)
   const { data: signer} = useSigner()
   const { chain } = useNetwork()
   const router = useRouter()
@@ -70,23 +68,23 @@ const HistoryTable = () => {
       profitLoss: 0
     }
 
-    for (let i = 0; i < roundsContext.rounds.length; i++) {
+    for (let i = 0; i < subgraphDataContext.rounds.length; i++) {
 
-      const roundGuesses = guessesContext.guesses.filter(guess => {
+      const roundGuesses = subgraphDataContext.guesses.filter(guess => {
         return (guess.user.toLowerCase() == myAddress.toLowerCase() && guess.roundId == i)
       })
       
       const entries = roundGuesses.length
       if (entries > 0) {
-        const entriesCost = roundsContext.rounds[i].guessCost * entries / 1e18
+        const entriesCost = subgraphDataContext.rounds[i].guessCost * entries / 1e18
         let roundWinningTime = 0
         roundGuesses.map(guess => {
           console.log(guess.id, guess.winningTime)
           roundWinningTime = +guess.winningTime
         })
         const winnings = parseFloat((
-          (roundsContext.rounds[i].deposits * roundWinningTime) /
-          (roundsContext.rounds[i].endTimestamp - roundsContext.rounds[i].startTimestamp) * 1e-18).toFixed(2))
+          (subgraphDataContext.rounds[i].deposits * roundWinningTime) /
+          (subgraphDataContext.rounds[i].endTimestamp - subgraphDataContext.rounds[i].startTimestamp) * 1e-18).toFixed(2))
         const profitLoss = winnings - entriesCost
         newRows.push({
           roundId: i.toString(),
@@ -103,7 +101,7 @@ const HistoryTable = () => {
     }
     newRows.push(totalsRow)
     setRows(newRows)
-  }, [myAddress, guessesContext.guesses, roundsContext.rounds])
+  }, [myAddress, subgraphDataContext.guesses, subgraphDataContext.rounds])
 
   if (!myAddress) {
     return <></>

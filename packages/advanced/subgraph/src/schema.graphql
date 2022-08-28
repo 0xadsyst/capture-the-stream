@@ -22,4 +22,18 @@ type Guess @entity {
   guess: BigInt!
   guessCost: BigInt!
   winningTime: BigInt!
+  disableEndTimestamp: BigInt!
+  enableEndTimestamp: BigInt!
+}
+
+type PowerUp @entity {
+  id: ID!
+  user: Bytes!
+  roundId: BigInt!
+  status: String!
+  typeOf: String!
+  length: BigInt!
+  endTime: BigInt!
+  selectableTarget: Boolean!
+  target: BigInt!
 }

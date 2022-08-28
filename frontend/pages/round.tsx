@@ -7,6 +7,9 @@ import RoundTable from 'src/components/RoundTable'
 import RoundSelector from 'src/components/RoundSelector'
 import RoundVisualization from 'src/components/RoundVisualization'
 import EnterRoundModal from 'src/components/EnterRoundModal'
+import GetPowerUpModal from 'src/components/GetPowerUpModal'
+import UsePowerUpModal from 'src/components/UsePowerUpModal'
+import PowerUpTable from 'src/components/PowerUpTable'
 
 // ** React
 import React from 'react'
@@ -24,12 +27,9 @@ const Round = () => {
         <Grid item xs={4} md={4}>
           <RoundSelector key={roundContext?.roundId} />
         </Grid>
-        <Grid item xs={4} md={4}>
-          <Box sx={{ mt: 2, mb: 2, ml: 2, mr: 2, textAlign: 'center' }}></Box>
-        </Grid>
-        <Grid item xs={4} md={4}>
-          <Box sx={{ mt: 2, mb: 2, ml: 2, mr: 2, textAlign: 'right' }}>
-            <EnterRoundModal />
+        <Grid item xs={8} md={8}>
+        <Box sx={{ mt: 2, mb: 2, ml: 2, mr: 2, textAlign: 'right' }}>
+        <UsePowerUpModal />{'   '}<GetPowerUpModal />{'   '}<EnterRoundModal />
           </Box>
         </Grid>
         <Grid item xs={12} md={12}>
@@ -37,6 +37,9 @@ const Round = () => {
         </Grid>
         <Grid item xs={12}>
           <RoundTable key={roundContext?.roundId} />
+        </Grid>
+        <Grid item xs={12}>
+          <PowerUpTable key={roundContext?.roundId} />
         </Grid>
       </Grid>
     </>

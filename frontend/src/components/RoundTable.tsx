@@ -6,14 +6,17 @@ import TableHead from '@mui/material/TableHead'
 import TableBody from '@mui/material/TableBody'
 import TableCell from '@mui/material/TableCell'
 import TableContainer from '@mui/material/TableContainer'
+import Tooltip from '@mui/material/Tooltip';
+import CardHeader from '@mui/material/CardHeader'
+import { Typography } from '@mui/material'
 
 import { useEffect, useState, useContext } from 'react'
 import usePrice from 'src/hooks/usePrice'
+import {getGuessRanges} from 'src/utils/guesshelpers'
 
 // ** Web3
 import { RoundContext } from 'src/context/roundContext'
-import { RoundsContext } from 'src/context/roundsContext'
-import { GuessesContext } from 'src/context/guessesContext'
+import { SubgraphDataContext } from 'src/context/subgraphDataContext'
 import { useNetwork, useSigner } from 'wagmi'
 import dayjs from 'dayjs'
 
@@ -24,7 +27,8 @@ interface RowType {
   difference: number
   winningTime: number
   winnings: string
-  priceNeeded: string
+  winningRange: string
+  tempStatus: string
   border: number
   borderColor: string
 }
@@ -34,14 +38,15 @@ const RoundTable = () => {
   const [time, setTime] = useState(Date.now())
   const [oracle, setOracle] = useState<string>()
   const roundContext = useContext(RoundContext)
-  const roundsContext = useContext(RoundsContext)
-  const guessesContext = useContext(GuessesContext)
+  const subgraphDataContext = useContext(SubgraphDataContext)
   const [myChain, setMyChain] = useState<number>()
   const { chain } = useNetwork()
 
   useEffect(() => {
     chain ? setMyChain(chain.id) : ''
   }, [chain])
+
+  useEffect
 
   const price = usePrice(oracle ?? null)
 
@@ -56,41 +61,48 @@ const RoundTable = () => {
   useEffect(() => {
     if (roundContext?.roundId != null) {
       const newRows: RowType[] = []
-      const roundData = roundsContext.rounds[roundContext.roundId]
-      setOracle(roundsContext.rounds[roundContext.roundId].oracle)
+      const roundData = subgraphDataContext.rounds[roundContext.roundId]
+      setOracle(subgraphDataContext.rounds[roundContext.roundId].oracle)
 
-      const sortedData = [...guessesContext.guesses]
+      const sortedData = [...subgraphDataContext.guesses]
         .filter(g => {
           return g.roundId == roundContext?.roundId
         })
         .sort((a, b) => a.guess - b.guess)
 
+      const guessRanges = getGuessRanges(subgraphDataContext.guesses, roundContext.roundId)
+
       sortedData.map((guessData, index) => {
-        let priceNeeded = ''
+        let winningRange = ''
         let winningTime = guessData['winningTime']
 
-        let lower = '0'
-        let upper = 'Infinity'
         const borderColor = '#F4D35E'
         let border = 0
         let decimalsForDisplay = 3
         price > 10  ? decimalsForDisplay = 2 : decimalsForDisplay = 3
         price > 100 ? decimalsForDisplay = 1 : decimalsForDisplay = 2
         price > 1000 ? decimalsForDisplay = 0 : decimalsForDisplay = 1
-        if (index != 0) {
-          lower = ((+guessData['guess'] + +sortedData[index - 1].guess) / 2).toFixed(decimalsForDisplay)
-        }
-        if (index != sortedData.length - 1) {
-          upper = ((+guessData['guess'] + +sortedData[index + 1].guess) / 2).toFixed(decimalsForDisplay)
-        }
-        if (lower == '0' && upper == 'Infinity') {
-          priceNeeded = '0 - Infinity'
-        } else if (lower == '0') {
-          priceNeeded = '<' + upper
-        } else if (upper == 'Infinity') {
-          priceNeeded = '>' + lower
+
+        const lower = guessRanges[guessData.guessId].lower
+        const upper = guessRanges[guessData.guessId].upper
+        const disabled =
+        (guessData.disableEndTimestamp ?? Number.MAX_SAFE_INTEGER) > dayjs().unix() ||
+        (guessData.enableEndTimestamp ?? 0) < dayjs().unix()
+      const temporary = (guessData.enableEndTimestamp ?? 0) < roundData.endTimestamp      
+
+        if (disabled) {
+          winningRange = 'Disabled'
+        } else if (lower == 0 && upper == Number.MAX_SAFE_INTEGER) {
+          winningRange = '0 - Infinity'
+        } else if (lower == 0) {
+          winningRange = '< ' + upper.toFixed(decimalsForDisplay)
+        } else if (upper == Number.MAX_SAFE_INTEGER) {
+          winningRange = '> ' + lower.toFixed(decimalsForDisplay)
         } else {
-          priceNeeded = lower + '-' + upper
+          winningRange = lower.toFixed(decimalsForDisplay) + '-' + upper.toFixed(decimalsForDisplay)
+        }
+        if (!disabled && temporary) {
+          winningRange += ' (Temp)'
         }
 
         if (roundData?.currentWinner == guessData.guessId) {
@@ -109,15 +121,30 @@ const RoundTable = () => {
           dayjs().unix() > roundData.startTimestamp
             ? (winningTime * roundData.deposits) / ((roundData.endTimestamp - roundData.startTimestamp) * 1e18)
             : 0
+
+        let tempStatus = ''
+        if (guessData.disableEndTimestamp > dayjs().unix()) {
+          tempStatus = 'Disabled until ' + dayjs(guessData.disableEndTimestamp * 1000).format('MMM D h:mm a')
+        }
+        if (guessData.enableEndTimestamp < roundData.endTimestamp) {
+          tempStatus = 'Enabled until ' + dayjs(guessData.enableEndTimestamp * 1000).format('MMM D h:mm a')
+        }
+
+        const hideOldTempGuesses = false
+
+        if (guessData.enableEndTimestamp < dayjs().unix() && hideOldTempGuesses) {
+          return
+        }
         if (guessData['roundId'] == roundContext?.roundId) {
           newRows.push({
             guessId: guessData['guessId'],
-            user: guessData['user'],
+            user: guessData['user'].substring(0,7),
             guess: guessData['guess'],
             difference: parseFloat(((price ?? guessData['guess']) - guessData['guess']).toFixed(decimalsForDisplay)),
             winningTime: winningTime,
             winnings: winnings.toFixed(4),
-            priceNeeded: priceNeeded,
+            winningRange: winningRange,
+            tempStatus: tempStatus,
             border: border,
             borderColor: borderColor
           })
@@ -127,18 +154,21 @@ const RoundTable = () => {
 
       setRows(newRows)
     }
-  }, [guessesContext.guesses, price, time, roundContext, roundsContext])
+  }, [subgraphDataContext.guesses, price, time, roundContext, subgraphDataContext])
 
   if (!myChain) {
     return <></>
   } else {
     return (
       <Card>
+        <Typography sx={{ fontSize: 18, mt: 2, ml: 5, fontWeight: 'bold'}} color="text.secondary" gutterBottom>
+          Guesses
+        </Typography>
         <TableContainer>
           <Table sx={{ minWidth: 800 }} aria-label='table in dashboard'>
             <TableHead>
               <TableRow>
-                <TableCell>Guess ID</TableCell>
+                <TableCell>ID</TableCell>
                 <TableCell>User</TableCell>
                 <TableCell>Guess</TableCell>
                 <TableCell>Difference</TableCell>
@@ -163,7 +193,7 @@ const RoundTable = () => {
                   <TableCell>{row.difference}</TableCell>
                   <TableCell>{row.winningTime}</TableCell>
                   <TableCell>{row.winnings + ' DAI'}</TableCell>
-                  <TableCell>{row.priceNeeded}</TableCell>
+                  <Tooltip key={row.guessId} title={row.tempStatus} placement="bottom" arrow><TableCell>{row.winningRange}</TableCell></Tooltip>
                 </TableRow>
               ))}
             </TableBody>

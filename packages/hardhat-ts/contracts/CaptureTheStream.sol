@@ -3,6 +3,8 @@ pragma solidity ^0.8.7;
 
 import "@chainlink/contracts/src/v0.8/interfaces/AggregatorV3Interface.sol";
 import "@chainlink/contracts/src/v0.8/KeeperCompatible.sol";
+import "@chainlink/contracts/src/v0.8/VRFConsumerBaseV2.sol";
+import "@chainlink/contracts/src/v0.8/interfaces/VRFCoordinatorV2Interface.sol";
 import "@openzeppelin/contracts/utils/math/Math.sol";
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import "@openzeppelin/contracts/utils/math/SignedSafeMath.sol";
@@ -17,7 +19,7 @@ import "@openzeppelin/contracts/access/Ownable.sol";
  * @title Capture the Stream
  * @author Adsyst (https://github.com/0xadsyst)
  */
-contract CaptureTheStream is KeeperCompatibleInterface, Ownable {
+contract CaptureTheStream is KeeperCompatibleInterface, VRFConsumerBaseV2, Ownable {
     using SafeMath for uint256;
     using SignedSafeMath for int256;
     using SafeERC20 for IERC20;
@@ -42,6 +44,8 @@ contract CaptureTheStream is KeeperCompatibleInterface, Ownable {
         address user;
         int256 guess;
         uint256 timeWinning;
+        uint256 disableEndTimestamp;
+        uint256 enableEndTimestamp;
     }
 
     mapping(address => uint256) public deposits;
@@ -52,14 +56,17 @@ contract CaptureTheStream is KeeperCompatibleInterface, Ownable {
 
     event Deposit(address user, uint256 depositAmount, uint256 balance);
     event Withdraw(address user, uint256 withdrawAmount, uint256 balance);
-    event EnterRound(
+    event NewGuess(
         uint256 roundId,
         uint256 guessIndex,
         address user,
         uint256 balance,
         int256 guess,
-        uint256 guessCost
+        uint256 guessCost,
+        uint256 disableEndTimestamp,
+        uint256 enableEndTimestamp
     );
+
     event StartWinner(
         uint256 roundId,
         uint256 winningGuessIndex,
@@ -89,8 +96,42 @@ contract CaptureTheStream is KeeperCompatibleInterface, Ownable {
         bool inRoundGuessesAllowed
     );
 
-    constructor() {
-        depositAsset = IERC20(0xE81Fca457ba225C7D0921207f0b24444b9303944); // MockDAI
+    event PowerUpEvent(
+        string id,
+        address user,
+        uint256 roundId,
+        string status,
+        string typeOf,
+        uint256 length,
+        uint256 endTime,
+        bool selectableTarget,
+        uint256 target
+    );
+
+    struct PowerUp {
+        address user;
+        uint256 roundId;
+        string status;
+        string typeOf;
+        uint256 length;
+        uint256 endTime;
+        bool selectableTarget;
+        uint256 target;
+    }
+
+    mapping(string => PowerUp) powerUps;
+
+    bytes32 keyHash;
+    uint64 s_subscriptionId;
+    VRFCoordinatorV2Interface COORDINATOR;
+    address public vrfCoordinator;
+
+    constructor(uint64 subscriptionId, address _vrfCoordinator, address _depositAsset, bytes32 _keyHash) VRFConsumerBaseV2(_vrfCoordinator) {
+        COORDINATOR = VRFCoordinatorV2Interface(_vrfCoordinator);
+        vrfCoordinator = _vrfCoordinator;
+        s_subscriptionId = subscriptionId;
+        depositAsset = IERC20(_depositAsset);
+        keyHash = _keyHash;
     }
 
     /**
@@ -138,26 +179,9 @@ contract CaptureTheStream is KeeperCompatibleInterface, Ownable {
         rounds[roundCount].lastWinnerChange = _startTimestamp;
         rounds[roundCount].roundClosed = false;
 
-        emitInitiateRound();
-
         roundCount++;
-    }
 
-    /**
-     * @notice Function to complete initiate round event emission.
-     */
-    function emitInitiateRound() internal {
-        emit InitiateRound(
-            roundCount,
-            rounds[roundCount].oracle,
-            rounds[roundCount].startTimestamp,
-            rounds[roundCount].endTimestamp,
-            rounds[roundCount].guessCutOffTimestamp,
-            rounds[roundCount].numberOfGuessesAllowed,
-            rounds[roundCount].minimumGuessSpacing,
-            rounds[roundCount].guessCost,
-            rounds[roundCount].inRoundGuessesAllowed
-        );
+        emitInitiateRound(roundCount.sub(1));
     }
 
     /**
@@ -204,24 +228,10 @@ contract CaptureTheStream is KeeperCompatibleInterface, Ownable {
             "Round guesses are full"
         );
 
-        for (uint256 i = 0; i < round.guesses.length; i++) {
-            uint256 guessDiff = SignedMath.abs(_guess - round.guesses[i].guess);
-            require(guessDiff >= round.minimumGuessSpacing, "Too close to another guess");
-        }
-
-        Guess memory newGuess = Guess({ user: msg.sender, guess: _guess, timeWinning: 0 });
-        rounds[_roundId].guesses.push(newGuess);
         deposits[msg.sender] = deposits[msg.sender].sub(round.guessCost);
         rounds[_roundId].deposits = round.deposits.add(round.guessCost);
 
-        emit EnterRound(
-            _roundId,
-            rounds[_roundId].guesses.length - 1,
-            msg.sender,
-            deposits[msg.sender],
-            _guess,
-            round.guessCost
-        );
+        newGuess(msg.sender, _roundId, _guess, round.endTimestamp, round.guessCost, false);
     }
 
     /**
@@ -299,11 +309,17 @@ contract CaptureTheStream is KeeperCompatibleInterface, Ownable {
         uint256 minPriceDifference = 2**256 - 1;
 
         for (uint256 i = 0; i < rounds[_roundId].guesses.length; i++) {
-            uint256 priceDifference = SignedMath.abs(_price.sub(rounds[_roundId].guesses[i].guess));
 
-            if (priceDifference < minPriceDifference) {
-                bestGuessIndex = i;
-                minPriceDifference = priceDifference;
+            if (
+                block.timestamp > rounds[_roundId].guesses[i].disableEndTimestamp &&
+                block.timestamp < rounds[_roundId].guesses[i].enableEndTimestamp
+            ) {
+                uint256 priceDifference = SignedMath.abs(_price.sub(rounds[_roundId].guesses[i].guess));
+
+                if (priceDifference < minPriceDifference) {
+                    bestGuessIndex = i;
+                    minPriceDifference = priceDifference;
+                }
             }
         }
         return bestGuessIndex;
@@ -315,9 +331,12 @@ contract CaptureTheStream is KeeperCompatibleInterface, Ownable {
      * @return upkeepNeeded True if upkeep is required.
      * @return performData Data for the upkeep, an encoded uint256 array of round numbers to be updated.
      */
-    function checkUpkeep(
-        bytes calldata checkData
-    ) external view override returns (bool upkeepNeeded, bytes memory performData) {
+    function checkUpkeep(bytes calldata checkData)
+        external
+        view
+        override
+        returns (bool upkeepNeeded, bytes memory performData)
+    {
         (uint256 updatesRequired, uint256[] memory roundsToUpdate) = getRoundsToUpdate();
         upkeepNeeded = updatesRequired > 0;
         uint256[] memory roundsToUpdateFinal = new uint256[](updatesRequired);
@@ -362,5 +381,204 @@ contract CaptureTheStream is KeeperCompatibleInterface, Ownable {
         for (uint256 i = 0; i < roundsToUpdate.length; i++) {
             updateRound(roundsToUpdate[i], false);
         }
+    }
+
+    function getPowerUp(uint256 _roundId) public {
+        uint256 powerUpCost = rounds[_roundId].guessCost.div(2);
+        require(deposits[msg.sender] >= powerUpCost, "Not enough funds to get a power up");
+        require(block.timestamp <= rounds[_roundId].endTimestamp, "Round has finished");
+        require(block.timestamp >= rounds[_roundId].startTimestamp, "Round has not started");
+        require((rounds[_roundId].guesses.length > 0), "Round must have at least one guess");
+
+
+        PowerUp memory powerUp = PowerUp({
+            user: msg.sender,
+            roundId: _roundId,
+            status: "UNFULFILLED",
+            typeOf: "FREE_GUESS",
+            length: 0,
+            endTime: 0,
+            selectableTarget: false,
+            target: 0
+        });
+
+        deposits[msg.sender] = deposits[msg.sender].sub(powerUpCost);
+        rounds[_roundId].deposits = rounds[_roundId].deposits.add(powerUpCost);
+
+        uint256 requestId = requestRandomWords();
+        string memory powerUpId = Strings.toString(requestId);
+        powerUps[powerUpId] = powerUp;
+        emitPowerUpEvent(powerUpId);
+    }
+
+    function requestRandomWords() internal returns (uint256 requestId) {
+        uint32 callbackGasLimit = 1000000;
+        uint32 numWords = 3;
+        uint16 requestConfirmations = 3;
+
+        requestId = COORDINATOR.requestRandomWords(
+            keyHash,
+            s_subscriptionId,
+            requestConfirmations,
+            callbackGasLimit,
+            numWords
+        );
+        return requestId;
+    }
+
+    function fulfillRandomWords(uint256 requestId, uint256[] memory randomWords) internal override {
+        string memory powerUpId = Strings.toString(requestId);
+        fulfillPowerUp(powerUpId, randomWords);
+    }
+
+    function fulfillPowerUp(string memory _powerUpId, uint256[] memory _randomWords) public {
+        string[3] memory powerUpTypes = ["DISABLE_GUESS", "TAKEOVER_GUESS", "FREE_GUESS"];
+        string memory typeOf = powerUpTypes[_randomWords[0].mod(powerUpTypes.length)];
+        uint256 length = _randomWords[1].mod(50).add(25);
+        uint256 roundGuessCount = rounds[powerUps[_powerUpId].roundId].guesses.length;
+        uint256 target = (_randomWords[2].mod(roundGuessCount * 2));
+        bool selectableTarget = false;
+        if (target >= roundGuessCount) {
+            selectableTarget = true;
+            target = 0;
+        }
+
+        powerUps[_powerUpId].typeOf = typeOf;
+        powerUps[_powerUpId].length = length;
+        powerUps[_powerUpId].selectableTarget = selectableTarget;
+        powerUps[_powerUpId].target = target;
+        powerUps[_powerUpId].status = "READY";
+
+        if (
+            !selectableTarget &&
+            (keccak256(abi.encodePacked(typeOf)) != keccak256(abi.encodePacked("FREE_GUESS"))) &&
+            rounds[powerUps[_powerUpId].roundId].guesses[target].user == powerUps[_powerUpId].user
+        ) {
+            usePowerUp(_powerUpId, target, 0);
+        }
+        emitPowerUpEvent(_powerUpId);
+    }
+
+    function usePowerUp(
+        string memory _powerUpId,
+        uint256 _target,
+        int256 _guess
+    ) public {
+        PowerUp memory powerUp = powerUps[_powerUpId];
+        Round memory round = rounds[powerUp.roundId];
+
+        require(msg.sender == powerUp.user || msg.sender == vrfCoordinator, "You are not the owner of the power up");
+        require(
+            keccak256(abi.encodePacked(powerUp.status)) == keccak256(abi.encodePacked("READY")),
+            "Power up is not ready or already used"
+        );
+        require(_target < round.guesses.length, "Invalid target for power up");
+        require(block.timestamp <= round.endTimestamp, "Round has finished");
+
+        uint256 roundTimeRemaining = round.endTimestamp.sub(block.timestamp);
+        powerUps[_powerUpId].endTime = block.timestamp.add(roundTimeRemaining.mul(powerUp.length).div(100));
+
+        if (powerUps[_powerUpId].selectableTarget) {
+            powerUps[_powerUpId].target = _target;
+        } else {
+            _target = powerUps[_powerUpId].target;
+        }
+
+        if (keccak256(abi.encodePacked(powerUp.typeOf)) == keccak256(abi.encodePacked("DISABLE_GUESS"))) {
+            require(
+                rounds[powerUp.roundId].guesses[_target].disableEndTimestamp < powerUps[_powerUpId].endTime,
+                "Target already disabled for longer"
+            );
+            rounds[powerUp.roundId].guesses[_target].disableEndTimestamp = powerUps[_powerUpId].endTime;
+        } else if (keccak256(abi.encodePacked(powerUp.typeOf)) == keccak256(abi.encodePacked("TAKEOVER_GUESS"))) {
+            require(
+                rounds[powerUp.roundId].guesses[_target].disableEndTimestamp < powerUps[_powerUpId].endTime,
+                "Target already disabled for longer"
+            );
+            rounds[powerUp.roundId].guesses[_target].disableEndTimestamp = powerUps[_powerUpId].endTime;
+            newGuess(
+                powerUp.user,
+                powerUp.roundId,
+                round.guesses[_target].guess,
+                powerUps[_powerUpId].endTime,
+                0,
+                true
+            );
+        } else if (keccak256(abi.encodePacked(powerUp.typeOf)) == keccak256(abi.encodePacked("FREE_GUESS"))) {
+            newGuess(powerUp.user, powerUp.roundId, _guess, round.endTimestamp, 0, false);
+        }
+
+        powerUps[_powerUpId].status = "USED";
+        emitPowerUpEvent(_powerUpId);
+    }
+
+    function newGuess(
+        address _user,
+        uint256 _roundId,
+        int256 _guess,
+        uint256 _enableEndTimestamp,
+        uint256 _guessCost,
+        bool _isTakeover
+    ) internal {
+        Round memory round = rounds[_roundId];
+        for (uint256 i = 0; i < round.guesses.length; i++) {
+            uint256 guessDiff = SignedMath.abs(_guess - round.guesses[i].guess);
+            require(
+                _isTakeover || (guessDiff != 0 && guessDiff >= round.minimumGuessSpacing),
+                "Too close to another guess"
+            );
+        }
+
+        rounds[_roundId].guesses.push(
+            Guess({
+                user: _user,
+                guess: _guess,
+                timeWinning: 0,
+                disableEndTimestamp: 0,
+                enableEndTimestamp: _enableEndTimestamp
+            })
+        );
+
+        emit NewGuess(
+            _roundId,
+            rounds[_roundId].guesses.length - 1,
+            _user,
+            deposits[_user],
+            _guess,
+            _guessCost,
+            0,
+            _enableEndTimestamp
+        );
+    }
+
+    /**
+     * @notice Function to complete initiate round event emission.
+     */
+    function emitInitiateRound(uint256 _roundCount) internal {
+        emit InitiateRound(
+            _roundCount,
+            rounds[_roundCount].oracle,
+            rounds[_roundCount].startTimestamp,
+            rounds[_roundCount].endTimestamp,
+            rounds[_roundCount].guessCutOffTimestamp,
+            rounds[_roundCount].numberOfGuessesAllowed,
+            rounds[_roundCount].minimumGuessSpacing,
+            rounds[_roundCount].guessCost,
+            rounds[_roundCount].inRoundGuessesAllowed
+        );
+    }
+
+        function emitPowerUpEvent(string memory _powerUpId) internal {
+        emit PowerUpEvent(
+            _powerUpId,
+            powerUps[_powerUpId].user,
+            powerUps[_powerUpId].roundId,
+            powerUps[_powerUpId].status,
+            powerUps[_powerUpId].typeOf,
+            powerUps[_powerUpId].length,
+            powerUps[_powerUpId].endTime,
+            powerUps[_powerUpId].selectableTarget,
+            powerUps[_powerUpId].target
+        );
     }
 }

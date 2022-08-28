@@ -11,9 +11,46 @@ import type {
 
 const _abi = [
   {
-    inputs: [],
+    inputs: [
+      {
+        internalType: "uint64",
+        name: "subscriptionId",
+        type: "uint64",
+      },
+      {
+        internalType: "address",
+        name: "_vrfCoordinator",
+        type: "address",
+      },
+      {
+        internalType: "address",
+        name: "_depositAsset",
+        type: "address",
+      },
+      {
+        internalType: "bytes32",
+        name: "_keyHash",
+        type: "bytes32",
+      },
+    ],
     stateMutability: "nonpayable",
     type: "constructor",
+  },
+  {
+    inputs: [
+      {
+        internalType: "address",
+        name: "have",
+        type: "address",
+      },
+      {
+        internalType: "address",
+        name: "want",
+        type: "address",
+      },
+    ],
+    name: "OnlyCoordinatorCanFulfill",
+    type: "error",
   },
   {
     anonymous: false,
@@ -94,49 +131,6 @@ const _abi = [
       },
       {
         indexed: false,
-        internalType: "uint256",
-        name: "guessIndex",
-        type: "uint256",
-      },
-      {
-        indexed: false,
-        internalType: "address",
-        name: "user",
-        type: "address",
-      },
-      {
-        indexed: false,
-        internalType: "uint256",
-        name: "balance",
-        type: "uint256",
-      },
-      {
-        indexed: false,
-        internalType: "int256",
-        name: "guess",
-        type: "int256",
-      },
-      {
-        indexed: false,
-        internalType: "uint256",
-        name: "guessCost",
-        type: "uint256",
-      },
-    ],
-    name: "EnterRound",
-    type: "event",
-  },
-  {
-    anonymous: false,
-    inputs: [
-      {
-        indexed: false,
-        internalType: "uint256",
-        name: "roundId",
-        type: "uint256",
-      },
-      {
-        indexed: false,
         internalType: "address",
         name: "oracle",
         type: "address",
@@ -191,6 +185,61 @@ const _abi = [
     anonymous: false,
     inputs: [
       {
+        indexed: false,
+        internalType: "uint256",
+        name: "roundId",
+        type: "uint256",
+      },
+      {
+        indexed: false,
+        internalType: "uint256",
+        name: "guessIndex",
+        type: "uint256",
+      },
+      {
+        indexed: false,
+        internalType: "address",
+        name: "user",
+        type: "address",
+      },
+      {
+        indexed: false,
+        internalType: "uint256",
+        name: "balance",
+        type: "uint256",
+      },
+      {
+        indexed: false,
+        internalType: "int256",
+        name: "guess",
+        type: "int256",
+      },
+      {
+        indexed: false,
+        internalType: "uint256",
+        name: "guessCost",
+        type: "uint256",
+      },
+      {
+        indexed: false,
+        internalType: "uint256",
+        name: "disableEndTimestamp",
+        type: "uint256",
+      },
+      {
+        indexed: false,
+        internalType: "uint256",
+        name: "enableEndTimestamp",
+        type: "uint256",
+      },
+    ],
+    name: "NewGuess",
+    type: "event",
+  },
+  {
+    anonymous: false,
+    inputs: [
+      {
         indexed: true,
         internalType: "address",
         name: "previousOwner",
@@ -204,6 +253,67 @@ const _abi = [
       },
     ],
     name: "OwnershipTransferred",
+    type: "event",
+  },
+  {
+    anonymous: false,
+    inputs: [
+      {
+        indexed: false,
+        internalType: "string",
+        name: "id",
+        type: "string",
+      },
+      {
+        indexed: false,
+        internalType: "address",
+        name: "user",
+        type: "address",
+      },
+      {
+        indexed: false,
+        internalType: "uint256",
+        name: "roundId",
+        type: "uint256",
+      },
+      {
+        indexed: false,
+        internalType: "string",
+        name: "status",
+        type: "string",
+      },
+      {
+        indexed: false,
+        internalType: "string",
+        name: "typeOf",
+        type: "string",
+      },
+      {
+        indexed: false,
+        internalType: "uint256",
+        name: "length",
+        type: "uint256",
+      },
+      {
+        indexed: false,
+        internalType: "uint256",
+        name: "endTime",
+        type: "uint256",
+      },
+      {
+        indexed: false,
+        internalType: "bool",
+        name: "selectableTarget",
+        type: "bool",
+      },
+      {
+        indexed: false,
+        internalType: "uint256",
+        name: "target",
+        type: "uint256",
+      },
+    ],
+    name: "PowerUpEvent",
     type: "event",
   },
   {
@@ -263,6 +373,16 @@ const _abi = [
             name: "timeWinning",
             type: "uint256",
           },
+          {
+            internalType: "uint256",
+            name: "disableEndTimestamp",
+            type: "uint256",
+          },
+          {
+            internalType: "uint256",
+            name: "enableEndTimestamp",
+            type: "uint256",
+          },
         ],
         indexed: false,
         internalType: "struct CaptureTheStream.Guess[]",
@@ -302,7 +422,7 @@ const _abi = [
     inputs: [
       {
         internalType: "bytes",
-        name: "",
+        name: "checkData",
         type: "bytes",
       },
     ],
@@ -388,6 +508,24 @@ const _abi = [
   {
     inputs: [
       {
+        internalType: "string",
+        name: "_powerUpId",
+        type: "string",
+      },
+      {
+        internalType: "uint256[]",
+        name: "_randomWords",
+        type: "uint256[]",
+      },
+    ],
+    name: "fulfillPowerUp",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
         internalType: "address",
         name: "_oracle",
         type: "address",
@@ -412,32 +550,9 @@ const _abi = [
         type: "uint256",
       },
     ],
-    name: "getRoundGuesses",
-    outputs: [
-      {
-        components: [
-          {
-            internalType: "address",
-            name: "user",
-            type: "address",
-          },
-          {
-            internalType: "int256",
-            name: "guess",
-            type: "int256",
-          },
-          {
-            internalType: "uint256",
-            name: "timeWinning",
-            type: "uint256",
-          },
-        ],
-        internalType: "struct CaptureTheStream.Guess[]",
-        name: "",
-        type: "tuple[]",
-      },
-    ],
-    stateMutability: "view",
+    name: "getPowerUp",
+    outputs: [],
+    stateMutability: "nonpayable",
     type: "function",
   },
   {
@@ -528,6 +643,24 @@ const _abi = [
       },
     ],
     name: "performUpkeep",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "uint256",
+        name: "requestId",
+        type: "uint256",
+      },
+      {
+        internalType: "uint256[]",
+        name: "randomWords",
+        type: "uint256[]",
+      },
+    ],
+    name: "rawFulfillRandomWords",
     outputs: [],
     stateMutability: "nonpayable",
     type: "function",
@@ -668,6 +801,42 @@ const _abi = [
     name: "updateRound",
     outputs: [],
     stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "string",
+        name: "_powerUpId",
+        type: "string",
+      },
+      {
+        internalType: "uint256",
+        name: "_target",
+        type: "uint256",
+      },
+      {
+        internalType: "int256",
+        name: "_guess",
+        type: "int256",
+      },
+    ],
+    name: "usePowerUp",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [],
+    name: "vrfCoordinator",
+    outputs: [
+      {
+        internalType: "address",
+        name: "",
+        type: "address",
+      },
+    ],
+    stateMutability: "view",
     type: "function",
   },
   {

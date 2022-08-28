@@ -28,8 +28,8 @@
       "~common/*": ["../common/src/*"]
     }
   },
-  "include": ["types", "scripts", "test", "helpers", "./hardhat.config.ts", "deploy", "tasks", "scripts"],
-  "exclude": ["**/node_modules"],
+  "include": ["types", "test", "helpers", "./hardhat.config.ts", "deploy", "tasks", "scripts"],
+  "exclude": ["**/node_modules", "scripts"],
   "ts-node": {
     "compilerOptions": {
       "module": "CommonJS"

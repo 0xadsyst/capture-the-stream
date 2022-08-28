@@ -9,7 +9,7 @@ import Typography from '@mui/material/Typography'
 import CardContent from '@mui/material/CardContent'
 
 import { RoundContext } from 'src/context/roundContext'
-import { RoundsContext, RoundType } from 'src/context/roundsContext'
+import { SubgraphDataContext, RoundType } from 'src/context/subgraphDataContext'
 import { useContext, useEffect, useState } from 'react'
 
 // ** Next
@@ -28,7 +28,7 @@ interface Props {
 
 const RoundOverview = (props: Props) => {
   const [roundOverviewCards, setroundOverviewCards] = useState<any[]>([])
-  const roundsContext = useContext(RoundsContext)
+  const subgraphDataContext = useContext(SubgraphDataContext)
   const roundContext = useContext(RoundContext)
   const { data: signer} = useSigner()
   const { chain } = useNetwork()
@@ -42,14 +42,14 @@ const RoundOverview = (props: Props) => {
   }
 
   useEffect(() => {
-    console.log('roundsContext.rounds', roundsContext.rounds)
+    console.log('subgraphDataContext.rounds', subgraphDataContext.rounds)
     const newroundOverviewCards: any[] = []
-    roundsContext?.rounds?.map(round => {
+    subgraphDataContext?.rounds?.map(round => {
       if (props.showFinishedRounds || round.endTimestamp > dayjs().unix())
       newroundOverviewCards.push(createRoundOverviewCard(round))
     })
     setroundOverviewCards(newroundOverviewCards)
-  }, [roundsContext.rounds, chain?.id])
+  }, [subgraphDataContext.rounds, chain?.id])
 
 
   function createRoundOverviewCard(round: RoundType) {

@@ -22,11 +22,13 @@ dataSources:
       eventHandlers:
         - event: InitiateRound(uint256,address,uint256,uint256,uint256,uint256,uint256,uint256,bool)
           handler: handleInitiateRound
-        - event: EnterRound(uint256,uint256,address,uint256,int256,uint256)
-          handler: handleEnterRound
+        - event: NewGuess(uint256,uint256,address,uint256,int256,uint256,uint256,uint256)
+          handler: handleNewGuess
         - event: EndWinner(uint256,uint256,address,int256,int256,uint256)
           handler: handleEndWinner
         - event: StartWinner(uint256,uint256,address,int256,int256)
           handler: handleStartWinner
+        - event: PowerUpEvent(string,address,uint256,string,string,uint256,uint256,bool,uint256)
+          handler: handlePowerUpEvent
 
       file: ./src/mapping.ts

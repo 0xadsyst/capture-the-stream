@@ -15,6 +15,8 @@ import { HardhatUserConfig } from 'hardhat/config';
 import { getMnemonic } from './tasks/functions/mnemonic';
 import { solidity } from 'ethereum-waffle';
 //require('solidity-coverage');
+import '@nomiclabs/hardhat-solhint';
+require('hardhat-ethernal');
 
 /**
  * ⛳️⛳️⛳️⛳️⛳️⛳️⛳️⛳️⛳️⛳️
@@ -134,6 +136,6 @@ export const config: HardhatUserConfig = {
   typechain: {
     outDir: './generated/contract-types',
     discriminateTypes: true,
-  },
+  }
 };
 export default config;

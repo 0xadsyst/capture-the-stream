@@ -51,6 +51,11 @@ export const appContractsConfig = () => {
         hardhatContracts.MockDAI__factory,
         hardhatDeployedContractsJson
       ),
+      MockVRFCoordinatorV2: createConnectorForHardhatContract(
+        'MockVRFCoordinatorV2',
+        hardhatContracts.MockVRFCoordinatorV2__factory,
+        hardhatDeployedContractsJson
+      ),
       // --------------------------------------------------
       // 🙋🏽‍♂️ Add your external contracts here, make sure to define the address in `externalContractsConfig.ts`Í
       // --------------------------------------------------

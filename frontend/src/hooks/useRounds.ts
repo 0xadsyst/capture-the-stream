@@ -4,7 +4,7 @@ import {  useEffect, useState } from 'react'
 import { useQuery, getApolloContext} from '@apollo/react-components'
 import { ROUNDS_QUERY } from 'src/constants/queries/queries'
 import { useContext } from 'react'
-import { RoundsContext, RoundType } from 'src/context/roundsContext'
+import { SubgraphDataContext, RoundType } from 'src/context/subgraphDataContext'
 
 
 interface RoundDataType {
@@ -30,7 +30,7 @@ const useRounds = () => {
   const [queryData, setQueryData] = useState(emptyRoundData)
   const [roundList, setRoundList] = useState<RoundType[]>([])
 
-  const roundsContext = useContext(RoundsContext)
+  const subgraphDataContext = useContext(SubgraphDataContext)
   const apolloContext = useContext(getApolloContext())
 
   const { loading, error, data } = useQuery(ROUNDS_QUERY, {
@@ -68,7 +68,7 @@ const useRounds = () => {
     })
     )
     setRoundList(roundList)
-    roundsContext?.setRounds(roundList)
+    subgraphDataContext?.setRounds(roundList)
   },[queryData])
 
   return roundList

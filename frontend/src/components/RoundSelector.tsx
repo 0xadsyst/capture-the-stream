@@ -9,13 +9,13 @@ import InputLabel from '@mui/material/InputLabel'
 import { useEffect, useState } from 'react'
 
 // ** Web3
-import { RoundsContext, RoundType } from 'src/context/roundsContext' 
+import { SubgraphDataContext, RoundType } from 'src/context/subgraphDataContext' 
 import { RoundContext } from 'src/context/roundContext'
 
 const emptyList = [<MenuItem value={0} key ="">0</MenuItem>]
 
 const RoundSelector = () => {
-  const roundsContext = useContext(RoundsContext)
+  const subgraphDataContext = useContext(SubgraphDataContext)
   const roundContext = useContext(RoundContext)
 
   const [items, setItems] = useState<any[]>([])
@@ -28,8 +28,8 @@ const RoundSelector = () => {
   }
 
   useEffect(() => {
-    if (roundsContext.rounds) {
-      const newItemList = roundsContext.rounds.map(r => {
+    if (subgraphDataContext.rounds) {
+      const newItemList = subgraphDataContext.rounds.map(r => {
         return (
           <MenuItem value={r.roundId} key={r.roundId}>
             {r.roundId}
@@ -38,11 +38,11 @@ const RoundSelector = () => {
       })
       setItems(newItemList)
     }
-  }, [roundsContext.rounds])
+  }, [subgraphDataContext.rounds])
 
   return (
     <FormControl fullWidth>
-      <InputLabel id='demo-simple-select-label'>Round</InputLabel>
+      <InputLabel id='round-select-label'>Round</InputLabel>
       <Select labelId='roundId-label' id='roundId-select' value={selectedValue} label='Round' onChange={handleChange}>
         {items}
       </Select>

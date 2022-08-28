@@ -13,5 +13,5 @@ export const AssetLogo = (props: Props) => {
     props.asset == 'ETH' ? image = ethLogo : image = image
     props.asset == 'MATIC' ? image = maticLogo : image = image
 
-  return <><Image src={image} alt={''} width="40px" height="40px" ></Image></>
+  return <><Image src={image} alt={''} width="30px" height="30px" ></Image></>
 } 

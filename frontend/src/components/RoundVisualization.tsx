@@ -95,7 +95,7 @@ const RoundVisualization = () => {
     const newRechartsData: RechartData = {}
 
     const guessRanges = getGuessRanges(subgraphDataContext.guesses, roundContext.roundId)
-    const newMinMax = [Number.MAX_SAFE_INTEGER, 0]
+    let newMinMax = [Number.MAX_SAFE_INTEGER, 0]
 
     guessRanges.map((guess) => {
       if (roundContext.roundId == undefined || !subgraphDataContext.rounds) {
@@ -196,6 +196,9 @@ const RoundVisualization = () => {
 
       newChartData.push(newUserSet)
     }
+    newMinMax[0] = newMinMax[0] == Number.MAX_SAFE_INTEGER ? price * 0.9 : newMinMax[0]
+    newMinMax[1] = newMinMax[1] == 0 ? price * 1.1 : newMinMax[1]
+
 
     setRechartMinMax(newMinMax)
 

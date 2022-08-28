@@ -68,22 +68,24 @@ const PowerUpTable = () => {
           endTime = dayjs((dayjs().unix() + ((round.endTimestamp - dayjs().unix()) * (p.length / 100))) * 1000).format('MMM D h:mma')
         }
         let powerUpType = ''
-        p.typeOf == "DISABLE_GUESS" ? powerUpType = 'Disable Guess' : null
-        p.typeOf == "TAKEOVER_GUESS" ? powerUpType = 'Takeover Guess' : null
-        p.typeOf == "FREE_GUESS" ? powerUpType = 'Free Guess' : null
+        powerUpType = p.typeOf == "DISABLE_GUESS" ? powerUpType = 'Disable Guess' : powerUpType
+        powerUpType = p.typeOf == "TAKEOVER_GUESS" ? powerUpType = 'Takeover Guess' : powerUpType
+        powerUpType = p.typeOf == "FREE_GUESS" ? powerUpType = 'Free Guess' : powerUpType
 
         let status = ''
-        p.status == "UNFUFILLED" ? status = 'Waiting for VRF' : null
+        p.status == "UNFULFILLED" ? status = 'Waiting for VRF' : null
         p.status == "READY" ? status = 'Ready!' : null
         p.status == "USED" ? status = 'Used' : null
+        console.log(p.typeOf, p.status)
+        console.log(powerUpType, status)
 
         newRows.push({
-          id: p.id.substring(p.id.length - 5, p.id.length - 1),
+          id: p.id.length > 5 ? p.id.substring(p.id.length - 5, p.id.length - 1) : p.id,
           user: p.user.substring(0, 8),
           status: status,
           typeOf: p.status == 'UNFULFILLED' ? '' : powerUpType,
           endTime: endTime,
-          target: target
+          target: p.status == 'UNFULFILLED' ? '' : target 
         })
       })
 

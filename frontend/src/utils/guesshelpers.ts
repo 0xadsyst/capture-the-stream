@@ -15,7 +15,6 @@ export const getGuessRanges = (allGuesses : GuessType[], roundId: number | null)
     const guesses = [...allGuesses].filter(g => {
       return g.roundId == roundId
     })
-    .sort((a, b) => a.guess - b.guess)
 
     const guessesAscending = [...guesses].sort((a, b) => a.guess - b.guess)
     const guessesDescending = [...guesses].sort((a, b) => b.guess - a.guess)

@@ -97,7 +97,7 @@ const RoundVisualization = () => {
     const guessRanges = getGuessRanges(subgraphDataContext.guesses, roundContext.roundId)
     const newMinMax = [Number.MAX_SAFE_INTEGER, 0]
 
-    guessRanges.map((guess, index) => {
+    guessRanges.map((guess) => {
       if (roundContext.roundId == undefined || !subgraphDataContext.rounds) {
         return
       }
@@ -111,16 +111,17 @@ const RoundVisualization = () => {
       let lower = guess.lower
       let upper = guess.upper
       if (guess.lower == 0) {
-        lower = Math.min(guessRanges[0].guess * 0.99, price * 0.99)
+        lower = Math.min(guess.guess * 0.99, price * 0.99)
         lowest = true
       }
       else if (guess.upper == Number.MAX_SAFE_INTEGER){
-        upper = Math.max(guessRanges[guessRanges.length - 1].guess * 1.01, price * 1.01)
+        upper = Math.max(guess.guess * 1.01, price * 1.01)
         highest = true
       }
       const tempGuessData = subgraphDataContext.guesses.find(g => {
         return g.id == roundContext.roundId + '-' + guess.id
       })
+
 
       const disabled =
         (tempGuessData?.disableEndTimestamp ?? Number.MAX_SAFE_INTEGER) > dayjs().unix() ||
@@ -216,6 +217,7 @@ const RoundVisualization = () => {
     }
 
     const roundData = subgraphDataContext.rounds[roundContext.roundId]
+    const wt = subgraphDataContext.guesses.find((guess) => {return (guess.id == roundContext.roundId + '-' + roundData.currentWinner)})?.winningTime ?? 0
 
     const startTime = dayjs(roundData.startTimestamp * 1000).format('MMM D h:mm a')
     const endTime = dayjs(roundData.endTimestamp * 1000).format('MMM D h:mm a')
@@ -231,7 +233,7 @@ const RoundVisualization = () => {
         : ''
     const currentWinnerWinnings =
       roundData.endTimestamp && dayjs().unix() < roundData.endTimestamp
-        ? (dayjs().unix() - roundData.lastWinnerChange).toString()
+        ? (wt + dayjs().unix() - roundData.lastWinnerChange).toString()
         : ''
     const asset = getAssetNameFromOracle(roundData['oracle'], myChain ?? 0)
 
@@ -268,11 +270,11 @@ const RoundVisualization = () => {
       tooltipData[label].map((guess : any, index) => {
         if (!guess.disabled && guess.name && guess.guess) {
           if (guess.lowest) {
-            tooltip.push(<div className='label' id={guess.name}>{' < $' + guess.upper}</div>)
+            tooltip.push(<div className='label' id={guess.name}>{'$' + guess.guess +' (< $' + guess.upper + ')'}</div>)
           } else if (guess.highest) {
-            tooltip.push(<div className='label'>{' > $' + guess.lower}</div>)
+            tooltip.push(<div className='label'>{'$' + guess.guess +' (> $' + guess.lower + ')'}</div>)
           } else {
-            tooltip.push(<div className='label'>{'$' + guess.lower + ' - $' + guess.upper}</div>)
+            tooltip.push(<div className='label'>{'$' + guess.guess +' ($' + guess.lower + ' - $' + guess.upper  + ')'}</div>)
           }
         }
       })
@@ -309,7 +311,7 @@ const RoundVisualization = () => {
         </Card>
         <Card>
           <CardContent>
-            <ResponsiveContainer width='100%' height={400}>
+            <ResponsiveContainer width='100%' height={300}>
               <ComposedChart data={rechartData} layout={'vertical'} key={1} ref={chartRef}>
                 <CartesianGrid strokeDasharray='3 3' />
                 <XAxis
@@ -319,6 +321,7 @@ const RoundVisualization = () => {
                   tickFormatter={tickFormatter}
                   style={{ fontSize: '1rem' }}
                   height={50}
+                  tickCount={7}
                 >
                   <Label value='Price' offset={0} position='insideBottom' />
                 </XAxis>
